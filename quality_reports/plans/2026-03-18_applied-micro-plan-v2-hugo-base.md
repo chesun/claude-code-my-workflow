@@ -174,29 +174,28 @@ All agent/skill references updated to `.claude/references/` paths (11 files fixe
 - [x] Updated CLAUDE.md template (pdflatex, Stata primary)
 - [x] Fixed all agent/skill path references (11 files) — committed: 7273dd1, da17ba7
 
-### Phase 2: Complete Template Setup ← NEXT
-Finish all template-level work before copying to any project repo.
+### Phase 2: Complete Template Setup ✅ COMPLETE
 
 **Reference files:**
-- [ ] Create `journal-profiles-applied-micro.md` in `.claude/references/` (merge Hugo's profiles + education/immigration journals we built earlier)
-- [ ] Create `identification-checklists.md` in `.claude/references/` (extract standalone checklist from strategist-critic)
-- [ ] Create `replication-standards.md` in `.claude/references/` (AEA Data Editor requirements)
+- [x] `journal-profiles-applied-micro.md` — Hugo's profiles + education/immigration journals (171 lines)
+- [x] `identification-checklists.md` — standalone DiD/IV/RDD/SC/FE/event study checklists (88 lines)
+- [x] `replication-standards.md` — AEA Data Editor requirements (73 lines)
 
 **New skills:**
-- [ ] `/challenge` skill (upgraded devils-advocate with `--paper`, `--identification`, `--fresh` modes)
-- [ ] `/balance` skill (generate balance tables in Stata/R)
-- [ ] `/event-study` skill (generate event study plots in Stata/R)
+- [x] `/challenge` — devil's advocate (--paper, --identification, --fresh)
+- [x] `/balance` — balance table generator (Stata/R, air-gapped aware)
+- [x] `/event-study` — event study plots (classic + staggered DiD)
 
-**Compilation & slides:**
-- [ ] Adapt `/compile-latex` for pdflatex paper compilation (currently xelatex slide-focused)
-- [ ] Verify `/talk` skill works with pdflatex Beamer
+**Compilation:**
+- [x] `/compile-latex` adapted for pdflatex (auto-detects paper vs talk mode)
+- [x] `/talk` skill (Hugo's, uses `/compile-latex` internally — works with pdflatex)
 
 **Template cleanup:**
-- [ ] Ensure CLAUDE.md is a clean generic template (no TX-specific content)
-- [ ] Verify all skills/agents read references from correct paths
-- [ ] Run `/deep-audit` on template to check consistency
+- [x] CLAUDE.md verified clean (no TX-specific content), skills table updated
+- [x] All agent/skill references point to `.claude/references/`
+- [ ] Run `/deep-audit` on template — DEFERRED (needs full project context to be meaningful)
 
-### Phase 3: Deploy to TX Project
+### Phase 3: Deploy to TX Project ← NEXT
 - [ ] Copy adapted `.claude/` and references to TX repo
 - [ ] Write TX-specific CLAUDE.md (project details only)
 - [ ] Test `/review --peer` on TX paper
@@ -232,7 +231,7 @@ Finish all template-level work before copying to any project repo.
 - [x] Merge Hugo's clo-author into applied-micro branch
 - [x] Adapt agents/skills for Stata and pdflatex
 - [x] Move heavy rules to references, fix all paths
-- [ ] Complete Phase 2 (reference files, new skills, compilation) ← NEXT
+- [x] Complete Phase 2 (reference files, new skills, compilation)
 - [ ] Run `/deep-audit` on template before deploying to projects
 
 ### Must-Do (TX Project — after template is complete)

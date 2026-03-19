@@ -124,7 +124,15 @@ Christina flagged: too many always-on rules (1,500 lines), too TX-specific, rebu
   - Rationale: agents would fail to find reference files at old paths
 - [x] Committed: 7273dd1 (Phase 1 adaptations), da17ba7 (path fixes)
 
-### Phase 2: Test with TX — NEXT
+### Phase 2: Complete Template Setup ✅ COMPLETE
+- [x] Reference files: journal-profiles-applied-micro, identification-checklists, replication-standards
+- [x] New skills: /challenge, /balance, /event-study
+- [x] /compile-latex adapted for pdflatex (paper + talk modes)
+- [x] CLAUDE.md verified clean, skills table updated
+- [x] All references verified pointing to .claude/references/
+- Committed: daf8057
+
+### Phase 3: Deploy to TX — NEXT
 - [ ] Copy adapted `.claude/` to TX repo
 - [ ] Write TX-specific CLAUDE.md (project details only)
 - [ ] Test `/review --peer` on TX paper
