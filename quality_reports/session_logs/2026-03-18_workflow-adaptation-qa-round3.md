@@ -51,10 +51,23 @@
 
 **Feedback saved:** Christina wants long outputs (>15 lines) exported to documents. Saved to memory.
 
+## Design Decisions (Implementation Phase)
+
+| Decision | Alternatives Considered | Rationale |
+|----------|------------------------|-----------|
+| Start from Hugo's clo-author, not Pedro's template | Build on Pedro (slide-focused), two separate repos, flavor packs | Hugo's 16-agent paper-centric system is exactly what applied micro needs. Building paper workflow on a slide template was backwards. |
+| Move heavy rules to `.claude/references/` | Keep all rules always-on, trim rules aggressively | References are read by agents on demand — reduces always-on budget from 1,697 to 964 lines without losing functionality |
+| Use Hugo's strategist + strategist-critic alongside identification rule | Rule only, agents only | Rule = passive guidance (always-on, shapes behavior). Agents = active tools (on-demand design/audit). Complementary, minimal overlap. |
+| Adapt Hugo's agents for Stata rather than building new ones | Build new Stata-specific agents, keep Hugo's R-only | Hugo's agents are well-designed and language-aware. Adding Stata sections is simpler and maintains Hugo's quality. |
+| One template repo with branches (not two repos) | Two separate template repos, flavor packs | Keeps Pedro's upstream sync via main. Shared improvements merge cleanly to both branches. Single maintenance point. |
+
 ## Learnings & Corrections
 
 - [LEARN:workflow] Always start session log immediately per session-logging rule — Christina caught the gap this session.
 - [LEARN:feedback] Export outputs >15 lines to documents — Christina prefers reading/answering in files, not terminal.
+- [LEARN:architecture] Start from the closest existing solution, don't rebuild from scratch. Hugo's clo-author saved us building 16 agents and 11 skills.
+- [LEARN:rules] Always-on rules must be kept short (<1,000 lines). Heavy reference content belongs in `.claude/references/` read by agents on demand.
+- [LEARN:paths] When moving files between directories, grep ALL agents and skills for path references and update them — broken paths cause silent failures.
 
 ## Open Questions / Blockers
 
@@ -79,15 +92,45 @@ See: `quality_reports/plans/2026-03-18_consolidated-decisions-and-applied-micro-
 ### PIVOT: Start from Hugo's clo-author instead of Pedro's template
 Christina flagged: too many always-on rules (1,500 lines), too TX-specific, rebuilding things Hugo already has. New approach: Hugo's clo-author as base + Pedro's infrastructure on top. See `2026-03-18_applied-micro-plan-v2-hugo-base.md`.
 
-### Phase 0 (revised): Merge Hugo + Pedro infra — NEXT
-- [ ] Merge Hugo's clo-author into applied-micro branch
-- [ ] Layer Pedro's hooks, commit, deep-audit, context-status, learn
-- [ ] Add TikZ + challenge skill
+### Phase 0 (revised): Merge Hugo + Pedro infra ✅ COMPLETE
+- [x] Deleted old applied-micro branch (was built from Pedro's template, too slide-focused)
+- [x] Created fresh applied-micro branch from main (commit 396dc4e)
+- [x] Replaced `.claude/` agents, skills, rules with Hugo's clo-author content (git checkout hugosantanna/main)
+  - Hugo provides: 16 worker-critic agents, 11 consolidated skills, 13 rules
+  - Rationale: Hugo's clo-author is paper-centric research workflow — exactly what applied micro needs. Building on Pedro's slide template was backwards.
+- [x] Layered Pedro's infrastructure on top:
+  - 7 hooks (context-monitor, log-reminder, pre-compact, post-compact, protect-files, verify-reminder, notify)
+  - 7 skills (commit, compile-latex, context-status, deep-audit, learn, validate-bib, extract-tikz)
+  - 3 rules (tikz-visual-quality, exploration-folder-protocol, exploration-fast-track)
+  - 1 agent (tikz-reviewer)
+  - Rationale: Pedro has superior context survival infrastructure (hooks), git workflow (/commit), and TikZ support that Hugo lacks
+- [x] Committed: 56e149b — 128 files changed, 18 skills, 18 agents, 15 rules, 7 hooks
 
-### Phase 1: Adapt for applied micro
-- [ ] Stata conventions, air-gapped rule, reference files, agent adaptations
+### Phase 1: Adapt for applied micro ✅ COMPLETE
+- [x] Moved 4 heavy rules to `.claude/references/` (read by agents on demand, not always-on):
+  - journal-profiles.md (149 lines), domain-profile.md (100), content-standards.md (304), meta-governance.md (251)
+  - Rationale: Christina flagged too many always-on rules hurting Claude's reliability. These are reference material agents read when invoked, not behavioral rules needed every conversation.
+  - Always-on budget: 964 lines (down from 1,697)
+- [x] Created `domain-profile-applied-micro.md` as reference file (peer effects, education, immigration lit)
+- [x] Created `stata-conventions.md` (43 lines, always-on) — Stata 18, settings.do, .doh, packages
+- [x] Created `air-gapped-workflow.md` (28 lines, always-on) — restricted server workflow
+- [x] Adapted 5 agents for Stata primary: coder, coder-critic, data-engineer, strategist-critic, verifier
+  - Added Stata package checks (reghdfe, ivreghdfe, estout, regsave, binscatter)
+  - Added Stata script standards (settings.do, .doh, mainscript.do pattern)
+  - Changed verifier default from xelatex to pdflatex
+- [x] Updated CLAUDE.md template for applied micro (pdflatex, Stata primary)
+- [x] Fixed all agent/skill path references from `.claude/rules/` to `.claude/references/` for moved files
+  - 11 files updated: domain-referee, methods-referee, coder, orchestrator, discover, new-project, analyze, write, review, submit, strategize
+  - Rationale: agents would fail to find reference files at old paths
+- [x] Committed: 7273dd1 (Phase 1 adaptations), da17ba7 (path fixes)
+
+### Phase 2: Test with TX — NEXT
+- [ ] Copy adapted `.claude/` to TX repo
+- [ ] Write TX-specific CLAUDE.md (project details only)
+- [ ] Test `/review --peer` on TX paper
+- [ ] Test `/strategize` on TX identification strategy
+- [ ] Test `/analyze` code review on exported .do files
 
 ### Later
-- [ ] Phase 2: Test with TX
-- [ ] Phase 3: Additional skills
+- [ ] Phase 3: Additional skills (/balance, /event-study, Beamer adaptation)
 - [ ] Behavioral plan_v2 → v3
