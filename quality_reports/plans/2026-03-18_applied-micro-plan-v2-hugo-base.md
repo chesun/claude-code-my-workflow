@@ -215,16 +215,15 @@ All agent/skill references updated to `.claude/references/` paths (11 files fixe
 - [ ] Copy adapted `.claude/` to TX repo and test ← NEXT STEP
 
 ### Should-Do
-- [ ] Export QSF from existing Qualtrics survey (behavioral workflow)
-- [ ] Share custom Beamer templates
 - [ ] Clarify Stata license type (SE vs MP)
 - [ ] Share TX variable codebook / summary statistics
+- [ ] Review journal profiles after testing `/review --peer`
+- [ ] Gather seminal papers for applied micro subfields (peer effects, education, immigration, labor)
 
 ### Nice-to-Have
-- [ ] Gather seminal papers by subfield
-- [ ] Set up Overleaf git sync for BDM and JMP
-- [ ] Consolidate JMP satellite repos
-- [ ] Review journal profiles after testing `/review --peer`
+- [ ] Create `.claude/references/identification-checklists.md` (extract from strategist-critic)
+- [ ] Create `.claude/references/replication-standards.md` (AEA Data Editor)
+- [ ] Merge Hugo's journal profiles with applied micro additions into single reference file
 
 ---
 
