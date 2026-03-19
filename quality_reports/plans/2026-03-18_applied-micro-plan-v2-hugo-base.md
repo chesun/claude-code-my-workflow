@@ -174,19 +174,41 @@ All agent/skill references updated to `.claude/references/` paths (11 files fixe
 - [x] Updated CLAUDE.md template (pdflatex, Stata primary)
 - [x] Fixed all agent/skill path references (11 files) — committed: 7273dd1, da17ba7
 
-### Phase 2: Test with TX ← NEXT
-- [ ] Copy adapted `.claude/` to TX repo
-- [ ] Write TX-specific CLAUDE.md (project details only, not workflow rules)
+### Phase 2: Complete Template Setup ← NEXT
+Finish all template-level work before copying to any project repo.
+
+**Reference files:**
+- [ ] Create `journal-profiles-applied-micro.md` in `.claude/references/` (merge Hugo's profiles + education/immigration journals we built earlier)
+- [ ] Create `identification-checklists.md` in `.claude/references/` (extract standalone checklist from strategist-critic)
+- [ ] Create `replication-standards.md` in `.claude/references/` (AEA Data Editor requirements)
+
+**New skills:**
+- [ ] `/challenge` skill (upgraded devils-advocate with `--paper`, `--identification`, `--fresh` modes)
+- [ ] `/balance` skill (generate balance tables in Stata/R)
+- [ ] `/event-study` skill (generate event study plots in Stata/R)
+
+**Compilation & slides:**
+- [ ] Adapt `/compile-latex` for pdflatex paper compilation (currently xelatex slide-focused)
+- [ ] Verify `/talk` skill works with pdflatex Beamer
+
+**Template cleanup:**
+- [ ] Ensure CLAUDE.md is a clean generic template (no TX-specific content)
+- [ ] Verify all skills/agents read references from correct paths
+- [ ] Run `/deep-audit` on template to check consistency
+
+### Phase 3: Deploy to TX Project
+- [ ] Copy adapted `.claude/` and references to TX repo
+- [ ] Write TX-specific CLAUDE.md (project details only)
 - [ ] Test `/review --peer` on TX paper
 - [ ] Test `/strategize` on TX identification strategy
-- [ ] Test `/analyze` code review on exported .do files
+- [ ] Test `/analyze` code review on exported .do files (blocked on FERPA for full test)
 - [ ] Iterate based on output quality
 
-### Phase 3: Additional Skills (if needed)
-- [ ] `/challenge` skill (upgraded devils-advocate with --paper, --identification, --fresh modes)
-- [ ] `/balance` skill
-- [ ] `/event-study` skill
-- [ ] Beamer/slides adaptation (from Pedro)
+### Phase 4: Beamer/Slides Adaptation (Later — Not Urgent)
+- [ ] Adapt Pedro's slide agents for applied micro presentations
+- [ ] Copy slide-related skills: `/proofread`, `/visual-audit`, `/slide-excellence`
+- [ ] Copy slide agents: slide-auditor, pedagogy-reviewer
+- [ ] Retain all TikZ infrastructure (already in place)
 
 ---
 
@@ -206,24 +228,24 @@ All agent/skill references updated to `.claude/references/` paths (11 files fixe
 
 ## Running To-Do List
 
-### Must-Do
+### Must-Do (Template)
 - [x] Merge Hugo's clo-author into applied-micro branch
 - [x] Adapt agents/skills for Stata and pdflatex
 - [x] Move heavy rules to references, fix all paths
+- [ ] Complete Phase 2 (reference files, new skills, compilation) ← NEXT
+- [ ] Run `/deep-audit` on template before deploying to projects
+
+### Must-Do (TX Project — after template is complete)
+- [ ] Copy template `.claude/` to TX repo
+- [ ] Write TX-specific CLAUDE.md
 - [ ] Export .do files from TERC (BLOCKED on FERPA)
 - [ ] Share swift raid Claude Chat memory/output (partially done — chat memory in consolidated plan)
-- [ ] Copy adapted `.claude/` to TX repo and test ← NEXT STEP
 
 ### Should-Do
 - [ ] Clarify Stata license type (SE vs MP)
 - [ ] Share TX variable codebook / summary statistics
-- [ ] Review journal profiles after testing `/review --peer`
 - [ ] Gather seminal papers for applied micro subfields (peer effects, education, immigration, labor)
-
-### Nice-to-Have
-- [ ] Create `.claude/references/identification-checklists.md` (extract from strategist-critic)
-- [ ] Create `.claude/references/replication-standards.md` (AEA Data Editor)
-- [ ] Merge Hugo's journal profiles with applied micro additions into single reference file
+- [ ] Review journal profiles after testing `/review --peer` on a real paper
 
 ---
 
