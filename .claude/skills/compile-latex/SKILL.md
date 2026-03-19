@@ -1,56 +1,66 @@
 ---
 name: compile-latex
-description: Compile a Beamer LaTeX slide deck with XeLaTeX (3 passes + bibtex). Use when compiling lecture slides.
-argument-hint: "[filename without .tex extension]"
+description: Compile LaTeX documents (papers or talks) with 3 passes + bibtex. Reads CLAUDE.md for engine choice (pdflatex default for papers, configurable for talks).
+argument-hint: "[filename without .tex] [--paper | --talk]"
 allowed-tools: ["Read", "Bash", "Glob"]
 ---
 
-# Compile Beamer LaTeX Slides
+# Compile LaTeX
 
-Compile a Beamer slide deck using XeLaTeX with full citation resolution.
+Compile a LaTeX document with full citation resolution.
 
 ## Steps
 
-1. **Navigate to Slides/ directory** and compile with 3-pass sequence:
+1. **Read CLAUDE.md** for engine choice and directory structure. Default: pdflatex for papers.
 
+2. **Detect mode** from arguments or file location:
+   - `--paper` or file in `Paper/`: compile as paper
+   - `--talk` or file in `Talks/`: compile as talk
+   - No flag: infer from file path
+
+3. **Compile with 3-pass sequence:**
+
+### Paper Mode (pdflatex)
 ```bash
-cd Slides
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
+cd Paper
+pdflatex -interaction=nonstopmode $ARGUMENTS.tex
 BIBINPUTS=..:$BIBINPUTS bibtex $ARGUMENTS
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode $ARGUMENTS.tex
+pdflatex -interaction=nonstopmode $ARGUMENTS.tex
+pdflatex -interaction=nonstopmode $ARGUMENTS.tex
 ```
 
-**Alternative (latexmk):**
+### Talk Mode (pdflatex with preambles)
 ```bash
-cd Slides
-TEXINPUTS=../Preambles:$TEXINPUTS BIBINPUTS=..:$BIBINPUTS latexmk -xelatex -interaction=nonstopmode $ARGUMENTS.tex
+cd Talks
+TEXINPUTS=../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode $ARGUMENTS.tex
+BIBINPUTS=..:$BIBINPUTS bibtex $ARGUMENTS
+TEXINPUTS=../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode $ARGUMENTS.tex
+TEXINPUTS=../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode $ARGUMENTS.tex
 ```
 
-2. **Check for warnings:**
+4. **Check for warnings:**
    - Grep output for `Overfull \\hbox` warnings
    - Grep for `undefined citations` or `Label(s) may have changed`
    - Report any issues found
 
-3. **Open the PDF** for visual verification:
+5. **Open the PDF** for visual verification:
    ```bash
-   open Slides/$ARGUMENTS.pdf          # macOS
-   # xdg-open Slides/$ARGUMENTS.pdf    # Linux
+   open [dir]/$ARGUMENTS.pdf          # macOS
    ```
 
-4. **Report results:**
+6. **Report results:**
    - Compilation success/failure
    - Number of overfull hbox warnings
    - Any undefined citations
    - PDF page count
 
 ## Why 3 passes?
-1. First xelatex: Creates `.aux` file with citation keys
+1. First pass: Creates `.aux` file with citation keys
 2. bibtex: Reads `.aux`, generates `.bbl` with formatted references
-3. Second xelatex: Incorporates bibliography
-4. Third xelatex: Resolves all cross-references with final page numbers
+3. Second pass: Incorporates bibliography
+4. Third pass: Resolves all cross-references with final page numbers
 
 ## Important
-- **Always use XeLaTeX**, never pdflatex
-- **TEXINPUTS** is required: your Beamer theme lives in `Preambles/`
-- **BIBINPUTS** is required: your `.bib` file lives in the repo root
+- Read CLAUDE.md for engine choice — default is **pdflatex** for applied micro projects
+- **TEXINPUTS** needed for talks if preambles are in separate directory
+- **BIBINPUTS** needed if `.bib` file is not in the same directory

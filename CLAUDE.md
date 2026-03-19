@@ -104,7 +104,11 @@ See `quality.md` for weighted aggregation formula.
 | `/revise [report]` | R&R cycle: classify + route referee comments |
 | `/talk [mode] [format]` | Create, audit, or compile Beamer presentations |
 | `/submit [mode]` | Journal targeting → package → audit → final gate |
-| `/tools [subcommand]` | Utilities: commit, compile, validate-bib, journal, etc. |
+| `/challenge [file --mode]` | Devil's advocate: `--paper`, `--identification`, `--fresh` |
+| `/balance [treatment]` | Generate balance tables (Stata/R) |
+| `/event-study [spec]` | Event study plots with pre-trends and CIs |
+| `/compile-latex [file]` | 3-pass pdflatex + bibtex (papers and talks) |
+| `/tools [subcommand]` | Utilities: commit, validate-bib, context-status, learn, etc. |
 
 ---
 
