@@ -13,6 +13,38 @@ Adapt the applied micro workflow (Hugo base + Pedro infrastructure) for behavior
 
 ---
 
+## Key Decisions (from 2026-03-17 Q&A)
+
+| Decision | Detail |
+|----------|--------|
+| Analysis language | Stata primary (95%), Python secondary, gradual transition |
+| LaTeX engine | pdflatex for Beamer (custom templates for both pdflatex and xelatex) |
+| Quarto | **Removed entirely** — not used |
+| Field experiments | **Removed** — lab and online only |
+| Pre-registration | **Core skill** — always pre-register (AsPredicted, OSF) |
+| Experimental design weight | **25%** — single most important component |
+| Theory weight | 15% — math-heavy (Markov, Bellman, structural) |
+| Seminal papers | Claude gathers per subfield → Christina approves → Christina augments |
+| `.doh` files | Do helper files, used with `include` to preserve local macros |
+| Test projects | JMP (`belief_distortion_discrimination`), BDM (`bdm_bic`) — separate repos |
+| Overleaf | BDM: `BDM Incentive and Truth Telling`, JMP: `belief_distortion_discrimination` |
+| Subfield categories | 12 categories (Christina edited — see plan v2 Part 5) |
+
+### Confirmed Subfield Categories (for seminal papers)
+1. Prospect Theory & Reference Dependence
+2. Social Preferences & Cooperation
+3. Time Preferences & Present Bias
+4. Belief Formation & Updating
+5. Discrimination
+6. Complexity & Noisy Cognition
+7. Attention & Limited Cognition (incl. Rational Inattention)
+8. Experimental Methods & Design (incl. Risk Elicitation, Belief Elicitation)
+9. Nudges & Choice Architecture
+10. Structural Behavioral Estimation
+11. Market/Auction Experiments
+
+---
+
 ## What the Behavioral Branch Adds (Beyond Applied Micro)
 
 ### Additional Skills
@@ -99,6 +131,71 @@ Adapt the applied micro workflow (Hugo base + Pedro infrastructure) for behavior
 | Paper quality | 20% | Clarity and argumentation |
 | Manuscript polish | 10% | Professional presentation |
 | Replication readiness | 5% | AEA compliance |
+
+---
+
+## `/challenge --design` Mode (Most Important Challenge Mode)
+
+Specific adversarial questions for experiment design review:
+
+**Identification & Inference:**
+- "You say Treatment A tests mechanism X — but it also changes Y. How do you isolate X?"
+- "Your statistical test assumes independence, but subjects interact in the lab."
+- "You powered for a 0.3 SD effect — what if the true effect is 0.15?"
+
+**Subject Experience:**
+- "Walk me through exactly what a subject sees, screen by screen."
+- "You're using a slider for belief elicitation — centering bias will contaminate your data."
+- "A median subject takes 25 minutes but the 90th percentile takes 55 — is that a problem?"
+
+**Incentive Compatibility:**
+- "Is your BDM implementation actually incentive compatible? (Danz et al. 2022)"
+- "Subjects earn $0.50 for a 'correct' belief but $12 show-up fee — are beliefs incentivized?"
+
+**Alternative Designs:**
+- "What if you used within-subject instead of between-subject?"
+- "Could a strategy method elicit the same information with fewer subjects?"
+
+## `/design experiment` — Inference-First Checklist
+
+The 12-step checklist produced by `/design experiment` (see plan v2 for full specification):
+1. Research question (causal/behavioral claim)
+2. Theoretical predictions (testable, from model)
+3. Statistical tests (specify BEFORE designing treatments)
+4. Data structure required
+5. Treatment arms (justify each)
+6. Interface & elicitation (method + justification + floor/ceiling analysis)
+7. Incentive design (payment structure + IC argument)
+8. Subject comprehension (instructions, understanding checks, attention checks)
+9. Timing & logistics
+10. Power analysis
+11. Budget
+12. Pre-registration draft
+
+## Experiment Design Principles (Constitutional Rule)
+
+Non-negotiable principles for the behavioral branch:
+- **Inference-first**: Specify statistical tests before designing treatments
+- **Subject comprehension**: Instructions must be clear; understanding checks required
+- **Interface intentionality**: Every elicitation choice documented with justification
+- **Simplicity**: Shortest experiment that answers the question
+- **Incentive compatibility**: Payment structure must align incentives; cite theoretical basis
+- **Floor/ceiling awareness**: Analyze bounded variables for compression risk
+- **Pre-registration mandatory**: No data collection without registered hypotheses + analysis plan
+- **Pilot first**: Run pilot (N=20-30) before full launch
+- **No deception**: Standard in econ experiments; if used, must justify
+
+---
+
+## Domain Profile (Behavioral)
+
+See plan v2 for full expanded domain profile including:
+- Target journals by tier (Top-5 + 12 field journals)
+- Common identification strategies (RCTs, within/between-subject, strategy method, structural estimation)
+- Notation conventions (utility, probability weighting, risk aversion, discount factors, etc.)
+- Seminal references organized by subfield (60+ papers)
+- Field-specific referee concerns (14 common objections)
+- Quality tolerance thresholds
 
 ---
 
