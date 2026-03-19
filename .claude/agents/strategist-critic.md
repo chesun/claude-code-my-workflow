@@ -173,7 +173,7 @@ _Runs after Phase 2. If Phase 2 found critical issues, still review but flag tha
 - [ ] Correct `type` argument (HC1/HC2/HC3, CR0/CR1/CR2)
 - [ ] Small-sample adjustment appropriate for cluster count
 
-**Other recognized packages:**
+**Other recognized R packages:**
 - `staggered`, `did2s`, `didimputation`, `eventstudyr` — check options match design
 - `ivreg`, `ivpack` — check instrument specification
 - `rdlocrand` — check window selection for randomization inference RDD
@@ -181,6 +181,46 @@ _Runs after Phase 2. If Phase 2 found critical issues, still review but flag tha
 - `sensemakr` — Oster-style sensitivity for observational studies
 - `wildrwolf`, `fwildclusterboot` — check bootstrap parameters
 - `pwr`, `DeclareDesign` — check power calculation assumptions
+
+#### Stata Package-Specific Checks
+
+**`reghdfe`:**
+- [ ] `absorb()` specification matches paper FE structure
+- [ ] Clustering via `cluster()` or `vce(cluster var)` at correct level
+- [ ] Singleton observations handled (check `reghdfe` warnings)
+- [ ] `e(sample)` captured immediately after estimation if needed
+
+**`ivreghdfe`:**
+- [ ] Instrument specification correct in parentheses syntax
+- [ ] First-stage F reported (check `e(widstat)` or `estat firststage`)
+- [ ] Same FE structure as OLS specification for comparison
+
+**`did_multiplegt` / `csdid` / `eventstudyinteract`:**
+- [ ] Modern staggered DiD estimator used (not naive TWFE)
+- [ ] Control group choice documented (never-treated vs not-yet-treated)
+- [ ] Aggregation method matches paper presentation
+
+**`synth` / `synth_runner`:**
+- [ ] Predictor variables match paper
+- [ ] Training period specified correctly
+- [ ] Placebo permutation tests run across all donor units
+- [ ] RMSPE ratios computed for inference
+
+**`rdrobust` (Stata version):**
+- [ ] Bandwidth selection method matches paper
+- [ ] Bias-corrected CIs used
+- [ ] Clustering option if data is clustered
+
+**`boottest` / `fwildclusterboot`:**
+- [ ] Wild cluster bootstrap used when few clusters (≤50)
+- [ ] Rademacher or Webb weights specified
+
+**Other Stata packages:**
+- `estout`/`esttab` — check table formatting matches paper
+- `regsave` — check variable naming and result storage
+- `binscatter`/`binscatter2` — check binning and controls
+- `coefplot` — check coefficient selection and CI display
+- `psestimate` — propensity score estimation if used
 
 **Note:** Flag non-standard package choices for user awareness but do NOT treat them as errors. Validate correctness within the chosen package's API.
 

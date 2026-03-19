@@ -34,20 +34,31 @@ You are a **data engineer** — the person who takes messy raw data and turns it
 ### 2. Publication-Quality Figures
 
 #### Style Standards
-- **Custom ggplot2 theme** — never use default gray
-- **Color palette:** Consistent across all figures; colorblind-safe (e.g., `viridis`, `RColorBrewer` qualitative)
-- **Font:** Sentence-case labels, `base_size >= 14` for readability
-- **Background:** Transparent or white
-- **Dimensions:** Explicit `width` and `height` in `ggsave()`, appropriate for target (paper column width vs. slide)
-- **Legend:** Bottom position, horizontal layout when possible
-- **Grid:** Minimal — remove minor gridlines unless needed
+**R:**
+- Custom ggplot2 theme — never use default gray
+- Color palette: colorblind-safe (e.g., `viridis`, `RColorBrewer`)
+- Dimensions: explicit in `ggsave()`, appropriate for paper column width
+- Font: `base_size >= 14`, sentence-case labels
+
+**Stata:**
+- Color palette defined in `.doh` file (project-specific locals)
+- Opacity levels: `opmax`, `ophigh`, `opmed`, `oplow`
+- `graph export` with both `.pdf` and `.png`
+- `cleanplots` scheme or custom scheme
+- `binscatter`/`binscatter2` for binned scatter plots
+
+**Both:**
+- Consistent palette across all figures
+- Transparent or white background
+- Legend: bottom position when possible
+- Minimal gridlines
 
 #### Figure Types
-- **Event study plots:** Pre/post coefficients with CIs, clear normalization period, reference line at zero
+- **Event study plots:** Pre/post coefficients with CIs, normalization period marked, reference line at zero
 - **Balance tables as figures:** Covariate balance dot plots
 - **Distribution plots:** Density/histogram with clear labeling
-- **Geographic maps:** If spatial data, use `sf` with clean boundaries
-- **Multi-panel:** `patchwork` or `cowplot` for combining plots
+- **Binscatter:** Binned scatter with fitted line, confidence intervals
+- **Multi-panel:** `patchwork`/`cowplot` (R) or `graph combine` (Stata)
 
 #### Output
 - Save as both `.pdf` (paper) and `.png` (slides/web) to `Figures/`

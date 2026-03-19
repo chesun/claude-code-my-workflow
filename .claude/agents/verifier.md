@@ -24,8 +24,12 @@ Checks 1–10. Full AEA Data Editor compliance audit before journal submission.
 ## Standard Checks (1–4)
 
 ### 1. LaTeX Compilation
+Read `CLAUDE.md` for engine choice. Default to pdflatex for papers.
 ```bash
-cd Paper && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode main.tex 2>&1 | tail -20
+# Paper (pdflatex)
+cd Paper && pdflatex -interaction=nonstopmode main.tex 2>&1 | tail -20
+# Talk (pdflatex or xelatex per CLAUDE.md)
+cd Talks && TEXINPUTS=../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode talk.tex 2>&1 | tail -20
 ```
 - Check exit code (0 = success)
 - Count `Overfull \\hbox` warnings
@@ -33,8 +37,12 @@ cd Paper && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode m
 - Verify PDF generated
 
 ### 2. Script Execution
+Read `CLAUDE.md` for analysis language. Check for both R and Stata scripts.
 ```bash
+# R
 Rscript scripts/R/FILENAME.R 2>&1 | tail -20
+# Stata (if available locally — may be air-gapped)
+stata-mp -b do scripts/stata/main.do 2>&1 | tail -20
 ```
 - Check exit code
 - Verify output files created

@@ -1,9 +1,9 @@
-# CLAUDE.MD -- Academic Project Development with Claude Code
+# CLAUDE.MD -- Applied Microeconomics Research with Claude Code
 
 <!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
-     Customize Beamer environments and CSS classes for your theme.
+     Customize for your analysis language, LaTeX engine, and identification strategy.
      Keep this file under ~150 lines — Claude loads it every session.
-     See the guide at docs/workflow-guide.html for full documentation. -->
+     Based on clo-author (Hugo Sant'Anna) + infrastructure from Pedro Sant'Anna. -->
 
 **Project:** [YOUR PROJECT NAME]
 **Institution:** [YOUR INSTITUTION]
@@ -14,10 +14,19 @@
 ## Core Principles
 
 - **Plan first** -- enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
-- **Verify after** -- compile/render and confirm output at the end of every task
-- **Single source of truth** -- Beamer `.tex` is authoritative; Quarto `.qmd` derives from it
-- **Quality gates** -- nothing ships below 80/100
+- **Verify after** -- compile and confirm output at the end of every task
+- **Single source of truth** -- Paper `main.tex` is authoritative; talks and supplements derive from it
+- **Quality gates** -- weighted aggregate score; nothing ships below 80/100; see `quality.md`
+- **Worker-critic pairs** -- every creator has a paired critic; critics never edit files
 - **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to MEMORY.md
+
+---
+
+## Getting Started
+
+1. Fill in the `[BRACKETED PLACEHOLDERS]` in this file
+2. Run `/discover interview [topic]` to build your research specification
+3. Or run `/new-project [topic]` for the full orchestrated pipeline
 
 ---
 
@@ -28,16 +37,28 @@
 ├── CLAUDE.MD                    # This file
 ├── .claude/                     # Rules, skills, agents, hooks
 ├── Bibliography_base.bib        # Centralized bibliography
-├── Figures/                     # Figures and images
-├── Preambles/header.tex         # LaTeX headers
-├── Slides/                      # Beamer .tex files
-├── Quarto/                      # RevealJS .qmd files + theme
-├── docs/                        # GitHub Pages (auto-generated)
-├── scripts/                     # Utility scripts + R code
-├── quality_reports/             # Plans, session logs, merge reports
+├── Paper/                       # Main LaTeX manuscript (source of truth)
+│   ├── main.tex                 # Primary paper file
+│   └── sections/                # Section-level .tex files
+├── Talks/                       # Derivative Beamer presentations
+│   ├── job_market_talk.tex      # 45-60 min, full results
+│   ├── seminar_talk.tex         # 30-45 min, standard seminar
+│   ├── short_talk.tex           # 15 min, conference session
+│   └── lightning_talk.tex       # 5 min, spiel/elevator pitch
+├── Data/                        # Project data
+│   ├── raw/                     # Original untouched data (often gitignored)
+│   └── cleaned/                 # Processed datasets ready for analysis
+├── Output/                      # Intermediate results (logs, temp files)
+├── Figures/                     # Final figures (.pdf, .png) referenced in paper
+├── Tables/                      # Final tables (.tex) referenced in paper
+├── Supplementary/               # Online appendix and supplements
+├── Replication/                 # Replication package for deposit
+├── Preambles/header.tex         # LaTeX headers / shared preamble
+├── scripts/                     # Analysis code (Stata primary, R/Python secondary)
+├── quality_reports/             # Plans, session logs, reviews, scores
 ├── explorations/                # Research sandbox (see rules)
 ├── templates/                   # Session log, quality report templates
-└── master_supporting_docs/      # Papers and existing slides
+└── master_supporting_docs/      # Reference papers and data docs
 ```
 
 ---
@@ -45,28 +66,28 @@
 ## Commands
 
 ```bash
-# LaTeX (3-pass, XeLaTeX only)
-cd Slides && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
-BIBINPUTS=..:$BIBINPUTS bibtex file
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
+# Paper compilation (3-pass, pdflatex)
+cd Paper && pdflatex -interaction=nonstopmode main.tex
+BIBINPUTS=..:$BIBINPUTS bibtex main
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
 
-# Deploy Quarto to GitHub Pages
-./scripts/sync_to_docs.sh LectureN
-
-# Quality score
-python scripts/quality_score.py Quarto/file.qmd
+# Talk compilation (pdflatex with preambles)
+cd Talks && TEXINPUTS=../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode talk.tex
 ```
 
 ---
 
 ## Quality Thresholds
 
-| Score | Gate | Meaning |
-|-------|------|---------|
-| 80 | Commit | Good enough to save |
-| 90 | PR | Ready for deployment |
-| 95 | Excellence | Aspirational |
+| Score | Gate | Applies To |
+|-------|------|------------|
+| 80 | Commit | Weighted aggregate (blocking) |
+| 90 | PR | Weighted aggregate (blocking) |
+| 95 | Submission | Aggregate + all components >= 80 |
+| -- | Advisory | Talks (reported, non-blocking) |
+
+See `quality.md` for weighted aggregation formula.
 
 ---
 
@@ -74,63 +95,35 @@ python scripts/quality_score.py Quarto/file.qmd
 
 | Command | What It Does |
 |---------|-------------|
-| `/compile-latex [file]` | 3-pass XeLaTeX + bibtex |
-| `/deploy [LectureN]` | Render Quarto + sync to docs/ |
-| `/extract-tikz [LectureN]` | TikZ → PDF → SVG |
-| `/proofread [file]` | Grammar/typo/overflow review |
-| `/visual-audit [file]` | Slide layout audit |
-| `/pedagogy-review [file]` | Narrative, notation, pacing review |
-| `/review-r [file]` | R code quality review |
-| `/qa-quarto [LectureN]` | Adversarial Quarto vs Beamer QA |
-| `/slide-excellence [file]` | Combined multi-agent review |
-| `/translate-to-quarto [file]` | Beamer → Quarto translation |
-| `/validate-bib` | Cross-reference citations |
-| `/devils-advocate` | Challenge slide design |
-| `/create-lecture` | Full lecture creation |
-| `/commit [msg]` | Stage, commit, PR, merge |
-| `/lit-review [topic]` | Literature search + synthesis |
-| `/research-ideation [topic]` | Research questions + strategies |
-| `/interview-me [topic]` | Interactive research interview |
-| `/review-paper [file]` | Manuscript review |
-| `/data-analysis [dataset]` | End-to-end R analysis |
-| `/learn [skill-name]` | Extract discovery into persistent skill |
-| `/context-status` | Show session health + context usage |
-| `/deep-audit` | Repository-wide consistency audit |
+| `/new-project [topic]` | Full pipeline: idea → paper (orchestrated) |
+| `/discover [mode] [topic]` | Discovery: interview, literature, data, ideation |
+| `/strategize [question]` | Identification strategy or pre-analysis plan |
+| `/analyze [dataset]` | End-to-end data analysis |
+| `/write [section]` | Draft paper sections + humanizer pass |
+| `/review [file/--flag]` | Quality reviews (routes by target: paper, code, peer) |
+| `/revise [report]` | R&R cycle: classify + route referee comments |
+| `/talk [mode] [format]` | Create, audit, or compile Beamer presentations |
+| `/submit [mode]` | Journal targeting → package → audit → final gate |
+| `/tools [subcommand]` | Utilities: commit, compile, validate-bib, journal, etc. |
 
 ---
 
 <!-- CUSTOMIZE: Replace the example entries below with your own
-     Beamer environments and Quarto CSS classes. These are examples
-     from the original project — delete them and add yours. -->
+     Beamer environments for talks. -->
 
-## Beamer Custom Environments
+## Beamer Custom Environments (Talks)
 
 | Environment       | Effect        | Use Case       |
 |-------------------|---------------|----------------|
 | `[your-env]`      | [Description] | [When to use]  |
 
-<!-- Example entries (delete and replace with yours):
-| `keybox` | Gold background box | Key points |
-| `highlightbox` | Gold left-accent box | Highlights |
-| `definitionbox[Title]` | Blue-bordered titled box | Formal definitions |
--->
-
-## Quarto CSS Classes
-
-| Class              | Effect        | Use Case       |
-|--------------------|---------------|----------------|
-| `[.your-class]`    | [Description] | [When to use]  |
-
-<!-- Example entries (delete and replace with yours):
-| `.smaller` | 85% font | Dense content slides |
-| `.positive` | Green bold | Good annotations |
--->
-
 ---
 
 ## Current Project State
 
-| Lecture | Beamer | Quarto | Key Content |
-|---------|--------|--------|-------------|
-| 1: [Topic] | `Lecture01_Topic.tex` | `Lecture1_Topic.qmd` | [Brief description] |
-| 2: [Topic] | `Lecture02_Topic.tex` | -- | [Brief description] |
+| Component | File | Status | Description |
+|-----------|------|--------|-------------|
+| Paper | `Paper/main.tex` | [draft/submitted/R&R] | [Brief description] |
+| Data | `scripts/stata/` | [complete/in-progress] | [Analysis description] |
+| Replication | `Replication/` | [not started/ready] | [Deposit status] |
+| Job Market Talk | `Talks/job_market_talk.tex` | -- | [Status] |

@@ -48,40 +48,44 @@ Review the Coder's or Data-engineer's scripts and output. Check 12 categories. P
 - No ASCII banners or decorative output
 
 #### 6. Reproducibility
+**R:**
 - Single `set.seed()` at top
 - `library()` not `require()`
 - Relative paths only — no `setwd()`, no absolute paths
 - `dir.create(..., recursive=TRUE)` before writing
 
-#### 7. Function Design
-- `snake_case` naming, verb-noun pattern
-- Roxygen docs for non-trivial functions
-- Default parameters, no magic numbers
+**Stata:**
+- `set seed` once in main.do or settings.do
+- `cap log close _all` and `set more off` at top of master
+- Relative paths via globals from `settings.do` only
+- `log using` for every analysis .do file
+- Machine-specific paths only in `settings.do` via `c(hostname)`
+
+#### 7. Function/Program Design
+**R:** `snake_case`, verb-noun, Roxygen docs, default params
+**Stata:** `.doh` helpers with `include` (preserves locals), header block, `program define` for reusable routines
 
 #### 8. Figure Quality
-- Consistent color palette across all figures
-- Custom ggplot2 theme (not default gray)
-- Transparent background, explicit dimensions
-- Readable fonts (`base_size >= 14`)
-- Sentence-case labels, bottom legend
+- Consistent color palette across all figures (R: custom ggplot2 theme; Stata: palette in .doh)
+- Readable fonts, sentence-case labels
+- `graph export` with both `.pdf` and `.png` (Stata)
 
-#### 9. RDS Pattern
-- Every computed object has `saveRDS()`
-- Descriptive filenames, `file.path()` for paths
-- **Missing RDS = HIGH severity** (downstream rendering fails)
+#### 9. Output Persistence
+**R:** Every computed object has `saveRDS()` — **Missing RDS = HIGH severity**
+**Stata:** `regsave` for regression results, `save` for intermediate datasets, output to both local AND Overleaf
 
 #### 10. Comment Quality
 - Comments explain WHY, not WHAT
 - No dead code (commented-out blocks)
+- Stata: `//---` section dividers for major sections
 
 #### 11. Error Handling
-- Simulation results checked for NA/NaN/Inf
-- Failed reps counted and reported
-- Parallel backend registered AND unregistered (`on.exit()`)
+**R:** Simulation results checked for NA/NaN/Inf; parallel backend cleanup
+**Stata:** `assert` for data structure assumptions; `capture` with error checking; singleton warnings flagged
 
 #### 12. Professional Polish
-- 2-space indentation, lines < 100 characters
-- Consistent operator spacing, consistent pipe style (`%>%` or `|>`, not mixed)
+**R:** 2-space indent, lines < 100 chars, consistent pipe style
+**Stata:** Indent inside loops/conditionals, backtick-quote locals correctly, no hardcoded paths
 - No legacy R (`T`/`F` instead of `TRUE`/`FALSE`)
 
 ### Data Cleaning (Stage 0)

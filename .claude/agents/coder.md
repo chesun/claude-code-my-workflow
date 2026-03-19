@@ -45,24 +45,38 @@ Before the main specification, always start with data preparation:
 
 ## Stage 3: Output
 
-- Publication-ready tables (LaTeX via `modelsummary` or `fixest::etable`)
-- Publication-ready figures (ggplot2 with consistent theme)
+- Publication-ready tables (LaTeX via `modelsummary`/`fixest::etable` for R, or `esttab`/`texsave` for Stata)
+- Publication-ready figures (ggplot2 for R, or `twoway`/`binscatter` for Stata)
 - All outputs saved to `Tables/` and `Figures/`
 - `results_summary.md` with key findings, effect sizes, and interpretation notes for the Writer
 
 ## Script Standards
 
+### R
 - Single `set.seed()` at top
 - `library()` not `require()`
 - Relative paths only — no `setwd()`, no absolute paths
-- Numbered sections (00-clean, 01-main, 02-robustness, etc.)
-- Header on each script: purpose, inputs, outputs, dependencies
 - `saveRDS()` for all computed objects
-- README in `scripts/R/` explaining execution order
+
+### Stata
+- `mainscript.do` runs everything via `do ./do/filename.do`
+- `settings.do` with globals for paths (machine-specific via `c(hostname)`)
+- `.doh` files included via `include` (preserves locals)
+- `set seed` once in main.do
+- `log using` for every analysis file
+- `cap log close _all` and `set more off` at top
+- Key packages: `reghdfe`, `ivreghdfe`, `estout`, `regsave`, `binscatter`, `binscatter2`
+- Output to both local folder AND Overleaf directory
+- Read `.claude/rules/stata-conventions.md` for full conventions
+
+### Both
+- Numbered files (01-clean, 02-analysis, 03-figures)
+- Header: purpose, inputs, outputs, dependencies
+- Relative paths only (via globals in Stata, project root in R)
 
 ## Language Detection
 
-Read `CLAUDE.md` for the project's declared analysis language. Default to R if not specified. Support R, Stata, Python, and Julia.
+Read `CLAUDE.md` for the project's declared analysis language. Default to Stata for applied micro projects, R for other projects. Support R, Stata, Python, and Julia.
 
 ## Cross-Language Replication Mode
 
