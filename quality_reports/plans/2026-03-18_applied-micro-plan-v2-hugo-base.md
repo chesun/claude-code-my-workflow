@@ -1,6 +1,6 @@
 # Applied Micro Workflow Plan v2: Hugo Base + Pedro Infrastructure
 
-**Status:** DRAFT — awaiting Christina's approval
+**Status:** APPROVED — Phases 0-1 complete, Phase 2 next
 **Date:** 2026-03-18
 **Supersedes:** The applied micro section of `2026-03-18_consolidated-decisions-and-applied-micro-plan.md`
 **Key change:** Start from Hugo's clo-author (paper-centric) instead of building up from Pedro's template (slide-centric)
@@ -123,52 +123,58 @@ The previous approach layered paper workflow onto Pedro's slide template. This c
 
 ---
 
-## Always-On Rule Budget
+## Always-On Rule Budget ✅ IMPLEMENTED
 
-**Target: <500 lines of always-on rules**
+**Actual: 964 lines** (target was <500, but Hugo's workflow.md and working-paper-format.md are larger than estimated — acceptable for now, can trim later)
 
-| Rule | Est. Lines | Source |
-|------|-----------|--------|
-| `workflow.md` | 80 | Hugo |
-| `agents.md` | 60 | Hugo |
-| `quality.md` | 70 | Hugo |
-| `logging.md` | 25 | Hugo |
-| `content-standards.md` | 50 | Hugo (adapted) |
-| `working-paper-format.md` | 40 | Hugo (trimmed) |
-| `tables.md` | 40 | Hugo |
-| `figures.md` | 30 | Hugo |
+| Rule | Actual Lines | Source |
+|------|-------------|--------|
+| `workflow.md` | 262 | Hugo |
+| `working-paper-format.md` | 131 | Hugo |
+| `logging.md` | 123 | Hugo |
+| `agents.md` | 111 | Hugo |
+| `quality.md` | 88 | Hugo |
+| `tikz-visual-quality.md` | 56 | Pedro |
+| `stata-conventions.md` | 43 | New |
+| `exploration-folder-protocol.md` | 42 | Pedro |
 | `revision.md` | 40 | Hugo |
-| `stata-conventions.md` | 60 | New (trimmed) |
-| `air-gapped-workflow.md` | 40 | New (trimmed) |
-| **Total** | **~535** | **Down from 1,500** |
+| `air-gapped-workflow.md` | 28 | New |
+| `exploration-fast-track.md` | 20 | Pedro |
+| `figures.md` | 10 | Hugo |
+| `tables.md` | 10 | Hugo |
+| **Total** | **964** | **Down from 1,697** |
 
-Heavy reference content (journal profiles, domain profile, identification checklists, replication standards, meta-governance) moves to `.claude/references/` — read by agents on demand, not loaded every conversation.
+**Moved to `.claude/references/`** (read by agents on demand):
+- `journal-profiles.md` (149 lines) — Hugo's 20+ journal profiles
+- `domain-profile-applied-micro.md` (57 lines) — applied micro field profile
+- `domain-profile.md` (100 lines) — Hugo's generic template
+- `content-standards.md` (304 lines) — writing/output standards
+- `meta-governance.md` (251 lines) — template vs project separation
+
+All agent/skill references updated to `.claude/references/` paths (11 files fixed).
 
 ---
 
 ## Implementation Plan (Revised)
 
-### Phase 0: Setup ✅ MOSTLY DONE
-- [x] `applied-micro` branch exists
-- [x] TX repos set up (paper + local)
-- [ ] **NEW: Merge Hugo's clo-author into `applied-micro` branch**
-- [ ] Layer Pedro's hooks, `/commit`, `/deep-audit`, `/context-status`, `/learn`, exploration protocol
-- [ ] Add TikZ infrastructure (tikz-reviewer, extract-tikz, visual quality)
-- [ ] Add `/challenge` skill (upgraded devils-advocate)
+### Phase 0: Setup ✅ COMPLETE
+- [x] `applied-micro` branch created fresh from main (commit 396dc4e)
+- [x] TX repos set up: `tx_peer_effects_paper` (Overleaf-synced), `tx_peer_effects_local` (renamed)
+- [x] Merged Hugo's clo-author into applied-micro branch (git checkout hugosantanna/main)
+- [x] Layered Pedro's hooks (7), skills (7), rules (3), agent (tikz-reviewer)
+- [x] Committed: 56e149b — 128 files, 18 skills, 18 agents, 15 rules, 7 hooks
+- [ ] Add `/challenge` skill (upgraded devils-advocate) — DEFERRED to Phase 3
 
-### Phase 1: Adapt for Applied Micro
-- [ ] Replace Hugo's `domain-profile.md` with applied micro version (as reference file)
-- [ ] Create `journal-profiles-applied-micro.md` (as reference file, merging Hugo's profiles)
-- [ ] Create `stata-conventions.md` (short, always-on rule)
-- [ ] Create `air-gapped-workflow.md` (short, always-on rule)
-- [ ] Create `.claude/references/` directory with heavy content
-- [ ] Adapt coder + coder-critic agents for Stata primary
-- [ ] Adapt data-engineer for Stata
-- [ ] Adapt strategist-critic for Stata packages
-- [ ] Adapt verifier for pdflatex + Stata
-- [ ] Update CLAUDE.md template for applied micro
+### Phase 1: Adapt for Applied Micro ✅ COMPLETE
+- [x] Moved 4 heavy rules to `.claude/references/` (journal-profiles, domain-profile, content-standards, meta-governance)
+- [x] Created `domain-profile-applied-micro.md` as reference file
+- [x] Created `stata-conventions.md` (43 lines, always-on)
+- [x] Created `air-gapped-workflow.md` (28 lines, always-on)
+- [x] Adapted 5 agents for Stata: coder, coder-critic, data-engineer, strategist-critic, verifier
+- [x] Updated CLAUDE.md template (pdflatex, Stata primary)
+- [x] Fixed all agent/skill path references (11 files) — committed: 7273dd1, da17ba7
 
-### Phase 2: Test with TX
+### Phase 2: Test with TX ← NEXT
 - [ ] Copy adapted `.claude/` to TX repo
 - [ ] Write TX-specific CLAUDE.md (project details only, not workflow rules)
 - [ ] Test `/review --peer` on TX paper
@@ -177,6 +183,7 @@ Heavy reference content (journal profiles, domain profile, identification checkl
 - [ ] Iterate based on output quality
 
 ### Phase 3: Additional Skills (if needed)
+- [ ] `/challenge` skill (upgraded devils-advocate with --paper, --identification, --fresh modes)
 - [ ] `/balance` skill
 - [ ] `/event-study` skill
 - [ ] Beamer/slides adaptation (from Pedro)
@@ -199,10 +206,13 @@ Heavy reference content (journal profiles, domain profile, identification checkl
 
 ## Running To-Do List
 
-### Must-Do Before Implementation
-- [ ] **Merge Hugo's clo-author into applied-micro branch** ← NEXT STEP
+### Must-Do
+- [x] Merge Hugo's clo-author into applied-micro branch
+- [x] Adapt agents/skills for Stata and pdflatex
+- [x] Move heavy rules to references, fix all paths
 - [ ] Export .do files from TERC (BLOCKED on FERPA)
-- [ ] Share swift raid Claude Chat memory/output
+- [ ] Share swift raid Claude Chat memory/output (partially done — chat memory in consolidated plan)
+- [ ] Copy adapted `.claude/` to TX repo and test ← NEXT STEP
 
 ### Should-Do
 - [ ] Export QSF from existing Qualtrics survey (behavioral workflow)
@@ -218,5 +228,4 @@ Heavy reference content (journal profiles, domain profile, identification checkl
 
 ---
 
-CS: Approve this revised approach? If yes, I'll merge Hugo's clo-author into the applied-micro branch and start Phase 0.
-CS: approved.
+**APPROVED** by Christina (2026-03-18). Phases 0-1 implemented same session.
