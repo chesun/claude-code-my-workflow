@@ -298,23 +298,25 @@ The domain profile (`.claude/references/domain-profile.md`) calibrates all agent
 
 If you have an existing project using clo-author 2.x, you can upgrade to 3.0 without losing any of your work.
 
-## Automatic Upgrade
+## Automatic Upgrade (3.x → future versions)
 
-Run `/tools upgrade` inside your project. It:
+Run `/tools upgrade` inside your project. It fetches the latest infrastructure, replaces `.claude/`, preserves your content, and reports what changed.
 
-1. Fetches the latest clo-author infrastructure from upstream
-2. Replaces `.claude/` (agents, skills, rules, references, hooks)
-3. Preserves your content (paper, scripts, data, bibliography)
-4. Updates paths in CLAUDE.md to match your folder structure
-5. Reports what changed and what needs manual attention
+::: {.callout-warning}
+`/tools upgrade` does **not** work for 2.x → 3.0 because 2.x doesn't have the `/tools` skill. Use the manual upgrade below.
+:::
 
-## Manual Upgrade
+## Manual Upgrade (2.x → 3.0)
+
+::: {.callout-note}
+**Your files are safe.** The upgrade only touches the `.claude/` directory (infrastructure). Your paper, scripts, data, bibliography, and all research content are never modified or deleted.
+:::
 
 1. **Back up:** `git stash` any uncommitted work
 2. **Add upstream:** `git remote add upstream https://github.com/hugosantanna/clo-author.git`
-3. **Copy infrastructure:** replace `.claude/` and `templates/` with the 3.0 versions
-4. **Keep your content:** don't rename folders that already have files
-5. **Update CLAUDE.md:** adjust paths to match your actual layout
+3. **Copy infrastructure:** replace your `.claude/` and `templates/` with the 3.0 versions from upstream
+4. **Keep your content:** don't rename folders that already have files in them --- if your paper is in `Paper/` not `paper/`, that's fine
+5. **Update CLAUDE.md:** adjust the folder structure section and compilation commands to match your actual layout
 
 ## What Changed in 3.0
 
