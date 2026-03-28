@@ -138,7 +138,14 @@ Christina flagged: too many always-on rules (1,500 lines), too TX-specific, rebu
 - [x] Wrote lean TX CLAUDE.md (project details only, 95 lines)
 - [x] Committed: 7c84c68 (156 files)
 
-### Testing — NEXT
+### Post-Deployment Updates
+- [x] Added `Read` permission to `.claude/settings.json` in both template and TX repos
+- [x] Fixed proofreading agents (writer-critic, domain-referee, methods-referee): ignore commented-out LaTeX, use tables as source of truth
+- [x] Saved LaTeX review feedback to memory
+- [x] Created testing guide at `tx_peer_effects_local/quality_reports/plans/testing-guide.md`
+- [x] Christina updated TX CLAUDE.md with local Stata path and air-gapped workflow clarification
+
+### Testing — NEXT (in fresh session from TX repo)
 - [ ] Copy adapted `.claude/` to TX repo
 - [ ] Write TX-specific CLAUDE.md (project details only)
 - [ ] Test `/review --peer` on TX paper
