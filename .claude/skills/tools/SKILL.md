@@ -23,19 +23,22 @@ Stage changes, create commit, optionally create PR and merge.
 - If quality score available and >= 80, note in commit
 
 ### `/tools compile [file]` — LaTeX Compilation
-3-pass XeLaTeX + bibtex compilation.
+3-pass pdflatex + bibtex/biber compilation. Paths are relative to the Overleaf directory.
 
 For papers:
 ```bash
-cd Paper && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode [file]
+cd [OVERLEAF_PATH]/Paper && pdflatex -interaction=nonstopmode [file]
 BIBINPUTS=..:$BIBINPUTS bibtex [file_base]
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode [file]
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode [file]
+pdflatex -interaction=nonstopmode [file]
+pdflatex -interaction=nonstopmode [file]
 ```
 
-For talks:
+For talks (each in its own folder under Slides/):
 ```bash
-cd Talks && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode [file]
+cd [OVERLEAF_PATH]/Slides/[name] && TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode [file]
+BIBINPUTS=../..:$BIBINPUTS bibtex [file_base]
+TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode [file]
+TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode [file]
 ```
 
 ### `/tools validate-bib` — Bibliography Validation

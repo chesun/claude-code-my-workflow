@@ -104,9 +104,11 @@ Also fixed:
 - oTree agent + skill updated to 5.x/6.x with 6.0 features from version history
 - replication-standards.md: raw data with PII should NOT be included; clean de-identified data can be shared
 
-Remaining:
-- [ ] `/revise` — check if needs changes
-- [ ] `/tools` — check if needs changes
+Completed:
+13. `/revise` — adapted (Overleaf path, Stata scripts, pre-registration compliance check)
+14. `/tools` — adapted (pdflatex compilation, Overleaf paths, full 3-pass for talks)
+
+**Phase 3 complete.** All 14 skills adapted or created.
 
 ## Corrections
 - notify.sh hook exists but was never wired into settings.json (Hugo's config doesn't have it either)

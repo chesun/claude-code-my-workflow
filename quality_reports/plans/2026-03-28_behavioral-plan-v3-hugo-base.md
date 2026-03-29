@@ -853,8 +853,9 @@ project-repo/                    # Git repo
   - tikz-reviewer → deferred (still pending)
 
 ### Phase 3: Skills
-- [ ] Adapt Hugo's skills: `/discover`, `/analyze`, `/write`, `/review`, `/submit`, `/talk`, `/revise`, `/tools`, `/archive`, `/new-project`
-- [ ] Create behavioral-specific skills: `/theory`, `/design experiment`, `/qualtrics`, `/otree`, `/preregister`
+- [x] Adapt Hugo's skills (2026-03-29): `/discover`, `/analyze`, `/write`, `/review`, `/submit`, `/talk`, `/revise`, `/tools`, `/new-project`
+- [x] Create behavioral-specific skills (2026-03-29): `/theory`, `/design` (experiment + power), `/qualtrics`, `/otree`, `/preregister`
+- [x] Replace `/strategize` with `/design` (2026-03-29)
 
 ### Phase 4: Testing with BDM Project
 - [ ] Copy adapted `.claude/` to BDM repo
