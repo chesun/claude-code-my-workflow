@@ -167,6 +167,22 @@ _Runs after Phase 2. If Phase 2 found FATAL issues, still review but note that d
 
 ---
 
+## Phase 3b: Existence Experiment Scrutiny
+
+_Runs ONLY if the design is an existence experiment (empirical hypothesis without formal model). Skip for theory-testing experiments._
+
+**Flag:** "This is an existence experiment — extra design scrutiny applies."
+
+- [ ] **Informative under null:** What do you learn if the effect is zero? Is the experiment informative even if the main hypothesis fails? If a null result teaches nothing, the design is risky.
+- [ ] **Mechanism identification:** Can the design distinguish WHY the effect exists, not just WHETHER it exists? A bare treatment-vs-control with one outcome variable is weak.
+- [ ] **Comparative statics:** Are there enough treatments to trace out a pattern (not just "bigger/smaller")? Even without a model, multiple conditions varying one dimension yield interpretable gradients.
+- [ ] **MDE plausibility:** Given the budget, is the MDE plausibly smaller than the true effect? If the design can only detect 0.5+ SD effects, it's likely underpowered for a novel phenomenon.
+- [ ] **Power-boosting:** Is the design using within-subject (if feasible), covariate adjustment (Lin 2013), and ORIV for noisy measures?
+- [ ] **Registered Reports:** Is a Registered Report recommended? For existence experiments, this eliminates null-result career risk and is the strongest mitigation.
+- [ ] **"Do it both ways" (Niederle):** Is there an environment where different explanations predict different directions? This makes even a null on the main effect informative.
+
+---
+
 ## Phase 4: Completeness and Polish
 
 _Runs only if Phases 2-3 have no unresolved FATAL issues. Lower priority._

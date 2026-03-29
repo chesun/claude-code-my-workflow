@@ -226,8 +226,13 @@ This is the core intellectual contribution of the behavioral workflow. It ensure
 1. RESEARCH QUESTION
    What causal/behavioral claim are you testing?
 
-2. THEORETICAL PREDICTIONS
-   What does the model predict? List each testable prediction.
+2. HYPOTHESES (theoretical or empirical)
+   If formal model: What does the model predict? List each testable prediction.
+   If no formal model (existence experiment): State the empirical hypothesis,
+   the direction, the comparison, and what would falsify it. Justify the
+   direction from prior evidence, related findings, or intuition.
+   Either way: the requirement is a specific hypothesis with a specific
+   comparison — not a formal model. "Hypothesis-driven, not 'stuff happens'" (Niederle).
 
 3. STATISTICAL TESTS (co-designed with treatments — Steps 3-5 are iterative)
    For each prediction: exact test, estimand, and null.
@@ -382,6 +387,10 @@ This is the core intellectual contribution of the behavioral workflow. It ensure
 
 11. POWER ANALYSIS
     - Effect size assumption (justify from theory, pilots, or literature)
+    - FOR EXISTENCE EXPERIMENTS (unknown effect size): flip the question —
+      compute MDE given budget constraint, then argue "is this MDE plausibly
+      smaller than the true effect?" If you can't argue yes, you're underpowered.
+      Conservative default: power for 0.3-0.4 SD (100-175 per cell).
     - Core formulas (List et al. 2011):
       Equal variance, two-arm: n* = 2(t_{α/2} + t_β)² × (σ/δ)² per arm
       α=0.05, power=0.80: 1 SD → n*=16; 0.5 SD → n*=64; 0.7 SD → n*=30
@@ -587,6 +596,72 @@ Christina's edited list (11 categories with sub-categories):
 - Have a draft? → Start at `/review`
 - Have a design but no theory? → Start at `/design`, flag that theory is missing
 - Have theory but no design? → Start at `/theory review`, then `/design`
+
+### 9b. Existence Experiments — "Does This Effect Exist?"
+
+The default pipeline assumes theory → predictions → design. But many behavioral experiments test whether an effect exists at all, without a formal model predicting the magnitude. Roth's taxonomy (via Croson) calls this **"anomaly investigation"** — a recognized legitimate category.
+
+**Why these are risky:**
+- No model means no predicted effect size → power analysis is harder
+- Null results are uninteresting and hard to publish
+- Without theory, it's easy to design an experiment that "just observes" without a specific comparison
+- Risk of fishing: running many comparisons and finding something by chance
+
+**The requirement is NOT a formal model — it's a specific hypothesis with a specific comparison.** Niederle's golden rule applies: "hypothesis-driven, not 'stuff happens.'" A single-treatment experiment that just observes behavior yields uninterpretable results. You need at least two conditions and a directional prediction.
+
+**Existence Experiment Protocol (additions to the standard 14-step checklist):**
+
+1. **Step 2 amended — Empirical hypothesis accepted alongside theoretical prediction:**
+   - If formal model: "Model predicts delta = X under assumption A"
+   - If no formal model: "We hypothesize that [treatment] increases/decreases [outcome] relative to [control]. Direction justified by: [prior evidence / intuition / related findings]"
+   - Either way: state the direction, state the comparison, state what would falsify it
+
+2. **Step 11 amended — Power analysis for unknown effect sizes:**
+   - Flip the question: given your budget constraint, compute the Minimum Detectable Effect (MDE)
+   - Ask: "Is this MDE plausibly smaller than the true effect?" If you can't argue yes, the experiment is underpowered
+   - Conservative default: power for 0.3-0.4 SD (requires 100-175 per cell)
+   - "30 per cell" only detects 0.70 SD — almost certainly too optimistic for an existence experiment
+
+3. **Power-boosting strategies (especially important for existence experiments):**
+   - Within-subject designs: ≥50% fewer subjects needed (Moffatt)
+   - Covariate adjustment: pre-treatment measure is single most effective power booster (Lin 2013, Huber & Graham)
+   - ORIV correction: recovers signal from noisy elicitations (30-50% measurement error)
+   - Optimal allocation: don't split 50/50 if variances differ
+   - Always collect RT: free data enabling DDM-based estimation
+
+4. **Registered Reports strongly recommended:**
+   - Submit paper with intro, design, hypotheses (no results) before data collection
+   - Journal peer-reviews the design; if accepted, publishes regardless of results
+   - Eliminates null-result career risk entirely
+   - Leads to more null results than normal publications (Scheel et al. 2021) — but these are publishable nulls
+
+5. **Designer-critic additional scrutiny for existence experiments:**
+   - Flag: "This is an existence experiment — extra design scrutiny applies"
+   - Check: can the design distinguish mechanisms even if the effect exists?
+   - Check: is the experiment informative under the null? (What do you learn from a null result?)
+   - Check: are there enough treatments for comparative statics, or just treatment vs. control?
+   - Check: "do it both ways" (Niederle) — find an environment where different explanations predict different directions
+
+6. **Design for comparative statics, not levels:**
+   - Even without a model, you can predict DIRECTION
+   - "Treatment A should produce more X than Treatment B" is testable without knowing the magnitude
+   - Multiple treatment arms that vary one dimension allow you to trace out a pattern, which is interpretable even with small effects
+
+**Modified dependency graph for existence experiments:**
+```
+/discover interview ─────┐
+                         ├──→ /discover lit ──→ [theory optional]
+/discover ideate ────────┘         │
+                                   ▼
+                          /design experiment ←── empirical hypothesis (not model predictions)
+                                   │
+                          [extra: designer-critic flags existence experiment]
+                          [extra: MDE analysis instead of target-effect-size power]
+                          [extra: Registered Reports recommended]
+                                   │
+                          ┌────────┼────────┐
+                          ...rest of pipeline same...
+```
 
 ---
 
@@ -856,6 +931,15 @@ project-repo/                    # Git repo
 - [x] Adapt Hugo's skills (2026-03-29): `/discover`, `/analyze`, `/write`, `/review`, `/submit`, `/talk`, `/revise`, `/tools`, `/new-project`
 - [x] Create behavioral-specific skills (2026-03-29): `/theory`, `/design` (experiment + power), `/qualtrics`, `/otree`, `/preregister`
 - [x] Replace `/strategize` with `/design` (2026-03-29)
+
+### Phase 3b: Existence Experiment Protocol
+Implements Section 9b additions. 6 files updated (2026-03-29):
+- [x] `.claude/references/inference-first-checklist.md` — Step 2: empirical hypotheses; Step 11: MDE approach; Step 14: Registered Reports promoted
+- [x] `.claude/agents/designer.md` — Step 2: empirical hypotheses + flag existence experiments; Step 11: MDE protocol + power-boosting
+- [x] `.claude/agents/designer-critic.md` — Phase 3b: existence experiment scrutiny (informative under null, mechanisms, comparative statics, MDE, Registered Reports)
+- [x] `.claude/skills/design/SKILL.md` — Workflow accepts empirical hypotheses; designer-critic Phase 3b in review; interactive mode updated
+- [x] `.claude/skills/preregister/SKILL.md` — Registered Reports promoted to "strongly recommended" for existence experiments
+- [x] `.claude/rules/experiment-design-principles.md` — Principle 1: empirical hypotheses with specific comparisons accepted
 
 ### Phase 4: Testing with BDM Project
 - [ ] Copy adapted `.claude/` to BDM repo

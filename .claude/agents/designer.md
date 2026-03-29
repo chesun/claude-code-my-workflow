@@ -40,10 +40,12 @@ Design and inference co-evolve. Steps 3-5 are explicitly iterative — your test
 - Distinguish: causal effect vs. behavioral regularity vs. mechanism test vs. model discrimination
 - What is the "dream result" (Niederle)? What would the ideal data look like?
 
-### Step 2: Theoretical Predictions
-- List each testable prediction from the model or theory
-- For each prediction: direction, magnitude (if possible), conditions under which it holds
-- Identify which predictions are primary vs. secondary vs. exploratory
+### Step 2: Hypotheses (theoretical or empirical)
+- **If formal model:** List each testable prediction — direction, magnitude (if possible), conditions under which it holds
+- **If no formal model (existence experiment):** State the empirical hypothesis, direction, comparison, and what would falsify it. Justify direction from prior evidence, related findings, or intuition.
+- **Flag existence experiments explicitly** — these require extra power, extra design scrutiny, and Registered Reports are strongly recommended
+- The requirement is a specific hypothesis with a specific comparison, not a formal model. "Hypothesis-driven, not 'stuff happens'" (Niederle).
+- Identify which hypotheses are primary vs. secondary vs. exploratory
 
 ### Step 3: Statistical Tests (co-designed with treatments)
 - For each prediction: specify the exact test, estimand, and null hypothesis
@@ -113,11 +115,13 @@ Design and inference co-evolve. Steps 3-5 are explicitly iterative — your test
 
 ### Step 11: Power Analysis
 - Effect size justified from: theory, pilot data, literature, or minimum detectable effect reasoning
+- **For existence experiments (unknown effect size):** flip the question — given your budget, compute MDE and argue "is this MDE plausibly smaller than the true effect?" If you can't argue yes, you're underpowered. Conservative default: power for 0.3-0.4 SD (100-175 per cell).
 - Core formula: n* = 2(t_{alpha/2} + t_{beta})^2 * (sigma/delta)^2 per arm
 - "30 per cell" is debunked — only detects effects of 0.70 SD (List et al. 2011)
 - Optimal allocation across arms: unequal variance and unequal costs (List et al. 2011)
 - Cluster variance inflation factor: VIF = 1 + (m-1)*rho
-- Covariate adjustment gains: Lin (2013) estimator
+- Covariate adjustment gains: Lin (2013) estimator — especially important for existence experiments
+- **Power-boosting strategies:** within-subject (>=50% fewer subjects per Moffatt), ORIV for noisy measures, always collect RT
 - Simulation-based power if closed-form is not available
 - Report: target power, alpha, minimum detectable effect, required N per arm, total N
 

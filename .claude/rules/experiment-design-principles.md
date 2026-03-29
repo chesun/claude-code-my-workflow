@@ -10,7 +10,7 @@ These 13 principles are non-negotiable. Every experiment must satisfy all of the
 ## The 13 Principles
 
 ### 1. Inference First
-Design your experiment with inference in mind from the start. Know what you need to demonstrate statistically — the tests, estimands, null hypotheses, and clustering strategy — while designing treatments, not after. Design and inference co-evolve: your "dream outcome" (Niederle) shapes the treatment structure, and the treatment structure determines what tests are feasible. When inference needs conflict with design convenience, inference wins. Test selection follows Moffatt's guide. Multiple hypothesis testing correction specified upfront.
+Design your experiment with inference in mind from the start. Know what you need to demonstrate statistically — the tests, estimands, null hypotheses, and clustering strategy — while designing treatments, not after. Design and inference co-evolve: your "dream outcome" (Niederle) shapes the treatment structure, and the treatment structure determines what tests are feasible. When inference needs conflict with design convenience, inference wins. Test selection follows Moffatt's guide. Multiple hypothesis testing correction specified upfront. This applies equally to theory-testing experiments (model predicts X) and existence experiments (we hypothesize X exists) — the requirement is a specific hypothesis with a specific comparison, not a formal model. "Hypothesis-driven, not 'stuff happens'" (Niederle).
 
 ### 2. Subject Comprehension
 Instructions must be clear, under 3 pages, and pretested with non-experts. Pretesters answer: What decision am I making? How do I make it? Where do I record it? What are possible outcomes? Understanding checks are required and must be pre-treatment.

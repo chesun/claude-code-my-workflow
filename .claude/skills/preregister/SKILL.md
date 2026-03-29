@@ -159,5 +159,5 @@ A filed pre-registration with unchecked assumptions is worse than no pre-registr
 - **Be honest about what's exploratory.** Label secondary analyses and subgroups clearly.
 - **Pre-registration alone does NOT curb p-hacking.** Only pre-registration WITH complete pre-analysis plans reduces it (Brodeur et al. 2024).
 - **Design-hacking warning.** Unreported pilots that tweak design until something "works," then PAP that design = "overly confident view of robustness" (Coffman & Dreber 2025).
-- **Consider Registered Reports** for high-risk designs — journal peer-reviews before data collection.
+- **Registered Reports strongly recommended for existence experiments** — submit before data collection; journal publishes regardless of results. Eliminates null-result career risk. Also consider for other high-risk designs.
 - **The design document is the source.** Pre-registration translates the approved design into registry format. If there's no design, run `/design experiment` first.

@@ -7,8 +7,10 @@ This is the portable reference version of the checklist. The designer agent read
 ## Step 1: Research Question
 What causal/behavioral claim are you testing?
 
-## Step 2: Theoretical Predictions
-What does the model predict? List each testable prediction.
+## Step 2: Hypotheses (theoretical or empirical)
+If formal model: What does the model predict? List each testable prediction.
+If no formal model (existence experiment): State the empirical hypothesis, the direction, the comparison, and what would falsify it. Justify the direction from prior evidence, related findings, or intuition.
+The requirement is a specific hypothesis with a specific comparison — not a formal model. "Hypothesis-driven, not 'stuff happens'" (Niederle).
 
 ## Step 3: Statistical Tests (co-designed with treatments)
 For each prediction: exact test, estimand, and null. Steps 3-5 are iterative — your test choices shape your treatment design and vice versa. The goal is to ensure your design can produce the data your tests require.
@@ -62,11 +64,13 @@ What data do those tests need? (paired, independent, panel, choice lists, belief
 
 ## Step 11: Power Analysis
 - Effect size justified from theory, pilots, or literature
+- **For existence experiments (unknown effect size):** flip the question — compute MDE given budget, then argue "is this MDE plausibly smaller than the true effect?" Conservative default: power for 0.3-0.4 SD (100-175 per cell).
 - Core formula: n* = 2(t_alpha/2 + t_beta)^2 * (sigma/delta)^2 per arm
 - "30 per cell" is debunked — only detects 0.70 SD
 - Optimal allocation for unequal variance/costs
 - Cluster VIF: 1 + (m-1)*rho
-- Covariate adjustment: Lin (2013) estimator
+- Covariate adjustment: Lin (2013) estimator — especially important for existence experiments
+- Power-boosting: within-subject designs (>=50% fewer subjects), ORIV for noisy measures, always collect RT
 
 ## Step 12: Budget & Attrition
 - Per-subject payment, platform fees, total budget
@@ -82,4 +86,5 @@ What data do those tests need? (paired, independent, panel, choice lists, belief
 - Coffman & Dreber 7-item PAP structure
 - Test hierarchy: primary > secondary > robustness > exploratory
 - Replication package requirements
-- Consider Registered Reports for high-risk designs
+- **Registered Reports strongly recommended for existence experiments** — submit before data collection; journal publishes regardless of results. Eliminates null-result career risk.
+- Consider Registered Reports for other high-risk designs as well

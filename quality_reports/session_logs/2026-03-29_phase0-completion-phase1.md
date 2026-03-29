@@ -110,6 +110,14 @@ Completed:
 
 **Phase 3 complete.** All 14 skills adapted or created.
 
+## Post-Phase 3: Existence Experiment Protocol (2026-03-29)
+
+Added Section 9b to the plan: "Existence Experiments — Does This Effect Exist?"
+- Pipeline gap identified: default assumes theory → predictions → design, but many behavioral experiments test whether an effect exists without a formal model
+- Roth's taxonomy (via Croson) recognizes "anomaly investigation" as legitimate — key requirement is specific hypothesis + comparison, not formal model
+- Plan amendments: Step 2 (accept empirical hypotheses), Step 11 (MDE approach for unknown effect sizes), designer-critic extra scrutiny, Registered Reports promotion, power-boosting strategies
+- Implementation pending: need to update inference-first-checklist.md, /design skill, designer-critic agent, experiment-design-principles.md
+
 ## Corrections
 - notify.sh hook exists but was never wired into settings.json (Hugo's config doesn't have it either)
 - No Claude Code hook event for "waiting for permission" — needs terminal-level notification config

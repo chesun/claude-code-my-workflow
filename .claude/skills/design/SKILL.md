@@ -33,7 +33,7 @@ Produce a complete inference-first design using the 14-step checklist.
 3. Read `.claude/references/domain-profile-behavioral.md` for field conventions
 4. If `--lab` or `--online` flag present, tailor platform-specific sections
 5. Dispatch **Designer** to produce the 14-step design:
-   - Steps 1-2: Research question and theoretical predictions
+   - Steps 1-2: Research question and hypotheses (theoretical predictions OR empirical hypotheses — both accepted)
    - Steps 3-5: Statistical tests, data structure, and treatment arms (co-designed iteratively)
    - Step 6: Interface and elicitation choices with IC justification
    - Step 7: Process measurement plan (always RT)
@@ -48,6 +48,7 @@ Produce a complete inference-first design using the 14-step checklist.
    - Phase 1: Completeness (all 14 steps addressed)
    - Phase 2: Design validity (13 principles from experiment-design-principles.md)
    - Phase 3: Inference validity (test selection, clustering, power)
+   - Phase 3b: Existence experiment scrutiny (if no formal model — MDE plausibility, informative under null, Registered Reports)
    - Phase 4: Completeness and polish
 7. If FATAL or SERIOUS issues found, iterate (max 3 rounds)
 8. Save design to `quality_reports/designs/YYYY-MM-DD_[topic]_design.md`
@@ -75,7 +76,7 @@ Produce a complete inference-first design using the 14-step checklist.
 If invoked with just a topic (no spec file), the Designer asks up to 5 clarifying questions before producing the design:
 
 1. What behavioral/causal claim are you testing?
-2. Do you have a formal model with predictions, or is this exploratory?
+2. Do you have a formal model with predictions, or an empirical hypothesis? *(If empirical: what's the direction, and why do you expect it?)*
 3. Lab or online? (Or both?)
 4. What's your approximate budget and timeline?
 5. Are there existing experiments on this question? (What's the gap?)
