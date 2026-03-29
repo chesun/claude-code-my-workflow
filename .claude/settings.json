@@ -23,6 +23,8 @@
       "Bash(BIBINPUTS=*)",
       "Bash(latexmk *)",
       "Bash(bibtex *)",
+      "Bash(biber *)",
+      "Bash(pdfinfo *)",
       "Bash(python3 *)",
       "Bash(Rscript *)",
       "Bash(chmod *)",
@@ -31,12 +33,27 @@
       "Bash(wc *)",
       "Bash(sort *)",
       "Bash(mkdir *)",
+      "Bash(mv *)",
       "Bash(du *)",
-      "Bash(cat *)"
+      "Bash(cat *)",
+      "Bash(git rm *)",
+      "Bash(git show *)",
+      "Bash(find *)"
     ],
     "additionalDirectories": []
   },
   "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/notify.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -51,21 +68,21 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|Task",
         "hooks": [
           {
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-monitor.py",
             "timeout": 5
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
           {
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-reminder.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-reminder.py",
             "timeout": 5
           }
         ]
@@ -90,6 +107,17 @@
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-compact-restore.py",
             "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-reminder.py",
+            "timeout": 10
           }
         ]
       }

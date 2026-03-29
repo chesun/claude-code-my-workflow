@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: End-to-end data analysis dispatching Coder and Data-engineer for implementation, coder-critic for review. Supports R, Stata, Python, Julia. Replaces /data-analysis.
+description: End-to-end data analysis dispatching Coder and Data-engineer for implementation, coder-critic for review. Stata 17 primary, R/Python secondary. Replaces /data-analysis.
 argument-hint: "[dataset path or goal] Options: --dual [lang1,lang2]"
 allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Task
 ---
@@ -16,10 +16,10 @@ Run end-to-end data analysis by dispatching the **Coder** (analysis), **Data-eng
 ## Workflow
 
 ### Step 1: Context Gathering
-1. Read .claude/references/domain-profile.md for field conventions
-2. Read strategy memo in `quality_reports/` if it exists
-3. Check CLAUDE.md for language preference (R/Stata/Python/Julia)
-4. Scan existing scripts in `scripts/` for project patterns
+1. Read `.claude/references/domain-profile-behavioral.md` for field conventions
+2. Read design document in `quality_reports/designs/` if it exists
+3. Check CLAUDE.md for language preference (default: Stata 17)
+4. Scan existing scripts in `scripts/stata/` for project patterns
 
 ### Step 2: Data Preparation (if needed)
 If raw data provided, dispatch **Data-engineer** first:
@@ -32,19 +32,23 @@ If raw data provided, dispatch **Data-engineer** first:
 ### Step 3: Main Analysis
 Dispatch **Coder** agent:
 - Stage 0: Data loading (from cleaned data or raw)
-- Stage 1: Main specification (from strategy memo or user description)
-- Stage 2: Robustness checks
-- Stage 3: Publication-ready output (tables to `paper/tables/`, figures to `paper/figures/`)
+- Stage 1: Main specification (from design document or user description)
+- Stage 1b: Non-parametric tests (per Moffatt test selection guide)
+- Stage 2: Robustness checks + multiple hypothesis testing corrections
+- Stage 2b: Structural estimation (if applicable: CRRA via `ml`, heterogeneous agents via `fmm`/`intreg`)
+- Stage 3: Publication-ready output (tables to Overleaf `Tables/`, figures to Overleaf `Figures/`)
 - Produce `results_summary.md` with all estimates, SEs, and key statistics (MANDATORY)
-- Save scripts to `scripts/R/` (or appropriate language directory)
+- Save scripts to `scripts/stata/` (or `scripts/python/` for secondary)
 
 The Coder follows these principles:
-- **Script structure:** Use the Script Structure Template below
-- **Packages:** `fixest` for panel data, `modelsummary` for tables, `ggplot2` for figures
-- **Standard errors:** Cluster at appropriate level (match treatment assignment)
-- **Output:** `.tex` tables for LaTeX, `.pdf`/`.png` figures, `.rds` for intermediate objects
-- **No hardcoded paths.** All paths relative to repository root.
-- **saveRDS everything.** Every computed object (estimates, model fits, data frames, summary statistics) gets serialized to `.rds` for downstream use by the writer and other agents.
+- **Script structure:** `main.do` → `settings.do` → numbered scripts (01_clean, 02_analysis, etc.)
+- **Packages:** `reghdfe` for FE, `estout`/`esttab` for tables, `coefplot` for figures
+- **Standard errors:** Cluster at session/group level by default for experimental data
+- **Non-parametric tests:** Mann-Whitney, KS, Wilcoxon, Fisher exact, permutation tests as appropriate
+- **Multiple testing:** `wyoung` (Romano-Wolf) or `qqvalue` (BH) when testing multiple outcomes
+- **Output:** bare `.tex` tabular via `esttab`, `.pdf`/`.png` figures via `graph export`
+- **No hardcoded paths.** All paths via globals from `settings.do`.
+- **Save intermediate results.** `estimates save` for models, `save` for .dta files.
 
 ### Step 4: Code Review
 Dispatch **coder-critic** agent — run the full 12-category checklist:
@@ -76,44 +80,56 @@ If coder-critic finds Critical or Major issues:
 ### Step 6: Present Results
 1. **Results summary** — key estimates with SEs and interpretation (from `results_summary.md`)
 2. **Scripts created** — paths and descriptions
-3. **Output files** — tables in `paper/tables/`, figures in `paper/figures/`
+3. **Output files** — tables in Overleaf `Tables/`, figures in Overleaf `Figures/`
 4. **Code review score** — from coder-critic
 5. **TODO items** — missing data, additional specifications needed
 
 ---
 
-## Script Structure Template
+## Script Structure Template (Stata)
 
-```r
-# ============================================================
-# [Descriptive Title]
-# Author: [from project context]
-# Purpose: [What this script does]
-# Inputs: [Data files]
-# Outputs: [Figures, tables, RDS files]
-# ============================================================
+```stata
+* ============================================================
+* [Descriptive Title]
+* Author: [from project context]
+* Purpose: [What this script does]
+* Inputs: [Data files]
+* Outputs: [Figures, tables]
+* ============================================================
 
-# 0. Setup ----
-library(tidyverse)
-library(fixest)
-library(modelsummary)
+* 0. Setup
+include settings.do
+set seed 42
 
-set.seed(42)
+* 1. Data Loading
+use "$cleaned/experiment_data.dta", clear
 
-dir.create("paper/tables", recursive = TRUE, showWarnings = FALSE)
-dir.create("paper/figures", recursive = TRUE, showWarnings = FALSE)
+* 2. Descriptive Statistics
+estpost summarize $outcomes $controls
+esttab using "$tables/sumstats.tex", replace ///
+    cells("mean(fmt(3)) sd(fmt(3)) min max count") booktabs fragment
 
-# 1. Data Loading ----
+* 3. Main Analysis — Non-parametric tests
+ranksum $outcome, by(treatment)
+ttest $outcome, by(treatment) unequal
 
-# 2. Exploratory Analysis ----
+* 4. Main Analysis — Regression
+eststo clear
+eststo: reg $outcome treatment, vce(cluster session_id)
+eststo: reg $outcome treatment $controls, vce(cluster session_id)
 
-# 3. Main Analysis ----
+esttab using "$tables/reg_main.tex", replace ///
+    style(tex) booktabs fragment ///
+    cells(b(star fmt(3)) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01)
 
-# 4. Tables and Figures ----
+* 5. Robustness + Multiple Testing
+* wyoung $outcomes, cmd(reg OUTCOMEVAR treatment, vce(cluster session_id)) ///
+*     familyp(treatment) bootstraps(1000)
 
-# 5. Export ----
-# saveRDS(model_fit, "scripts/R/output/model_fit.rds")
-# saveRDS(main_results, "scripts/R/output/main_results.rds")
+* 6. Figures
+coefplot, keep(treatment) xline(0)
+graph export "$figures/coefplot_main.pdf", as(pdf) replace
 ```
 
 ---
@@ -167,8 +183,8 @@ Inspired by Scott Cunningham's replication methodology: **if two independent imp
 ## Principles
 - **Reproduce, don't guess.** If the user specifies a regression, run exactly that.
 - **Show your work.** Print summary statistics before jumping to regressions.
-- **Strategy alignment.** If strategy memo exists, code MUST implement it faithfully.
+- **Design alignment.** If design document exists, code MUST implement it faithfully.
 - **Worker-critic pairing.** Coder creates, coder-critic critiques. Never skip review.
-- **saveRDS everything.** Every computed object gets saved via `saveRDS()` for downstream use — model fits, cleaned data frames, summary statistics, not just final tables.
-- **Publication-ready output.** Tables and figures directly includable in the paper.
+- **Save intermediate results.** `estimates save` for models, `save` for .dta files — downstream agents need these.
+- **Publication-ready output.** Tables and figures directly includable in the paper via Overleaf.
 - **Cross-language convergence.** When `--dual` is used, divergence is a bug until proven otherwise.

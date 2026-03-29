@@ -80,8 +80,40 @@ Continue behavioral workflow implementation: complete remaining Phase 0 tasks, t
 **Kept as-is:** storyteller pair, editor
 **Total:** 24 agents
 
+## Phase 3: Skills (in progress 2026-03-29)
+
+Completed so far (7 of 14):
+1. `/strategize` → renamed to `/design` with `experiment` and `power` modes
+2. `/discover` — adapted interview, lit search (behavioral journals), data discovery (experimental)
+3. `/analyze` — Stata 17 primary, non-parametric tests, structural estimation, Overleaf paths
+4. `/write` — theory + design sections, McCloskey/Cochrane/Knuth rules, experimental reporting checklist
+5. `/review` — strategist-critic → designer-critic routing throughout
+6. `/theory` — new skill (develop + review modes, dispatches theorist pair)
+7. `/preregister` — new skill (AsPredicted v2.00 + OSF PAP, hard gate, interactive mode)
+
+Completed since last log update:
+8. `/qualtrics` — new (create, validate, improve, export-js modes)
+9. `/otree` — new (create, review, explain modes; updated to 5.x/6.x with 6.0 features)
+10. `/submit` — adapted (experimental replication package, pre-reg compliance, de-identified data)
+11. `/talk` — adapted (pdflatex, Overleaf Slides/ paths, unique talk names)
+12. `/new-project` — adapted (8-phase behavioral pipeline, pre-reg gate, behavioral folder scaffold)
+
+Also fixed:
+- settings.json: added Notification hook for desktop notifications (was missing from behavioral branch)
+- settings.json: corrected hook event assignments to match main branch
+- oTree agent + skill updated to 5.x/6.x with 6.0 features from version history
+- replication-standards.md: raw data with PII should NOT be included; clean de-identified data can be shared
+
+Remaining:
+- [ ] `/revise` — check if needs changes
+- [ ] `/tools` — check if needs changes
+
+## Corrections
+- notify.sh hook exists but was never wired into settings.json (Hugo's config doesn't have it either)
+- No Claude Code hook event for "waiting for permission" — needs terminal-level notification config
+
 ## Next Steps
 
-- [ ] Phase 3: Skills (adapt Hugo's skills + create behavioral-specific skills)
+- [ ] Continue Phase 3 skills
 - [ ] Phase 4: Testing with BDM project
 - [ ] Phase 5: Testing with JMP project

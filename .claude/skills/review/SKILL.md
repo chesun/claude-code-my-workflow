@@ -16,7 +16,7 @@ Unified review command that routes to the appropriate critic agents based on the
 ## Routing Logic
 
 ### Auto-detect by file type
-- `.tex` paper file → **Comprehensive review** (writer-critic + strategist-critic + Verifier)
+- `.tex` paper file → **Comprehensive review** (writer-critic + designer-critic + Verifier)
 - `.R`, `.py`, `.do`, `.jl` file → **Code review** (coder-critic standalone, categories 4-12)
 - `.tex` talk file (in talks/) → **Talk review** (storyteller-critic)
 
@@ -24,7 +24,7 @@ Unified review command that routes to the appropriate critic agents based on the
 - `--peer [journal]` → **Full peer review** (editor desk review → referee dispatch → editorial decision)
 - `--peer --r2 [journal]` → **R&R second round** (same referees, same dispositions, memory of prior review)
 - `--stress [journal]` → **Hostile stress test** (same flow, adversarial referee dispositions)
-- `--methods` → **Causal audit** (strategist-critic standalone, 4-phase review)
+- `--methods` → **Experimental design audit** (designer-critic standalone, 4-phase review)
 - `--proofread` → **Manuscript polish** (writer-critic standalone, 6 categories)
 - `--code [file]` → **Code review** (coder-critic standalone, categories 4-12)
 - `--replicate [language]` → **Cross-language replication** (Coder re-implements in target language + coder-critic + comparison)
@@ -36,7 +36,7 @@ Unified review command that routes to the appropriate critic agents based on the
 
 ### Comprehensive Review (default for .tex paper)
 Dispatch in parallel:
-1. **strategist-critic** — causal design audit (4 phases)
+1. **designer-critic** — experimental design audit (4 phases)
 2. **writer-critic** — manuscript polish (6 categories)
 3. **Verifier** — compilation check
 Compute weighted aggregate score.
@@ -185,7 +185,7 @@ Save report to `quality_reports/[file]_code_review.md`
 
 ### Causal Audit (`--methods`)
 
-Dispatch **strategist-critic** standalone for a full 4-phase causal inference review.
+Dispatch **designer-critic** standalone for a full 4-phase experimental design and inference review.
 
 #### 4-Phase Econometrics Review Protocol
 
@@ -234,7 +234,7 @@ Dispatch **writer-critic** standalone:
 1. Auto-detect source language from file extension
 2. Dispatch **Coder** in replication mode — re-implement in target language
 3. **coder-critic** reviews both implementations
-4. Compare numerical outputs per `.claude/references/domain-profile.md` Quality Tolerance Thresholds
+4. Compare numerical outputs per `.claude/references/domain-profile-behavioral.md` Quality Tolerance Thresholds
 5. Save replicated script and comparison report
 
 ---

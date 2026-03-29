@@ -7,9 +7,9 @@ Based on AEA Data Editor requirements and Coffman & Dreber (2025).
 ## What Must Be Included
 
 ### 1. Data
-- **Raw data:** Platform exports BEFORE any cleaning (Prolific CSV, oTree exports, Qualtrics CSV)
-- **Cleaned data:** Analysis-ready datasets with codebook
-- **Simulated data:** If raw data cannot be shared (IRB restrictions), provide simulated data that runs with the code
+- **Cleaned de-identified data:** Analysis-ready datasets with PII stripped (no Prolific IDs, MTurk worker IDs, IP addresses). Clean data without PII can typically be shared.
+- **Raw data:** Do NOT include raw platform exports — they contain confidential information. The cleaning code documents the transformation from raw to clean.
+- **Codebook:** Variable definitions, coding, units for all included datasets
 
 ### 2. Code
 - **Cleaning code:** Transforms raw → cleaned (every step documented)

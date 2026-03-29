@@ -28,10 +28,10 @@ Conduct a structured conversational interview to formalize a research idea.
 
 Interview structure:
 1. **Big Picture** (1-2 questions): "What phenomenon are you trying to understand?" "Why does this matter?"
-2. **Theoretical Motivation** (1-2 questions): "What's your intuition for why X happens?" "What would standard theory predict?"
-3. **Data and Setting** (1-2 questions): "What data do you have access to?" "Is there a specific institutional setting?"
-4. **Identification** (1-2 questions): "Is there a natural experiment or policy change you can exploit?" "What's the biggest threat to causal interpretation?"
-5. **Expected Results** (1-2 questions): "What would you expect to find?" "What would surprise you?"
+2. **Theoretical Motivation** (1-2 questions): "What's your intuition for why X happens?" "Do you have a formal model, or is this exploratory?"
+3. **Experimental Setting** (1-2 questions): "Lab or online? What's your subject pool?" "Have others run experiments on this question?"
+4. **Design Intuition** (1-2 questions): "What's the key comparison — what would convince a skeptic?" "What's your 'dream outcome'? (Niederle)"
+5. **Expected Results** (1-2 questions): "What would you expect to find?" "What alternative explanations worry you?"
 6. **Contribution** (1 question): "How does this differ from what's been done? What gap are you filling?"
 
 Interview style:
@@ -48,14 +48,15 @@ After interview (5-8 exchanges), produce:
 ## Research Question — [one sentence]
 ## Motivation — [why this matters, theoretical context, policy relevance]
 ## Hypothesis — [testable prediction with expected direction]
-## Empirical Strategy — [method, treatment, control, identifying assumption, robustness]
-## Data — [primary dataset, key variables, sample, unit of observation]
+## Empirical Strategy — [experiment type (lab/online/field), key comparison, identification]
+## Theory — [formal model if applicable, testable predictions]
+## Data — [experimental data structure, subject pool, platform]
 ## Expected Results — [what the researcher expects and why]
 ## Contribution — [how this advances the literature]
 ## Open Questions — [issues needing further thought]
 ```
 
-**Output 2: Domain Profile** → `.claude/references/domain-profile.md` (if still template)
+**Output 2: Domain Profile** → `.claude/references/domain-profile-behavioral.md` (if still template)
 Fill in field, target journals, common data sources, identification strategies, field conventions, seminal references, and referee concerns based on the interview.
 
 ### `/discover lit [topic]` — Literature Review
@@ -65,14 +66,17 @@ Search and synthesize academic literature.
 **Output:** Annotated bibliography + BibTeX entries + frontier map
 
 Workflow:
-1. Read `.claude/references/domain-profile.md` for field journals and seminal references
+1. Read `.claude/references/domain-profile-behavioral.md` for field journals and seminal references
 2. Check `master_supporting_docs/` for uploaded papers
 3. Read `bibliography_base.bib` for papers already in the project
 4. Dispatch Librarian to search:
    - Top-5 journals (AER, Econometrica, QJE, JPE, REStud)
-   - Field journals from domain-profile.md
-   - NBER/SSRN/IZA working papers
-   - **Citation chains** — forward and backward citation tracking from key papers. Follow: (a) backward citations (what do the key papers cite?), and (b) forward citations (who cites the key papers?). This is often the most productive search vector.
+   - Behavioral/experimental field journals (AEJ:Micro, JEBO, Games and Economic Behavior, JEEA, Experimental Economics, JRU, JDM, Management Science)
+   - Psychology crossover journals (Psychological Science, Cognition, JEP:General, PNAS) — evaluate with skepticism about inference standards
+   - NBER/SSRN working papers
+   - **Always check:** Is there existing experimental evidence on this question? (Before proposing a novel study)
+   - **Citation chains** — forward and backward citation tracking from key papers
+   - Read `.claude/references/seminal-papers-by-subfield.md` for canonical references
 5. Assign **proximity scores** to each paper:
    - **1** — Directly competes (same question, similar method)
    - **2** — Closely related (same question, different method or setting)
@@ -92,7 +96,7 @@ Output format for each paper:
 - **Journal:** [venue]
 - **Proximity:** [1-5 score]
 - **Main contribution:** [1-2 sentences]
-- **Identification strategy:** [DiD / IV / RDD / SC / descriptive]
+- **Method:** [lab experiment / online experiment / field experiment / observational / descriptive]
 - **Key finding:** [result with effect size]
 - **Relevance:** [why it matters for our research]
 ```
@@ -105,14 +109,14 @@ Find and assess datasets for the research question.
 
 Workflow:
 1. Read research spec and strategy memo if they exist
-2. Read `.claude/references/domain-profile.md` for common data sources in the field
+2. Read `.claude/references/domain-profile-behavioral.md` for common data sources in the field
 3. Understand what variables are needed: treatment, outcome, controls, time period, geography
 4. Dispatch Explorer to search across source categories:
-   - Public microdata (CPS, ACS, NHIS, MEPS, etc.)
-   - Administrative data (Medicare claims, tax records, court records)
+   - Own experimental data (oTree exports, Qualtrics exports, Prolific demographics)
+   - Existing experimental datasets (replication packages from published experiments)
+   - Public microdata (CPS, ACS, NHIS — for field experiment or complementary analysis)
    - Survey data (RAND HRS, PSID, Add Health, NLSY)
-   - International (World Bank, OECD, Eurostat)
-   - Novel/alternative (satellite imagery, web scraping, proprietary)
+   - Platform-specific: Prolific (demographics, attention metrics), MTurk, university lab pools
 5. For each dataset found, report:
    - Name, provider, access level (public/restricted)
    - Key variables available
@@ -160,5 +164,5 @@ Generate:
 - **Effect sizes matter:** Report magnitudes, not just signs. Note identification strategy for every paper.
 - **Data feasibility matters:** A perfect dataset you can't access is useless. Always assign A/B/C/D grades.
 - **5-point data critique:** Measurement validity, sample selection, external validity, identification compatibility, known issues. Never skip this.
-- **Domain-profile aware:** Always read `.claude/references/domain-profile.md` first for field calibration.
+- **Domain-profile aware:** Always read `.claude/references/domain-profile-behavioral.md` first for field calibration.
 - **Worker-critic pairing:** Librarian + librarian-critic, Explorer + explorer-critic. Never skip the critic.
