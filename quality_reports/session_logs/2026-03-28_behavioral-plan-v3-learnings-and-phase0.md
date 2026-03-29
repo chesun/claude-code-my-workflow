@@ -91,8 +91,9 @@ New skill in `~/github_repos/claude-config/skills/pdf-learnings/`:
 
 ## Remaining Phase 0 Tasks
 
-- [ ] **Task #7:** Create `/challenge` skill with behavioral modes (`--design`, `--theory`, `--paper`, `--fresh`) — plan Section 10 has full spec
-- [ ] **Task #8:** Update CLAUDE.md for behavioral workflow + verify folder structure matches plan Section 12
+- [x] **Task #6b:** Verify TikZ infrastructure — TikZ package loads in preamble; tikz-reviewer agent + visual quality rule deferred to Phase 2 (2026-03-29)
+- [x] **Task #7:** Create `/challenge` skill — 4 modes (--design, --theory, --paper, --fresh), all challenge categories from plan Section 10 (2026-03-29)
+- [x] **Task #8:** Update CLAUDE.md for behavioral workflow — pdflatex, Stata 17, behavioral folder structure (theory/, experiments/), behavioral skills table, inference-first principle (2026-03-29)
 
 ## Next: Phase 1
 
@@ -112,3 +113,4 @@ After Phase 0 completes:
 2. **Learnings stay in `quality_reports/paper_learnings/`** — agents read them as reference files, not duplicated into `.claude/references/`
 3. **Lowercase folder convention** — all project folders lowercase except CLAUDE.md, MEMORY.md, WORKFLOW_QUICK_REF.md
 4. **Settings.json protected by hook** — must edit via shell, not Edit tool
+5. **TikZ deferred to Phase 2** — package already loads in preamble; the tikz-reviewer agent and visual quality rule belong with other agent work, not setup

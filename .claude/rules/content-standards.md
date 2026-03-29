@@ -4,11 +4,13 @@ paths:
   - "**/*.py"
   - "**/*.jl"
   - "**/*.do"
+  - "**/*.doh"
   - "**/*.tex"
-  - "paper/tables/**"
-  - "paper/figures/**"
+  - "tables/**"
+  - "figures/**"
   - "master_supporting_docs/**"
   - "explorations/**"
+  - "experiments/**"
 ---
 
 # Content Standards: Tables, Figures, PDFs, and Explorations
@@ -91,52 +93,34 @@ For tables with multiple panels:
 - `\midrule` after each panel label
 - Small vertical space (`\\[0.5em]`) between panels
 
-### Preferred R Packages
+### Preferred Packages
 
-**Primary: `modelsummary`**
+**Stata (primary): `estout`/`esttab`**
 
-```r
-library(modelsummary)
+```stata
+* Store estimates
+eststo clear
+eststo: reg y treatment, vce(cluster session_id)
+eststo: reg y treatment x1 x2, vce(cluster session_id)
 
-modelsummary(
-  models,
-  output   = "latex_tabular",  # bare tabular, no wrapper
-  stars    = c("*" = 0.10, "**" = 0.05, "***" = 0.01),
-  coef_rename = c(
-    "treatment"  = "Treatment",
-    "log_income" = "Log income"
-  ),
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
-  escape  = FALSE
-)
+* Export bare tabular
+esttab using "$tables/reg_main.tex", replace ///
+    style(tex) booktabs ///
+    cells(b(star fmt(3)) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    stats(N r2, fmt(%9,0gc 3) labels("Observations" "R\$^2\$")) ///
+    nomtitles fragment
 ```
 
-**Alternative: `fixest::etable`**
+**R (secondary): `modelsummary`**
 
 ```r
-fixest::etable(
-  models,
-  tex      = TRUE,
-  style.tex = style.tex(
-    main     = "aer",
-    depvar.title = "",
-    fixef.title  = "",
-    yesNo    = c("Yes", "No")
-  ),
-  se.below = TRUE,
-  signif.code = c("***" = 0.01, "**" = 0.05, "*" = 0.10)
-)
+modelsummary(models, output = "latex_tabular",
+  stars = c("*" = 0.10, "**" = 0.05, "***" = 0.01),
+  gof_map = c("nobs", "r.squared"), escape = FALSE)
 ```
 
-**For summary / descriptive tables: `kableExtra`**
-
-```r
-library(kableExtra)
-
-kbl(df, format = "latex", booktabs = TRUE, escape = FALSE,
-    align = c("l", rep("c", ncol(df) - 1))) |>
-  kable_styling(latex_options = "hold_position")
-```
+**R alternative: `fixest::etable`** for multi-equation models.
 
 ### Typography
 
@@ -147,37 +131,20 @@ kbl(df, format = "latex", booktabs = TRUE, escape = FALSE,
 
 ### Export
 
-```r
-# Write .tex fragment (no \begin{table} wrapper -- added in main.tex)
-writeLines(tex_output, file.path("paper/tables", "reg_main_specification.tex"))
-```
-
 - Output **bare `tabular` environment** (no `\begin{table}` float)
 - The paper's `main.tex` wraps it with `\begin{table}`, `\caption{}`, and `\input{}`
-- Write to `paper/tables/`
+- Write to Overleaf `Tables/` directory (path set in `settings.do` or CLAUDE.md)
 
 ### File Naming
-
-```
-tables/
-├── descriptive/
-│   ├── sumstats_main_sample.tex
-│   └── balance_treatment_control.tex
-├── estimation/
-│   ├── reg_main_specification.tex
-│   ├── reg_heterogeneity_gender.tex
-│   └── did_event_study_coefficients.tex
-└── robustness/
-    └── reg_alternative_controls.tex
-```
 
 Pattern: `{table_type}_{content_description}.tex`
 
 - `sumstats_` for summary statistics
-- `balance_` for balance / pre-treatment tests
+- `balance_` for balance / randomization checks
 - `reg_` for regression output
-- `did_` for difference-in-differences specific tables
-- `first_stage_` for IV first stage
+- `treat_` for treatment effect tables
+- `nonparam_` for non-parametric test results
+- `structural_` for structural estimation results
 
 ### Prohibited Patterns
 
@@ -290,12 +257,12 @@ Female (\%)             &  47.8      &  48.6    &  -0.8       &  (1.2)  &  0.505
   2. **LaTeX `\caption{}`** — the authoritative title, numbered and editable without re-running R
 - **Panel labels are the exception** — "Panel A: Employment" inside multi-panel figures (via `patchwork`, `cowplot`, etc.) is fine since they identify sub-panels, not the whole figure
 - **Axis labels must be publication-quality** — "Employment Rate" not "emp_rate". Clean labels stay in the figure; titles and context go in the caption
-- **Use serif fonts** — figures should match the paper's body text. In ggplot, set `theme(text = element_text(family = "serif"))` or use `theme_minimal(base_family = "serif")`
-- **Show all years on the x-axis** when the panel spans ~20 years or fewer — use `scale_x_continuous(breaks = min_year:max_year)`. Only thin out labels when they overlap (roughly >20 ticks)
-- **Output PDF for figures** — vector graphics for LaTeX. Use `ggsave("fig.pdf")`. PNG only for raster content (maps, photos).
-- **Colorblind-friendly palettes** — use `scale_color_brewer(palette = "Set2")`, `viridis`, or similar. Never rely on red/green contrast alone.
-- **Color-independent design** — figures must be readable in grayscale. Combine color with shape (`shape` aesthetic) and linetype (`linetype` aesthetic) so series remain distinguishable without color.
+- **Use serif fonts** — figures should match the paper's body text. In Stata: `graph set eps fontface "Times New Roman"`. In ggplot: `theme(text = element_text(family = "serif"))`.
+- **Output PDF for figures** — vector graphics for LaTeX. In Stata: `graph export "fig.pdf", as(pdf) replace`. PNG for slides: `graph export "fig.png", as(png) width(1200) replace`. In R: `ggsave("fig.pdf")`.
+- **Colorblind-friendly palettes** — in Stata use `palettes` and `cleanplots` scheme. In R use `viridis` or `scale_color_brewer(palette = "Set2")`. Never rely on red/green contrast alone.
+- **Color-independent design** — figures must be readable in grayscale. Use distinct marker shapes and line patterns so series remain distinguishable without color.
 - **Figure width** — single-panel: `width=0.8\textwidth`. Side-by-side panels: `width=0.48\textwidth` each.
+- **Label all axes** with human-readable names and units. No raw variable names.
 
 ---
 
@@ -356,7 +323,37 @@ done
 
 ---
 
-## 4. Exploration Folder Protocol
+## 4. Experimental Reporting Standards
+
+**Every experimental paper must include:**
+
+### In the Paper
+- **Subject pool:** N recruited, N analyzed, demographics (age, gender, education, experience)
+- **Exclusion criteria:** pre-registered rules and counts excluded per criterion
+- **Treatment descriptions:** exact instructions shown to subjects (or "see Appendix X")
+- **Randomization:** method and verification (balance table)
+- **Payment:** show-up fee, average earnings, range, duration
+- **Timing:** dates conducted, median completion time
+- **Pre-registration:** registry, ID, date filed, link
+- **Clustering:** what level and why (session, group, individual)
+
+### In the Appendix/Supplement
+- Full instructions (verbatim or screenshots)
+- Comprehension quiz questions
+- All screens/interfaces shown to subjects
+- Attention check details and failure rates
+- Full balance tables
+
+### In the Replication Package
+- Raw data (platform exports before ANY cleaning)
+- Code that does BOTH cleaning AND analysis
+- Experimental materials (instructions PDF, QSF, oTree code)
+- IRB approval documentation
+- README with "computational empathy" (Vilhuber) — write as if a stranger needs to understand
+
+---
+
+## 5. Exploration Folder Protocol
 
 **All experimental work goes into `explorations/` first.** Never directly into production folders.
 
@@ -396,7 +393,7 @@ explorations/
 
 ---
 
-## 5. Exploration Fast-Track
+## 6. Exploration Fast-Track
 
 **Lightweight workflow for experimental work.** Quality threshold: 60/100 (vs 80 for production). No planning needed.
 

@@ -46,6 +46,20 @@ Review the Explorer's output (ranked data sources, fit assessments, coverage det
 - Is there a first stage? Treatment/control groups? Running variable?
 - Enough variation for the proposed design?
 
+### 7. Experimental Data Quality (when applicable)
+- Are attention check and comprehension quiz exclusion rates documented?
+- Are response time distributions assessed for inattention (extremely fast) and disengagement (extremely slow)?
+- Are multiple switching patterns flagged for MPL/price-list elicitations?
+- Are focal value clustering and ceiling/floor effects reported?
+- Is the exclusion pipeline transparent (how many subjects at each stage)?
+
+### 8. Clustering Structure for Experiments
+- Does the clustering structure support the planned statistical tests?
+- For session-level randomization: are there enough independent sessions per treatment?
+- For group-level interactions: is group_id the correct clustering level?
+- Is the number of clusters sufficient for cluster-robust inference (rule of thumb: >= 20-30 per arm)?
+- Are within-session spillovers across treatments ruled out by design?
+
 ---
 
 ## Scoring (0–100)
@@ -55,9 +69,12 @@ Review the Explorer's output (ranked data sources, fit assessments, coverage det
 | Proposed variable doesn't measure the concept | -25 |
 | Major sample selection issue unaddressed | -20 |
 | Better dataset exists and was missed | -15 |
+| Clustering structure insufficient for planned tests | -15 |
 | No discussion of measurement error | -10 |
 | Access timeline unrealistic | -10 |
 | Missing identification compatibility check | -10 |
+| Experimental exclusion criteria undocumented or unreported | -10 |
+| RT/attention/comprehension quality checks missing (experimental data) | -10 |
 | No discussion of external validity | -5 |
 
 ## Report Format

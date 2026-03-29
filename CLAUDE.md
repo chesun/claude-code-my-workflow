@@ -1,14 +1,18 @@
-# CLAUDE.MD -- Empirical Social Science Research with Claude Code
+# CLAUDE.MD -- Behavioral & Experimental Economics Research with Claude Code
 
 <!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
      Customize Beamer environments for your talk preamble.
      Keep this file under ~150 lines — Claude loads it every session.
-     See the guide at https://hugosantanna.github.io/clo-author/ for full documentation. -->
+     Based on clo-author (Hugo Sant'Anna) + infrastructure from Pedro Sant'Anna
+     + behavioral/experimental econ extensions. -->
 
 **Project:** [YOUR PROJECT NAME]
 **Institution:** [YOUR INSTITUTION]
-**Field:** [YOUR FIELD — e.g., Economics, Finance, Marketing, Management, Accounting]
+**Field:** Behavioral & Experimental Economics
 **Branch:** main
+**Stata version:** 17
+**LaTeX engine:** pdflatex
+**Overleaf path:** [YOUR OVERLEAF PATH — e.g., ~/Library/CloudStorage/Dropbox/Apps/Overleaf/project-name]
 
 ---
 
@@ -19,6 +23,7 @@
 - **Single source of truth** -- Paper `main.tex` is authoritative; talks and supplements derive from it
 - **Quality gates** -- weighted aggregate score; nothing ships below 80/100; see `quality.md`
 - **Worker-critic pairs** -- every creator has a paired critic; critics never edit files
+- **Inference first** -- design experiments with inference in mind from the start; tests and treatments co-evolve (see inference-first checklist)
 - **Auto-memory** -- corrections and preferences are saved automatically via Claude Code's built-in memory system
 
 ---
@@ -33,29 +38,48 @@
 
 ## Folder Structure
 
+The project spans two locations: a **git repo** (code, data, experiments, workflow) and an **Overleaf project** (paper, talks, LaTeX). Overleaf syncs via Dropbox.
+
 ```
-[YOUR-PROJECT]/
-├── CLAUDE.MD                    # This file
+[YOUR-PROJECT]/                  # Git repo
+├── CLAUDE.md                    # This file
 ├── .claude/                     # Rules, skills, agents, hooks
-├── Bibliography_base.bib        # Centralized bibliography
-├── paper/                       # Main LaTeX manuscript (source of truth)
-│   ├── main.tex                 # Primary paper file
-│   ├── sections/                # Section-level .tex files
-│   ├── figures/                 # Generated figures (.pdf, .png)
-│   ├── tables/                  # Generated tables (.tex)
-│   ├── talks/                   # Beamer presentations
-│   ├── quarto/                  # Quarto RevealJS presentations
-│   ├── preambles/               # LaTeX headers / shared preamble
-│   ├── supplementary/           # Online appendix and supplements
-│   └── replication/             # Replication package for deposit
-├── data/                        # Project data
-│   ├── raw/                     # Original untouched data (often gitignored)
-│   └── cleaned/                 # Processed datasets ready for analysis
-├── scripts/                     # Analysis code (R, Stata, Python, Julia)
-├── quality_reports/             # Plans, session logs, reviews, scores
-├── explorations/                # Research sandbox (see rules)
-├── templates/                   # Session log, quality report templates
+├── theory/                      # Formal models
+│   ├── model.tex
+│   └── proofs/
+├── experiments/                 # Experiment materials
+│   ├── designs/                 # Design docs, checklists
+│   ├── protocols/               # IRB, consent forms
+│   ├── instructions/            # Subject instructions (LaTeX)
+│   ├── oTree/                   # oTree project code
+│   ├── qualtrics/               # QSF exports, custom JS/CSS
+│   ├── comprehension/           # Understanding/attention checks
+│   └── pilots/                  # Pilot data, timing, budgets
+├── data/
+│   ├── raw/                     # Untouched data
+│   ├── cleaned/                 # Processed data
+│   └── simulated/               # Power analysis simulations
+├── scripts/
+│   ├── stata/                   # PRIMARY (main.do, settings.do, numbered .do files)
+│   └── python/                  # SECONDARY
+├── replication/                  # AEA replication package (code + data + README)
+├── explorations/                # Research sandbox
+├── quality_reports/             # Plans, specs, reviews, session logs
+├── templates/                   # Session log, quality report, experiment checklist
 └── master_supporting_docs/      # Reference papers and data docs
+
+[OVERLEAF_PATH]/                 # Overleaf project (via Dropbox)
+├── Paper/                       # Main manuscript (SOURCE OF TRUTH)
+│   └── main.tex
+├── Slides/                      # Each talk is its own folder
+│   ├── job_market/
+│   ├── seminar/
+│   └── short/
+├── Figures/
+├── Tables/
+├── Supplementary/               # Online appendix
+├── Preambles/                   # Shared LaTeX headers
+└── bibliography_base.bib
 ```
 
 ---
@@ -63,14 +87,17 @@
 ## Commands
 
 ```bash
-# Paper compilation (3-pass, XeLaTeX only)
-cd paper && TEXINPUTS=preambles:$TEXINPUTS xelatex -interaction=nonstopmode main.tex
+# Paper compilation (3-pass, pdflatex) — run from Overleaf dir
+cd [OVERLEAF_PATH]/Paper && pdflatex -interaction=nonstopmode main.tex
 BIBINPUTS=..:$BIBINPUTS bibtex main
-TEXINPUTS=preambles:$TEXINPUTS xelatex -interaction=nonstopmode main.tex
-TEXINPUTS=preambles:$TEXINPUTS xelatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
 
-# Talk compilation
-cd paper/talks && TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstopmode talk.tex
+# Talk compilation (pdflatex with preambles) — each talk has its own folder
+cd [OVERLEAF_PATH]/Slides/job_market && TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode talk.tex
+BIBINPUTS=../..:$BIBINPUTS bibtex talk
+TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode talk.tex
+TEXINPUTS=../../Preambles:$TEXINPUTS pdflatex -interaction=nonstopmode talk.tex
 ```
 
 ---
@@ -84,7 +111,7 @@ cd paper/talks && TEXINPUTS=../preambles:$TEXINPUTS xelatex -interaction=nonstop
 | 95 | Submission | Aggregate + all components >= 80 |
 | -- | Advisory | Talks (reported, non-blocking) |
 
-See `quality.md` for weighted aggregation formula.
+See `quality.md` for behavioral scoring weights (design 25%, paper 20%, theory 15%).
 
 ---
 
@@ -94,19 +121,21 @@ See `quality.md` for weighted aggregation formula.
 |---------|-------------|
 | `/new-project [topic]` | Full pipeline: idea → paper (orchestrated) |
 | `/discover [mode] [topic]` | Discovery: interview, literature, data, ideation |
-| `/strategize [question]` | Identification strategy or pre-analysis plan |
-| `/analyze [dataset]` | End-to-end data analysis |
+| `/design experiment [topic]` | Inference-first experiment design (14-step checklist) |
+| `/theory [develop/review]` | Formal model development or proof review |
+| `/analyze [dataset]` | End-to-end data analysis (Stata 17 primary) |
 | `/write [section]` | Draft paper sections + humanizer pass |
 | `/review [file/--flag]` | Quality reviews (routes by target: paper, code, peer) |
+| `/challenge [--mode] [file]` | Devil's advocate: `--design`, `--theory`, `--paper`, `--fresh` |
+| `/preregister [study]` | Generate pre-registration (AsPredicted, OSF) |
+| `/qualtrics [mode]` | Create/validate/improve Qualtrics surveys |
+| `/otree [mode]` | Generate/review oTree experiment code |
 | `/revise [report]` | R&R cycle: classify + route referee comments |
 | `/talk [mode] [format]` | Create, audit, or compile Beamer presentations |
 | `/submit [mode]` | Journal targeting → package → audit → final gate |
-| `/tools [subcommand]` | Utilities: commit, compile, validate-bib, journal, etc. |
+| `/tools [subcommand]` | Utilities: commit, compile, validate-bib, context-status, etc. |
 
 ---
-
-<!-- CUSTOMIZE: Replace the example entries below with your own
-     Beamer environments for talks. -->
 
 ## Beamer Custom Environments (Talks)
 
@@ -118,11 +147,7 @@ See `quality.md` for weighted aggregation formula.
 
 ## Output Organization
 
-<!-- Options: by-script (default) or by-purpose -->
 Output organization: by-script
-
-<!-- by-script:  paper/figures/main_regression/figure1.pdf, paper/tables/main_regression/table1.tex -->
-<!-- by-purpose: paper/figures/estimation/coefplot_main.pdf, paper/tables/robustness/alt_controls.tex -->
 
 ---
 
@@ -130,7 +155,10 @@ Output organization: by-script
 
 | Component | File | Status | Description |
 |-----------|------|--------|-------------|
-| Paper | `paper/main.tex` | [draft/submitted/R&R] | [Brief description] |
-| Data | `scripts/R/` | [complete/in-progress] | [Analysis description] |
-| Replication | `paper/replication/` | [not started/ready] | [Deposit status] |
-| Job Market Talk | `paper/talks/job_market_talk.tex` | -- | [Status] |
+| Paper | `[OVERLEAF]/Paper/main.tex` | [draft/submitted/R&R] | [Brief description] |
+| Theory | `theory/model.tex` | [not started/draft/complete] | [Model description] |
+| Experiment | `experiments/designs/` | [design/piloting/running/complete] | [Design description] |
+| Data | `scripts/stata/` | [complete/in-progress] | [Analysis description] |
+| Replication | `replication/` | [not started/ready] | [Deposit status] |
+| Pre-registration | -- | [not started/filed] | [Registry and ID] |
+| Job Market Talk | `[OVERLEAF]/Slides/job_market/` | -- | [Status] |

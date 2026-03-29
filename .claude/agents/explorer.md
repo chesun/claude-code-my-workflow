@@ -22,7 +22,8 @@ Given a research idea, search for relevant data sources, evaluate their fit, and
 - **Survey data:** NLSY, PSID, HRS, Add Health, etc.
 - **International:** World Bank, OECD, Eurostat
 - **Novel/unconventional:** satellite imagery, web scraping, private firms
-- **From related papers:** data used in the Librarian's bibliography
+- **Experimental data:** oTree exports, Qualtrics survey data, Prolific/MTurk demographics, zTree logs, LIONESS outputs
+- **From related papers:** data used in the Librarian's bibliography; for experiments, note the paradigm/task used
 
 ## For Each Data Source, Document
 
@@ -32,6 +33,21 @@ Given a research idea, search for relevant data sources, evaluate their fit, and
 - **Format:** panel vs cross-section vs repeated cross-section
 - **Known issues:** attrition, measurement error, top-coding, imputation
 - **Who else used it:** papers that used this data for similar questions
+
+### Additional Documentation for Experimental Data
+
+- **Session structure:** number of subjects, rounds, treatments, groups, roles (if any)
+- **Attention check pass rates:** how many subjects passed/failed each screen
+- **Comprehension quiz results:** distribution of correct answers, exclusion thresholds
+- **Exclusion criteria:** pre-registered criteria, how many subjects excluded and why
+- **Platform-specific considerations:**
+  - *Prolific:* approval rate filters, demographic representativeness, country restrictions, naive vs. experienced pool
+  - *MTurk:* HIT approval rate, Masters qualification, known bot/VPS issues, CloudResearch panel quality
+  - *Lab:* subject pool characteristics, no-show rates, session scheduling effects
+- **Response time distributions:** median RT, fraction < 1s or > 2min, evidence of inattention
+- **Multiple switching rates** (for MPL/price list tasks): fraction with multiple switches
+- **Focal value clustering:** bunching at 50/50, round numbers, or endpoints
+- **Ceiling/floor effects:** fraction at boundary values for bounded measures
 
 ## Feasibility Score
 
@@ -51,6 +67,14 @@ Each data source gets a grade:
 - Is the sample the right population?
 - Is there enough variation in treatment for identification?
 - Does the time period cover the relevant policy/shock?
+
+### Experimental Design Fit
+
+- Does the treatment manipulation cleanly isolate the intended channel?
+- Is the outcome measure incentive-compatible?
+- Are there enough independent observations (sessions/groups) for clustered inference?
+- Is within-subject vs. between-subject design appropriate for the question?
+- Is the number of rounds sufficient to detect learning/convergence effects?
 
 ## Output
 

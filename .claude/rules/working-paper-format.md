@@ -215,20 +215,20 @@ Each section uses `\section{}` with `\label{sec:name}`. Subsections use `\subsec
 ```
 
 - `\printbibliography` replaces `\bibliography{}`/`\bibliographystyle{}`
-- Compile with `biber` (not `bibtex`): `xelatex → biber → xelatex → xelatex`
+- Compile with `biber` (not `bibtex`): `pdflatex → biber → pdflatex → pdflatex`
 - Single-spaced or `\small` references
 - New page before references
 
 ## Compilation
 
 ```bash
-xelatex new_main.tex
+pdflatex new_main.tex
 biber new_main
-xelatex new_main.tex
-xelatex new_main.tex
+pdflatex new_main.tex
+pdflatex new_main.tex
 ```
 
-Note: `biber` replaces `bibtex` when using `biblatex`.
+Note: `biber` replaces `bibtex` when using `biblatex`. Use `pdflatex` (not `xelatex`) — the preamble uses `lmodern` + `T1` fontenc which is pdflatex-compatible.
 
 ## What the Writer-Critic Checks
 

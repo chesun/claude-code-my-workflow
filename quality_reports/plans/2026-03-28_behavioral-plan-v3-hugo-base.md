@@ -220,7 +220,7 @@ These differ substantially from applied micro, where identification strategy tak
 
 ## 5. The Inference-First Design Checklist (14 Steps)
 
-This is the core intellectual contribution of the behavioral workflow. It reverses the usual design process: specify statistical tests BEFORE designing treatments. Enriched with findings from Niederle (2025), Snowberg & Yariv (2025), List et al. (2011), Healy & Leo (2025), Chapman & Fisher (2025), Brocas et al. (2025), Moffatt "Experimetrics," Coffman & Dreber (2025), and Huber & Graham (2025).
+This is the core intellectual contribution of the behavioral workflow. It ensures inference needs drive the design process: know your tests, estimands, and data requirements while designing treatments — not after. Design and inference co-evolve (Niederle's "dream outcome test"), but inference needs take priority when they conflict with design convenience. Enriched with findings from Niederle (2025), Snowberg & Yariv (2025), List et al. (2011), Healy & Leo (2025), Chapman & Fisher (2025), Brocas et al. (2025), Moffatt "Experimetrics," Coffman & Dreber (2025), and Huber & Graham (2025).
 
 ```
 1. RESEARCH QUESTION
@@ -229,7 +229,7 @@ This is the core intellectual contribution of the behavioral workflow. It revers
 2. THEORETICAL PREDICTIONS
    What does the model predict? List each testable prediction.
 
-3. STATISTICAL TESTS (specify BEFORE designing treatments)
+3. STATISTICAL TESTS (co-designed with treatments — Steps 3-5 are iterative)
    For each prediction: exact test, estimand, and null.
    - Test selection guide (Moffatt):
      Between-subject continuous normal → t-test (`ttest y, by(g) unequal`)
@@ -705,16 +705,13 @@ pdflatex -interaction=nonstopmode main.tex
 
 ## 12. Folder Structure (Behavioral Project)
 
+The project spans two locations: a **git repo** (code, data, experiments, workflow) and an **Overleaf project** (paper, talks, LaTeX — synced via Dropbox). Each talk lives in its own folder under Slides/.
+
 ```
-project-repo/
+project-repo/                    # Git repo
 ├── CLAUDE.md                    # Project configuration (project-specific only)
 ├── CLAUDE.local.md              # Machine-specific overrides (gitignored)
 ├── MEMORY.md                    # Cross-session learning
-├── bibliography_base.bib        # Centralized bibliography
-│
-├── paper/                       # Main manuscript (SOURCE OF TRUTH)
-│   ├── main.tex
-│   └── sections/                # Modular section files
 │
 ├── theory/                      # Formal models (BEHAVIORAL-SPECIFIC)
 │   ├── model.tex
@@ -735,14 +732,6 @@ project-repo/
 │   ├── cleaned/                 # Processed data
 │   └── simulated/               # Simulated data for power analysis
 │
-├── figures/
-├── tables/
-├── supplementary/               # Online appendix
-│
-├── slides/                      # Beamer presentations
-├── preambles/                   # LaTeX headers
-├── replication/                 # Replication package
-│
 ├── scripts/
 │   ├── stata/                   # PRIMARY
 │   │   ├── main.do
@@ -753,6 +742,7 @@ project-repo/
 │   │   └── helpers/             # .doh reusable routines
 │   └── python/                  # SECONDARY
 │
+├── replication/                  # AEA replication package (code + data + README)
 ├── explorations/                # Research sandbox
 ├── master_supporting_docs/      # Reference papers
 ├── quality_reports/             # Plans, specs, reviews, session logs
@@ -774,6 +764,19 @@ project-repo/
     ├── pre-registration-template.md
     ├── subject-instructions-template.tex
     └── skill-template.md
+
+[OVERLEAF_PATH]/                 # Overleaf project (via Dropbox)
+├── Paper/                       # Main manuscript (SOURCE OF TRUTH)
+│   └── main.tex
+├── Slides/                      # Each talk is its own folder
+│   ├── job_market/
+│   ├── seminar/
+│   └── short/
+├── Figures/
+├── Tables/
+├── Supplementary/               # Online appendix
+├── Preambles/                   # Shared LaTeX headers
+└── bibliography_base.bib
 ```
 
 ---
@@ -812,40 +815,42 @@ project-repo/
 - [x] Add Pedro's workflow rules (`plan-first-workflow`, `session-logging`, `orchestrator-protocol`) to behavioral branch (2026-03-28)
 - [x] Update `settings.json`: register all hooks, remove Hugo's local paths (2026-03-28)
 - [x] Copy paper learnings docs + plan + templates to behavioral branch (2026-03-28)
-- [ ] Verify TikZ infrastructure carries over
-- [ ] Add `/challenge` skill with behavioral modes (`--design`, `--theory`, `--paper`, `--fresh`)
-- [ ] Update CLAUDE.md for behavioral workflow + verify folder structure
+- [x] Verify TikZ infrastructure carries over → **Deferred to Phase 2.** TikZ package loads in preamble; tikz-reviewer agent and visual quality rule to be created with other agents (2026-03-29)
+- [x] Add `/challenge` skill with behavioral modes (`--design`, `--theory`, `--paper`, `--fresh`) (2026-03-29)
+- [x] Update CLAUDE.md for behavioral workflow + verify folder structure (2026-03-29)
 
 ### Phase 1: Rules and Reference Files
-- [ ] Create `experiment-design-principles.md` (always-on rule, ~90 lines, 13 principles)
-- [ ] Create `stata-code-conventions.md` (always-on rule, ~60 lines)
-- [ ] Create `python-code-conventions.md` (always-on rule, ~30 lines)
-- [ ] Adapt `quality.md` with behavioral scoring weights
-- [ ] Adapt `workflow.md` with behavioral dependency graph and `/preregister` gate
-- [ ] Adapt `content-standards.md` with experimental reporting standards
-- [ ] Adapt `working-paper-format.md` for pdflatex
-- [ ] Adapt `tables.md` for estout/esttab
-- [ ] Adapt `figures.md` for Stata graph export
-- [ ] Create `.claude/references/` with: domain profile, journal profiles, inference-first checklist, seminal papers, replication standards
-- [ ] Create templates: experiment-design-checklist.md, pre-registration-template.md, subject-instructions-template.tex
+- [x] Create `experiment-design-principles.md` (always-on rule, 13 principles) (2026-03-29)
+- [x] Create `stata-code-conventions.md` (always-on rule, Stata 17 + experimental data) (2026-03-29)
+- [x] Create `python-code-conventions.md` (always-on rule, secondary language) (2026-03-29)
+- [x] Adapt `quality.md` with behavioral scoring weights (design 25%, theory 15%) (2026-03-29)
+- [x] Adapt `workflow.md` with behavioral dependency graph and `/preregister` gate (2026-03-29)
+- [x] Adapt `content-standards.md` with experimental reporting standards + Stata table/figure conventions (2026-03-29)
+- [x] Adapt `working-paper-format.md` for pdflatex (2026-03-29)
+- [x] Tables/figures conventions — folded into `content-standards.md` and `stata-code-conventions.md` (no separate files needed) (2026-03-29)
+- [x] Create `.claude/references/`: domain-profile-behavioral, inference-first-checklist, replication-standards, seminal-papers-by-subfield (starter — needs Christina review) (2026-03-29)
+- [x] Create templates: experiment-design-checklist.md, pre-registration-template.md, subject-instructions-template.tex (2026-03-29)
 
 ### Phase 2: Agents
-- [ ] Adapt Hugo's shared agents:
-  - librarian pair → behavioral/experimental journals
-  - explorer pair → experimental data structure
-  - coder pair → Stata 17, non-parametric tests, session clustering
-  - writer pair → experimental reporting standards
-  - data-engineer → session/round/role, attention checks, exclusion criteria
-  - domain-referee → behavioral journal calibration
-  - methods-referee → experimental validity, demand effects, incentive compatibility
-  - orchestrator → behavioral dependency graph
-  - verifier → pdflatex + Stata 17
-  - storyteller pair → keep as-is
-- [ ] Create behavioral-specific agents:
-  - theorist + theorist-critic
-  - designer + designer-critic
-  - qualtrics-specialist
-  - otree-specialist
+- [x] Adapt Hugo's shared agents (2026-03-29):
+  - librarian pair → behavioral/experimental journals, psychology crossover scrutiny
+  - explorer pair → experimental data quality (RT, attention, focal values, clustering)
+  - coder pair → Stata 17 primary, non-parametric tests, session clustering, estout
+  - writer pair → McCloskey/Cochrane/Knuth rules, experimental reporting standards
+  - data-engineer → experimental pipeline (oTree/Qualtrics/Prolific → cleaned .dta)
+  - domain-referee → behavioral journal calibration, 10-item concerns checklist
+  - methods-referee → 5 dimensions rewritten for experimental validity
+  - orchestrator → behavioral dependency graph with /preregister gate
+  - verifier → pdflatex + Stata 17 + experimental materials check
+  - storyteller pair → kept as-is
+  - strategist pair → kept with routing note (superseded by designer pair for experiments)
+  - editor → kept as-is
+- [x] Create behavioral-specific agents (2026-03-29):
+  - theorist + theorist-critic (16-item checklist, Thomson/Varian/Board rules)
+  - designer + designer-critic (14-step inference-first, adversarial design review)
+  - qualtrics-specialist (QSF, JS/CSS, survey flow, platform integration)
+  - otree-specialist (5.x patterns, common experiment designs)
+  - tikz-reviewer → deferred (still pending)
 
 ### Phase 3: Skills
 - [ ] Adapt Hugo's skills: `/discover`, `/analyze`, `/write`, `/review`, `/submit`, `/talk`, `/revise`, `/tools`, `/archive`, `/new-project`
@@ -876,8 +881,8 @@ project-repo/
 
 ### Must-Do (Blocks Implementation)
 - [x] **Merge Hugo's clo-author into behavioral branch** — done 2026-03-28 (clean start from Hugo's main + Pedro layered on top)
-- [ ] **Create `/challenge` skill** ← NEXT STEP
-- [ ] **Update CLAUDE.md** for behavioral workflow
+- [x] **Create `/challenge` skill** — done 2026-03-29
+- [x] **Update CLAUDE.md** for behavioral workflow — done 2026-03-29
 - [ ] **Gather seminal papers per subfield** — Claude searches, Christina reviews and augments (11 categories)
 - [ ] **Confirm subfield categories** — Christina's edited list has 11; confirm no changes
 - [ ] **Export a QSF from existing Qualtrics survey** — needed for `/qualtrics` skill development
