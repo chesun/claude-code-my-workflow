@@ -1,6 +1,6 @@
 # Behavioral & Experimental Economics Workflow Plan v3: Hugo Base + Pedro Infrastructure
 
-**Status:** DRAFT — awaiting Christina's approval
+**Status:** APPROVED — Phase 0 in progress (branch created, infrastructure layered)
 **Date:** 2026-03-28
 **Supersedes:** `2026-03-17_workflow-adaptation-plan-v2.md` (behavioral v2.1)
 **Key change:** Restructured around Hugo's clo-author as base (mirroring applied micro plan structure), preserving all v2.1 content
@@ -806,11 +806,15 @@ project-repo/
 ## 14. Phased Implementation Plan
 
 ### Phase 0: Setup
-- [ ] Create `behavioral` branch from main
-- [ ] Merge Hugo's clo-author into `behavioral` branch
-- [ ] Verify Pedro's hooks, `/commit`, `/deep-audit`, `/context-status`, `/learn` carry over from main
+- [x] Create `behavioral` branch from Hugo's clo-author main (2026-03-28)
+- [x] Layer Pedro's hooks (`context-monitor`, `log-reminder`, `verify-reminder`, `notify`) onto behavioral branch (2026-03-28)
+- [x] Add Pedro's utility skills (`/commit`, `/deep-audit`, `/context-status`, `/learn`) to behavioral branch (2026-03-28)
+- [x] Add Pedro's workflow rules (`plan-first-workflow`, `session-logging`, `orchestrator-protocol`) to behavioral branch (2026-03-28)
+- [x] Update `settings.json`: register all hooks, remove Hugo's local paths (2026-03-28)
+- [x] Copy paper learnings docs + plan + templates to behavioral branch (2026-03-28)
 - [ ] Verify TikZ infrastructure carries over
 - [ ] Add `/challenge` skill with behavioral modes (`--design`, `--theory`, `--paper`, `--fresh`)
+- [ ] Update CLAUDE.md for behavioral workflow + verify folder structure
 
 ### Phase 1: Rules and Reference Files
 - [ ] Create `experiment-design-principles.md` (always-on rule, ~90 lines, 13 principles)
@@ -871,7 +875,9 @@ project-repo/
 ## 15. Running To-Do List
 
 ### Must-Do (Blocks Implementation)
-- [ ] **Merge Hugo's clo-author into behavioral branch** ← NEXT STEP
+- [x] **Merge Hugo's clo-author into behavioral branch** — done 2026-03-28 (clean start from Hugo's main + Pedro layered on top)
+- [ ] **Create `/challenge` skill** ← NEXT STEP
+- [ ] **Update CLAUDE.md** for behavioral workflow
 - [ ] **Gather seminal papers per subfield** — Claude searches, Christina reviews and augments (11 categories)
 - [ ] **Confirm subfield categories** — Christina's edited list has 11; confirm no changes
 - [ ] **Export a QSF from existing Qualtrics survey** — needed for `/qualtrics` skill development
