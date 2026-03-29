@@ -40,7 +40,7 @@ The v2.1 behavioral plan (2026-03-17) was comprehensive but built from scratch. 
 | `/talk` | Paper → Beamer talk (4 formats) | **Adapt** for pdflatex | |
 | `/tools` | Utility subcommands | **Keep** | |
 | `/archive` | Archive completed work | **Keep** | |
-| `/new-project` | Full orchestrated project setup | **Adapt** | Add Theory/, Experiments/ folders to scaffold |
+| `/new-project` | Full orchestrated project setup | **Adapt** | Add theory/, experiments/ folders to scaffold |
 
 ### Agents (16 — full worker-critic system)
 
@@ -133,7 +133,7 @@ This is what makes the behavioral workflow **different** from the applied micro 
 
 | Rule | Lines Target | Content | Scope |
 |------|-------------|---------|-------|
-| `experiment-design-principles.md` | ~90 | The experiment "constitution" — 13 principles (see Section 6) | Paths: `Experiments/**`, `designs/**` |
+| `experiment-design-principles.md` | ~90 | The experiment "constitution" — 13 principles (see Section 6) | Paths: `experiments/**`, `designs/**` |
 | `stata-code-conventions.md` | ~60 | Stata 17, settings.do, .doh, key packages, experimental data conventions | Paths: `**/*.do`, `**/*.doh` |
 | `python-code-conventions.md` | ~30 | Type hints, requirements.txt, seed management, Jupyter for exploration only | Paths: `**/*.py` |
 
@@ -460,7 +460,7 @@ This is the core intellectual contribution of the behavioral workflow. It revers
 
 ## 6. Experiment Design Principles Rule (The "Constitution")
 
-This is an **always-on rule** (scoped to `Experiments/**`, `designs/**`). Non-negotiable principles:
+This is an **always-on rule** (scoped to `experiments/**`, `designs/**`). Non-negotiable principles:
 
 1. **Inference-first**: Specify statistical tests before designing treatments
 2. **Subject comprehension**: Instructions must be clear; understanding checks required
@@ -493,9 +493,9 @@ Behavioral needs more than applied micro (~535) because the experiment design pr
 | `quality.md` | 70 | Hugo (replaced weights) | Always-on |
 | `logging.md` | 25 | Hugo | Always-on |
 | `content-standards.md` | 50 | Hugo (adapted) | Path-scoped |
-| `working-paper-format.md` | 40 | Hugo (adapted, pdflatex) | Path-scoped: `Paper/**/*.tex` |
-| `tables.md` | 40 | Hugo (adapted, estout) | Path-scoped: `Tables/**` |
-| `figures.md` | 30 | Hugo (adapted, Stata graphs) | Path-scoped: `Figures/**` |
+| `working-paper-format.md` | 40 | Hugo (adapted, pdflatex) | Path-scoped: `paper/**/*.tex` |
+| `tables.md` | 40 | Hugo (adapted, estout) | Path-scoped: `tables/**` |
+| `figures.md` | 30 | Hugo (adapted, Stata graphs) | Path-scoped: `figures/**` |
 | `revision.md` | 40 | Hugo | Path-scoped |
 | `experiment-design-principles.md` | 90 | **New** (behavioral-specific, 13 principles) | Path-scoped: `Experiments/**`, `designs/**` |
 | `stata-code-conventions.md` | 60 | **New** | Path-scoped: `**/*.do`, `**/*.doh` |
@@ -716,12 +716,12 @@ project-repo/
 │   ├── main.tex
 │   └── sections/                # Modular section files
 │
-├── Theory/                      # Formal models (BEHAVIORAL-SPECIFIC)
+├── theory/                      # Formal models (BEHAVIORAL-SPECIFIC)
 │   ├── model.tex
 │   ├── proofs/
 │   └── notes/
 │
-├── Experiments/                  # Experiment materials (BEHAVIORAL-SPECIFIC)
+├── experiments/                  # Experiment materials (BEHAVIORAL-SPECIFIC)
 │   ├── designs/                 # Design documents, checklists
 │   ├── protocols/               # IRB protocols, consent forms
 │   ├── instructions/            # Subject instructions (LaTeX → PDF)
@@ -730,18 +730,18 @@ project-repo/
 │   ├── comprehension/           # Understanding checks, attention checks
 │   └── pilots/                  # Pilot data, budget estimates, timing
 │
-├── Data/
+├── data/
 │   ├── raw/                     # Untouched data
 │   ├── cleaned/                 # Processed data
 │   └── simulated/               # Simulated data for power analysis
 │
-├── Figures/
-├── Tables/
-├── Supplementary/               # Online appendix
+├── figures/
+├── tables/
+├── supplementary/               # Online appendix
 │
-├── Slides/                      # Beamer presentations
-├── Preambles/                   # LaTeX headers
-├── Replication/                 # Replication package
+├── slides/                      # Beamer presentations
+├── preambles/                   # LaTeX headers
+├── replication/                 # Replication package
 │
 ├── scripts/
 │   ├── stata/                   # PRIMARY
