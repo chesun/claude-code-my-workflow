@@ -63,7 +63,7 @@ Continue behavioral workflow implementation: complete remaining Phase 0 tasks, t
 
 ## Open Questions / Blockers
 
-- [ ] Seminal papers list needs Christina's review and augmentation from Mendeley
+- [x] Seminal papers list expanded from 37 → 228 entries using Mendeley + web search (Christina reviewing)
 - [ ] Journal profiles reference file not yet created (needs more detail than domain profile)
 - [ ] Subfield categories (11) — confirm no changes from Christina's edited list
 
@@ -122,8 +122,39 @@ Added Section 9b to the plan: "Existence Experiments — Does This Effect Exist?
 - notify.sh hook exists but was never wired into settings.json (Hugo's config doesn't have it either)
 - No Claude Code hook event for "waiting for permission" — needs terminal-level notification config
 
+## Seminal Papers Expansion (2026-03-29, session 2)
+
+**Task:** Dramatically expand `.claude/references/seminal-papers-by-subfield.md` from starter list to comprehensive reference.
+
+**Sources used:**
+- Christina's Mendeley library (deep search by subfield + by researcher name)
+- Web search (Google Scholar, NBER, SSRN) for canonical papers not in Mendeley
+
+**Researcher-specific Mendeley searches:** Oprea, Yuksel, Enke, Zimmermann, Vieider, Coffman, Bohren/Imas, Bordalo/Gennaioli/Shleifer, Niederle, Esponda/Vespa
+
+**Result:** 37 entries → **228 entries** across 12 sections (added new section 12: Gender & Competition)
+
+**Key expansions by section:**
+- Section 1 (Risk/Ambiguity): +10 — added Vieider program (4 papers), description-experience gap (Hertwig/Erev, Barron/Erev, Oprea/Vieider), Machina/Schmeidler "Bayes without Bernoulli", Barberis review
+- Section 4 (Beliefs): 3 → 33 — reorganized into Foundations, Motivated Beliefs, Information Processing sub-categories. Major additions: Enke WYSIATI, Enke/Zimmermann correlation neglect, Enke/Schwerter/Zimmermann associative memory, Esponda/Vespa/Yuksel mental models (AER), Charness/Oprea/Yuksel biased sources, Falk/Zimmermann commitment
+- Section 5 (Discrimination): 0 → 33 — built from scratch. Added Stereotypes sub-category (Bordalo/Coffman/Gennaioli/Shleifer 2016 QJE as centerpiece), Bohren/Imas program (dynamics, inaccurate statistical, systemic), field experiments (Bertrand/Mullainathan, audit studies), gender (Carlana, Mengel), contact theory (Allport, Pettigrew)
+- Section 12 (Gender): NEW — 19 entries covering competition (Niederle/Vesterlund, Gneezy/Leonard/List), stereotypes (BCGS, Coffman), and gender gaps
+
+**Christina's corrections applied:**
+- Renamed Section 1: "Prospect Theory" → "Risk, Ambiguity, & Non-Standard Preferences"
+- Added Social Norms sub-category to Section 2 (Krupka & Weber 2013)
+- Fixed Chakraborty cite: not Calford et al. 2017, but Chakraborty (2021) "Present Bias" Econometrica
+- Added Machina & Schmeidler (1995) with correct subtitle "Bayes without Bernoulli"
+- Formatted her incomplete entries (Coutts 2019, Karni 2009, Holt & Smith 2016, Hao & Houser 2012, etc.)
+- Confirmed BCGS (2016) "Stereotypes" QJE already in list (user shared working paper PDF — same paper)
+
+**Decisions:**
+- Cross-listing allowed between sections (e.g., Esponda/Oprea/Yuksel 2023 in both Beliefs and Discrimination)
+- [M] tag retained for Mendeley-confirmed papers
+- Papers without [M] are canonical additions from web search / my knowledge
+
 ## Next Steps
 
-- [ ] Continue Phase 3 skills
+- [ ] Christina to review expanded seminal papers list
 - [ ] Phase 4: Testing with BDM project
 - [ ] Phase 5: Testing with JMP project
