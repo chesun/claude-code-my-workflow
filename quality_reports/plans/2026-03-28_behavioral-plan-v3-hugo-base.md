@@ -970,7 +970,7 @@ Implements Section 9b additions. 6 files updated (2026-03-29):
 - [x] **Update CLAUDE.md** for behavioral workflow — done 2026-03-29
 - [x] **Gather seminal papers per subfield** — done 2026-03-29. Mendeley deep search + web sources. 37 → 232 entries, 12 sections (added Gender & Competition). Christina reviewed and corrected.
 - [x] **Confirm subfield categories** — done 2026-03-29. Christina expanded to 12 categories (added Gender & Competition, renamed section 1 to "Risk, Ambiguity, & Non-Standard Preferences", added Social Norms sub-category)
-- [ ] **Export a QSF from existing Qualtrics survey** — needed for `/qualtrics` skill development
+- [x] **Export a QSF from existing Qualtrics survey** — done 2026-03-29. Analyzed two JMP QSF files (All treats + Match & Benchmark). Documented 18 reusable patterns in `quality_reports/paper_learnings/jmp-qualtrics-patterns.md`
 
 ### Should-Do (Improves Quality)
 - [ ] Share custom Beamer templates (pdflatex and xelatex)
