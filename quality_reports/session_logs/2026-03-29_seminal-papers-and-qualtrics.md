@@ -87,5 +87,28 @@ Analyzing two JMP experiment QSF files:
 - Auto-learning: skill and agent check patterns docs after each task, append novel techniques
 - Single-file with one randomizer is the standard (two-file is a workaround)
 
+## 2026-04-08 — Global Config Sync + MacDown Markdown Rules
+
+**Operations:**
+
+- Created global rule `~/.claude/rules/markdown-macdown-compat.md` — two MacDown rendering fixes (blank line before lists, `\$` for literal dollar signs)
+- Created global rule `~/.claude/rules/sync-global-config.md` — auto-sync global config changes to claude-config repo
+- Added `rules/` directory to `~/github_repos/claude-config/` repo
+- Updated `install.sh` to symlink `rules/` on new machines (same pattern as skills/commands)
+- Replaced local `~/.claude/rules/` with symlink to repo
+- Updated README with rules directory
+- Committed and pushed: `c80e256`
+
+**Decisions:**
+
+- Symlink (not copy) for rules — same as skills/commands, edits go directly to repo
+- settings.json and project memory stay as copies (machine-specific content)
+
+**Results:**
+
+- Global Claude config now tracks: skills, rules, commands (symlinked) + settings.json, project memory (copied)
+- MacDown compat rules apply to all projects automatically
+
 ## Open Questions
+
 - None currently blocking
