@@ -20,7 +20,7 @@ import hashlib
 from pathlib import Path
 from datetime import datetime
 
-THRESHOLD = 15
+THRESHOLD = 10
 
 
 def get_state_dir() -> Path:
