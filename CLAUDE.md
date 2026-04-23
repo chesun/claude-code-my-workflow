@@ -25,6 +25,8 @@
 - **Worker-critic pairs** -- every creator has a paired critic; critics never edit files
 - **Inference first** -- design experiments with inference in mind from the start; tests and treatments co-evolve (see inference-first checklist)
 - **Primary source first** -- before citing a paper in a load-bearing artifact, read the PDF and produce reading notes in `master_supporting_docs/literature/reading_notes/`; hooks block edits otherwise (see `primary-source-first.md`)
+- **Decisions are ADRs** -- substantive design, identification, or specification decisions live in `decisions/NNNN_slug.md`; analysis docs hold reasoning, ADRs hold the record (see `decision-log.md`)
+- **Track TODOs** -- project root `TODO.md` tracks open work (Active / Up Next / Waiting / Backlog / Done); update after completing any task (see `todo-tracking.md`)
 - **Auto-memory** -- corrections and preferences are saved automatically via Claude Code's built-in memory system
 
 ---
@@ -44,7 +46,9 @@ The project spans two locations: a **git repo** (code, data, experiments, workfl
 ```
 [YOUR-PROJECT]/                  # Git repo
 ├── CLAUDE.md                    # This file
+├── TODO.md                      # Active work tracker (see todo-tracking.md)
 ├── .claude/                     # Rules, skills, agents, hooks
+├── decisions/                   # ADRs — NNNN_slug.md, append-only (see decision-log.md)
 ├── theory/                      # Formal models
 │   ├── model.tex
 │   └── proofs/
