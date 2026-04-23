@@ -13,7 +13,9 @@
 | librarian | librarian-critic | Literature coverage, gaps, recency |
 | explorer | explorer-critic | Data feasibility, quality, identification fit |
 | data-engineer | coder-critic | Data pipeline quality, reproducibility, transformation correctness |
-| strategist | strategist-critic | Identification validity, assumptions, robustness |
+| strategist *(applied-micro overlay)* | strategist-critic | Identification validity, assumptions, robustness |
+| designer *(behavioral overlay)* | designer-critic | Experimental design, inference-first checklist |
+| theorist *(behavioral overlay)* | theorist-critic | Formal model assumptions, proofs, testable predictions |
 | coder | coder-critic | Code quality, reproducibility, code-strategy alignment |
 | writer | writer-critic | Manuscript polish, LaTeX quality, hedging |
 | storyteller | storyteller-critic | Talk structure, audience calibration, visual quality |
@@ -63,7 +65,9 @@ A creator cannot evaluate the quality of its own work. The score always comes fr
 | librarian | Annotated bibliography | librarian-critic |
 | explorer | Data assessment | explorer-critic |
 | data-engineer | Data pipeline and cleaned datasets | coder-critic |
-| strategist | Strategy memo | strategist-critic |
+| strategist *(applied-micro overlay)* | Strategy memo | strategist-critic |
+| designer *(behavioral overlay)* | Design checklist | designer-critic |
+| theorist *(behavioral overlay)* | Formal model and proofs | theorist-critic |
 | coder | R/Stata/Python scripts | coder-critic |
 | writer | Paper manuscript | writer-critic |
 | storyteller | Beamer talk | storyteller-critic |
@@ -95,10 +99,12 @@ Round 3: Critic reviews → Worker fixes
 
 | Pair | Escalation Target | What Happens |
 |------|-------------------|--------------|
-| coder + coder-critic | strategist-critic | Re-evaluates whether the strategy memo is implementable |
-| data-engineer + coder-critic | strategist-critic | Re-evaluates whether the data specification is tractable |
+| coder + coder-critic | strategist-critic (applied) / designer-critic (behavioral) | Re-evaluates whether the strategy/design is implementable |
+| data-engineer + coder-critic | strategist-critic (applied) / designer-critic (behavioral) | Re-evaluates whether the data specification is tractable |
 | writer + writer-critic | Orchestrator | Structural rewrite, not just polish |
-| strategist + strategist-critic | User | Fundamental design question — needs human judgment |
+| strategist + strategist-critic *(applied-micro overlay)* | User | Fundamental design question — needs human judgment |
+| designer + designer-critic *(behavioral overlay)* | User | Fundamental experimental design question — needs human judgment |
+| theorist + theorist-critic *(behavioral overlay)* | User | Fundamental modeling choice — needs human judgment |
 | librarian + librarian-critic | User | Scope disagreement — user decides breadth vs depth |
 | explorer + explorer-critic | User | Data feasibility deadlock — user decides resource trade-offs |
 | storyteller + storyteller-critic | User | Talk scope/format disagreement |

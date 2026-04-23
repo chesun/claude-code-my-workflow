@@ -98,7 +98,9 @@ The Orchestrator selects agents based on what the task requires:
 | Literature/references | librarian + librarian-critic |
 | Data sourcing | explorer + explorer-critic |
 | Data engineering | data-engineer + coder-critic |
-| Identification strategy | strategist + strategist-critic |
+| Identification strategy (applied-micro overlay) | strategist + strategist-critic |
+| Experimental design (behavioral overlay) | designer + designer-critic |
+| Formal theory/model (behavioral overlay) | theorist + theorist-critic |
 | R/Stata/Python scripts | coder + coder-critic |
 | Paper manuscript | writer + writer-critic |
 | Peer review | Orchestrator → domain-referee + methods-referee |
@@ -158,7 +160,7 @@ When user says "just do it" / "handle it":
 |-------|----------|---------------|
 | Discovery | Research idea | Always — librarian is persistent |
 | Strategy | At least one of: literature review OR data assessment | Yes — new data or literature can trigger re-strategy |
-| Execution (Code) | Approved strategy (strategist-critic >= 80) | Yes — strategy revision triggers re-coding |
+| Execution (Code) | Approved strategy/design (strategist-critic OR designer-critic >= 80) | Yes — strategy revision triggers re-coding |
 | Execution (Write) | Approved code (coder-critic >= 80) | Yes — new results trigger rewriting |
 | Peer Review | Approved paper (writer-critic >= 80) + approved code | Yes — major revisions loop back |
 | Submission | Orchestrator accepts + Verifier PASS + overall >= 95 | No — terminal |
@@ -201,9 +203,9 @@ The Orchestrator activates Discovery → Strategy → Execution → Peer Review 
 
 The user invokes a skill directly:
 
-> `/strategize paper/main.tex`
+> `/strategize paper/main.tex` (applied-micro overlay) or `/design experiment` (behavioral overlay)
 
-This runs the strategist-critic agent alone, right now, no phase dependencies.
+This runs the relevant critic agent alone, right now, no phase dependencies. The concrete skill names depend on the overlay installed.
 
 ### Why Both Modes
 
@@ -218,7 +220,8 @@ All skills in the reference below work without pipeline context when invoked dir
 | Skill | What It Does |
 |-------|-------------|
 | `/discover` | Literature search + data discovery |
-| `/strategize` | Identification strategy design + review |
+| `/strategize` (applied-micro overlay) | Identification strategy design + review |
+| `/design`, `/theory`, `/preregister` (behavioral overlay) | Experiment design, formal model, pre-registration |
 | `/analyze` | End-to-end data analysis (code + debug) |
 | `/write` | Draft paper sections + humanizer pass |
 | `/review` | Simulated peer review (domain + methods referees) |
