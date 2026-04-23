@@ -18,12 +18,15 @@ Last updated: 2026-04-23
 - [ ] Share swift raid Claude Chat memory/output — waiting on Christina
 
 ## Backlog
+- [ ] Reverse port to applied-micro: behavioral's richer prose-quality checks (McCloskey 11-item, Cochrane style flags, Knuth math rules, experimental reporting completeness) + concrete reference preamble in `working-paper-format.md` (biblatex+biber, lmodern, microtype, full theorem envs) — see `quality_reports/reviews/2026-04-23_latex-feature-gap-review.md`
+- [ ] Port `extract-tikz` skill from applied-micro if/when Quarto becomes an active talk workflow for behavioral
 - [ ] Review and refine journal profiles after testing `/review --peer`
 - [ ] Identify additional referee concerns from real reviews
 - [ ] Customize notation conventions to Christina's exact preferences
 - [ ] Set up Stata package auto-discovery hook
 
 ## Done (recent)
+- [x] Port LaTeX features from applied-micro: writer-critic Critical Rules (ignore commented LaTeX, regression tables as source of truth), tikz-reviewer agent, tikz-visual-quality rule, storyteller-critic tikz dispatch pointer — 2026-04-23
 - [x] Backport decision-log (ADR) rule from BDM + `decisions/` universal folder + template README; port `todo-tracking` rule to applied-micro — 2026-04-23
 - [x] Port primary-source-first hook + rule from `behavioral` to `applied-micro` (cherry-pick with manual CLAUDE.md conflict resolve) — 2026-04-23
 - [x] Backport primary-source-first rule + PreToolUse + Stop hooks from BDM BIC (generalized: externalized surname allowlist, generic paths, sanitized rule doc); added `master_supporting_docs/literature/{papers,reading_notes}/` to universal folder structure — 2026-04-23
