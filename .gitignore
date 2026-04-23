@@ -60,7 +60,8 @@ Thumbs.db
 
 # --- Claude Code (local-only, not shared across machines) ---
 .claude/settings.local.json
-.claude/state/
+.claude/state/*
+!.claude/state/primary_source_surnames.txt
 .claude/worktrees/
 CLAUDE.local.md
 
