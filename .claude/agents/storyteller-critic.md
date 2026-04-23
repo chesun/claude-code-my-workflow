@@ -46,6 +46,7 @@ Review the Storyteller's Beamer presentation and score it across 5 categories. *
 - Does Beamer compile without errors?
 - No overfull hbox warnings?
 - All referenced figures/tables exist?
+- **If slides contain `\begin{tikzpicture}` blocks:** dispatch the `tikz-reviewer` agent for each TikZ diagram. Collect its APPROVED / NEEDS REVISION / REJECTED verdicts and fold TikZ-specific deductions into the score. Rule: `rules/tikz-visual-quality.md`.
 
 ---
 

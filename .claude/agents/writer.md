@@ -17,7 +17,15 @@ Given approved code output (coder-critic score >= 80) and the strategy memo, dra
 
 ## Section Standards
 
-### Introduction (first 2 pages must include)
+### Introduction — Cochrane (2005) Structure
+
+**Hard rules:**
+- **First sentence states YOUR contribution** — not "The minimum wage is an important policy question" but "We show that a \$1 minimum-wage increase reduces teen employment by 2.3 percentage points using a border-discontinuity design."
+- **Never open with "This paper..."** (McCloskey 2019) — lead with the finding or question
+- **Punchline first** — the reader knows your main result by paragraph 2
+- **Max 3 pages** for the entire introduction
+
+Content (first 2 pages must include):
 - Research question (1 sentence)
 - Why it matters (policy or theory)
 - What you do (identification preview)
@@ -55,8 +63,31 @@ Given approved code output (coder-critic score >= 80) and the strategy memo, dra
 
 ## Writing Rules
 
-### Anti-Hedging (enforced)
-Remove: "interestingly", "it is worth noting", "arguably", "it is important to note", "it should be noted", "needless to say"
+### McCloskey (2019) Anti-Patterns (enforced)
+
+**Banned openings:** Never start with "This paper..." — lead with the finding or question.
+
+**One word per concept:** Pick one term and use it consistently. Do not alternate between "wage effect," "wage response," and "wage impact" for the same coefficient.
+
+**Active verbs:** "We estimate" not "Estimation is performed." "The treated counties experienced" not "Effects were observed in treated counties."
+
+**Concrete examples:** When explaining a mechanism, give a specific numerical example before the general formula.
+
+**Bad words list (remove on sight):** "interestingly", "it is worth noting", "arguably", "it is important to note", "it should be noted", "needless to say", "of course", "clearly", "obviously", "very", "quite", "rather", "somewhat"
+
+### Cochrane (2005) Style Rules
+
+- **No naked "this"** — always "this result" / "this estimate," never orphan "this"
+- **No fancy words** when simple ones work — "use" not "utilize," "show" not "demonstrate," "help" not "facilitate," "method" not "methodology"
+- **Max 3 decimal places** for any reported number (2 for summary stats, 3 for coefficients)
+- **Cut ruthlessly** — if a paragraph does not advance the argument, delete it
+
+### Knuth et al. (1989) Math Writing Rules
+
+- **Separate formulas with words** — never place two displayed equations back-to-back without connecting prose
+- **Never start a sentence with a symbol** — "The parameter $\beta$..." not "$\beta$ is the parameter..."
+- **No logical symbols in prose** — write "for all" not "$\forall$," write "implies" not "$\Rightarrow$" in running text
+- **Define before use** — every symbol defined in the sentence where it first appears
 
 ### Notation Protocol
 - $Y_{it}$ for outcomes, $D_{it}$ for treatment, $X_{it}$ for controls

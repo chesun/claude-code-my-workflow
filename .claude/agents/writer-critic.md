@@ -39,7 +39,33 @@ Review the specified file thoroughly and produce a detailed report of all issues
 - Assumptions listed match the actual design?
 
 ### 4. Writing Quality
-- **Anti-hedging:** Flag "interestingly", "it is worth noting", "arguably", "it is important to note", "needless to say"
+
+#### McCloskey (2019) 11-Item Anti-Pattern Checklist
+1. Opens with "This paper..." — flag every instance
+2. Uses multiple words for same concept (e.g., alternates "wage effect" / "wage impact" / "wage response")
+3. Passive voice where active is clearer ("Estimation is performed" vs. "We estimate")
+4. Abstract example instead of concrete one before the general formula
+5. Hedging: "interestingly", "it is worth noting", "arguably", "it is important to note", "needless to say"
+6. Filler: "of course", "clearly", "obviously"
+7. Intensifiers that add nothing: "very", "quite", "rather", "somewhat"
+8. Fancy synonym for plain word: "utilize" (use), "demonstrate" (show), "facilitate" (help), "implement" (do), "subsequent" (later)
+9. Nominalizations: "the estimation of" (estimating), "the implementation of" (implementing)
+10. Unnecessary throat-clearing: "It is important to note that..." (just state the thing)
+11. Signposting overkill: "The remainder of this paper is organized as follows..."
+
+#### Cochrane (2005) Style Flags
+- **Naked "this":** Flag every "this" not followed by a noun ("This suggests..." should be "This result suggests...")
+- **Passive voice density:** Flag paragraphs where >50% of sentences are passive
+- **Decimal excess:** Flag any number with >3 decimal places (>2 for summary stats)
+- **Fancy words:** Flag "utilize", "demonstrate", "facilitate", "subsequent", "aforementioned", "methodology" (use "method")
+
+#### Knuth et al. (1989) Math Writing — Hard Rules
+- Flag two consecutive displayed equations with no connecting prose between them
+- Flag any sentence that starts with a math symbol
+- Flag logical symbols used in prose ($\forall$, $\exists$, $\Rightarrow$, $\iff$ in running text)
+- Flag symbols used before they are defined
+
+#### Standard Checks
 - **Notation consistency:** Same symbol never means two things; different symbols for the same thing
 - **Effect sizes with units:** Never just "the coefficient is significant"
 - **Terminology consistency** across sections
@@ -71,7 +97,14 @@ Review the specified file thoroughly and produce a detailed report of all issues
 | Broken citations (`\cite{}`) | -15 |
 | Broken references (`\ref{}`) | -15 |
 | Overfull hbox > 10pt | -10 per |
+| McCloskey anti-pattern (each type) | -3 per type (max -15) |
 | Hedging language | -5 per (max -15) |
+| Naked "this" (no following noun) | -2 per (max -10) |
+| Sentence starts with math symbol | -3 per |
+| Consecutive displayed equations without prose | -3 per |
+| Logical symbol in running text | -2 per |
+| Symbol used before definition | -3 per |
+| >3 decimal places | -2 per |
 | Notation inconsistency | -5 |
 | Overfull hbox 1–10pt | -1 per |
 
