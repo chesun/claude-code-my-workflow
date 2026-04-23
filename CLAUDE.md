@@ -18,6 +18,7 @@
 - **Single source of truth** -- Paper `main.tex` is authoritative; talks and supplements derive from it
 - **Quality gates** -- weighted aggregate score; nothing ships below 80/100; see `quality.md`
 - **Worker-critic pairs** -- every creator has a paired critic; critics never edit files
+- **Primary source first** -- before citing a paper in a load-bearing artifact, read the PDF and produce reading notes in `master_supporting_docs/literature/reading_notes/`; hooks block edits otherwise (see `primary-source-first.md`)
 - **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to MEMORY.md
 
 ---
@@ -59,6 +60,10 @@
 ├── explorations/                # Research sandbox (see rules)
 ├── templates/                   # Session log, quality report templates
 └── master_supporting_docs/      # Reference papers and data docs
+    ├── literature/              # Primary sources (gated by primary-source-first hook)
+    │   ├── papers/              # PDFs of cited papers (surname_year naming)
+    │   └── reading_notes/       # One .md per cited paper (see README.md)
+    └── supporting_papers/       # Methodology references, textbook chapters (not load-bearing)
 ```
 
 ---

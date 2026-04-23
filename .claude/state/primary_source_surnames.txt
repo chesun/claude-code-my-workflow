@@ -1,0 +1,27 @@
+# Primary-Source Allowlist — Project-Specific Author Surnames
+#
+# One lowercase surname per line. Blank lines and `#` comments ignored.
+#
+# Purpose: the citation extractor in .claude/hooks/primary_source_lib.py
+# uses this file to filter Author-Year pattern matches down to papers we
+# actually cite — cuts false positives like "Table 2 (2024)" or coincidental
+# capitalized words near a year.
+#
+# Behavior when file is empty or missing: the extractor accepts ALL
+# Author-Year matches (no filtering). This produces more false positives
+# but ensures new/unfamiliar citations are never silently skipped.
+#
+# Behavior when file is populated: only citations where the leading surname
+# appears in this list are extracted. Add surnames as you cite papers.
+#
+# Convention: lowercase, ASCII, no diacritics (match the surname as it
+# appears in a bibtex key — e.g., "koszegi" for Kőszegi, "munoz-rodriguez"
+# for Muñoz-Rodriguez).
+#
+# Example (uncomment and adapt for your project):
+# angrist
+# pischke
+# card
+# chetty
+# kahneman
+# thaler
