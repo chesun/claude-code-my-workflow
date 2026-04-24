@@ -1,6 +1,6 @@
 # TODO — Claude Code Behavioral Workflow
 
-Last updated: 2026-04-23
+Last updated: 2026-04-24
 
 ## Active
 - [ ] Test `/discover lit` with mandatory agent dispatch fix in bdm_bic
@@ -18,12 +18,15 @@ Last updated: 2026-04-23
 - [ ] Share swift raid Claude Chat memory/output — waiting on Christina
 
 ## Backlog
+- [ ] **Guide site v1** — when 1–2 finished projects exist, copy `guide/` scaffolding from `main-lecture-archive` (Quarto + cosmo theme + custom.scss + workflow-guide.qmd structure). Adapt content for behavioral research workflow. Publish via `quarto publish gh-pages`. Pre-req: real-project examples (BDM, JMP, TX peer-effects) for the guide.
+- [ ] **Guide screenshots/demos** — short demos of `/new-project`, `/review --peer`, `/submit`, `/preregister` once the guide structure is in place.
 - [ ] Review and refine journal profiles after testing `/review --peer`
 - [ ] Identify additional referee concerns from real reviews
 - [ ] Customize notation conventions to Christina's exact preferences
 - [ ] Set up Stata package auto-discovery hook
 
 ## Done (recent)
+- [x] Phase 1–3 trunk-and-overlays refactor: promoted applied-micro to universal `main` (17 agents, 14 skills, 22 rules); rebuilt `applied-micro` and `behavioral` as thin overlays on main. Phase 1.5 cleanup: removed 4 applied-specific files from main's references/, fixed 5 stale references. /tools subcommands fleshed out (compile, validate-bib have full procedures). Archive branches preserved. — 2026-04-24
 - [x] Port LaTeX features from applied-micro: writer-critic Critical Rules (ignore commented LaTeX, regression tables as source of truth), tikz-reviewer agent, tikz-visual-quality rule, storyteller-critic tikz dispatch pointer — 2026-04-23
 - [x] Backport decision-log (ADR) rule from BDM + `decisions/` universal folder + template README; port `todo-tracking` rule to applied-micro — 2026-04-23
 - [x] Port primary-source-first hook + rule from `behavioral` to `applied-micro` (cherry-pick with manual CLAUDE.md conflict resolve) — 2026-04-23
