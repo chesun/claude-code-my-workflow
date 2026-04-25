@@ -254,7 +254,17 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
             continue
 
         stem = "_".join(s.lower() for s in surnames) + "_" + year
-        display = " ".join(surnames) + f" ({year})"
+        # Use comma+and form so the display string round-trips through this
+        # same extractor: a space-joined "Chetty Friedman Rockoff (2014)"
+        # would be re-parsed as "Rockoff (2014)" alone (the regex doesn't
+        # recognize space as a multi-author separator). Comma+and is what
+        # the regex's `,/and/&` separator alternation actually accepts.
+        if len(surnames) == 1:
+            display = f"{surnames[0]} ({year})"
+        elif len(surnames) == 2:
+            display = f"{surnames[0]} and {surnames[1]} ({year})"
+        else:
+            display = ", ".join(surnames[:-1]) + f", and {surnames[-1]} ({year})"
 
         if stem not in seen:
             seen.add(stem)
