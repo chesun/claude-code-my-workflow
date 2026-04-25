@@ -161,6 +161,39 @@ assert_escape_stems(
     "escape hatch spans multiple lines (DOTALL)",
 )
 
+print("\n=== Display string round-trips safely (comma+and form, not space-joined) ===")
+# A 3-name display string echoed back into prose must not re-extract as
+# "Rockoff (2014)" alone. The display now uses comma+and form so the
+# regex's `,/and/&` separator alternation matches it.
+result = lib.extract_citations(
+    "Per the canonical Chetty-Friedman-Rockoff (2014) method."
+)
+assert len(result) == 1, f"FAIL: expected 1 citation, got {len(result)}: {result}"
+stem, display = result[0]
+assert stem == "chetty_friedman_rockoff_2014", f"FAIL: stem = {stem!r}"
+assert display == "Chetty, Friedman, and Rockoff (2014)", (
+    f"FAIL: display = {display!r}; expected comma+and form"
+)
+# Now feed the display string back through the extractor; should produce
+# the same stem (round-trip safety).
+roundtrip = lib.extract_citations(f"See {display}.")
+assert len(roundtrip) == 1, f"FAIL: roundtrip extracted {len(roundtrip)} citations"
+assert roundtrip[0][0] == "chetty_friedman_rockoff_2014", (
+    f"FAIL: roundtrip stem = {roundtrip[0][0]!r}"
+)
+print("PASS: 3-name display string round-trips to same stem")
+
+# Two-author and one-author display strings also round-trip
+two_result = lib.extract_citations("Following Chetty and Friedman (2014).")
+assert two_result[0][1] == "Chetty and Friedman (2014)", (
+    f"FAIL: 2-name display = {two_result[0][1]!r}"
+)
+print("PASS: 2-name display uses 'X and Y' form")
+
+one_result = lib.extract_citations("Following Chetty (2014).")
+assert one_result[0][1] == "Chetty (2014)", f"FAIL: 1-name display = {one_result[0][1]!r}"
+print("PASS: 1-name display unchanged")
+
 print("\n=== Hyphenated compound at sentence-start (filter 3 must run before filter 2) ===")
 # These tests require chetty/friedman/rockoff in the allowlist because
 # sentence-start positions only pass when the head surname is allowlisted.
