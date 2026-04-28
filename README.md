@@ -38,6 +38,29 @@ A full diff vs upstream lives at `docs/concepts/upstream-differences.md` (Phase 
 
 ---
 
+## Where this fits in your research process
+
+**Treat Claude as a capable first- or second-year graduate student RA** — technically proficient (writes Stata / R / Python that runs, formats LaTeX, drafts paper sections, debugs) but with limited subject-matter expertise on cutting-edge work. The four-rule epistemic stack and the worker–critic infrastructure catch *mechanical* defects (fabricated paths, ungrounded citations, unverified compliance). They cannot catch *substantive* defects (a misframed contribution, a misunderstood literature, a confounded mechanism). Those remain yours.
+
+The asymmetry across overlays is real: **applied-micro work leans more on the workflow** (settled methodology, codified diagnostics) while **behavioral work involving novel mechanisms or theories needs heavier human review** (every textbook design pattern can be wrong for *your* specific question). Subject-matter expertise and literature knowledge are irreplaceable; quality control is your job; the workflow is leverage.
+
+Read [`docs/concepts/appropriate-use.md`](docs/concepts/appropriate-use.md) before using this on real research. It's the most important page in the docs.
+
+---
+
+## Documentation
+
+The repo root README (this file) is the short-form pitch. Depth lives under [`docs/`](docs/):
+
+- [`docs/README.md`](docs/README.md) — nav hub with reading paths for new users, forkers, and contributors
+- [`docs/getting-started/`](docs/getting-started/) — installation, prerequisites (with curated learning resources), branch-picker
+- [`docs/concepts/`](docs/concepts/) — the four-rule epistemic stack, where Claude fits in research, more depth coming in v0.2.x
+- [`docs/reference/`](docs/reference/) — glossary; full skill / agent / rule / hook catalogues coming in v0.2.x
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — issues, PRs, fork policy
+- [`CHANGELOG.md`](CHANGELOG.md) — what's in `v0.1.0`, what's planned
+
+---
+
 ## Quick Start (5 minutes)
 
 ### 1. Fork & Clone
