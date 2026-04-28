@@ -74,7 +74,7 @@ An agent whose job is to evaluate another agent's output, score it against a ded
 
 ### Decision log (ADR)
 
-ADR = **Architecture Decision Record** — a short, dated, immutable document that records a single substantive design decision and the reasoning behind it. The convention comes from software engineering (see [Michael Nygard's 2011 introduction](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)) and is adopted here for research design choices: identification strategy, sample restrictions, experimental parameters, etc.
+ADR = **Architecture Decision Record** — a short, dated, immutable document that records a single substantive design decision and the reasoning behind it. The convention originates in software-engineering practice and is adopted here for research design choices: identification strategy, sample restrictions, experimental parameters, etc. For background on ADRs in software practice, the [adr.github.io community site](https://adr.github.io/) collects examples, templates, and tooling.
 
 In this workflow, ADRs live in `decisions/NNNN_slug.md` (zero-padded number, hyphenated slug). Once marked `Decided`, the file is immutable; supersession happens via a new ADR with `Supersedes: #NNNN` in its header. The log answers "what was decided when, and why" without requiring readers to spelunk through commit history.
 
