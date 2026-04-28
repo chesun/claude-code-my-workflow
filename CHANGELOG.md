@@ -77,4 +77,4 @@ The next release will fill in `docs/` (per [`quality_reports/plans/2026-04-28_pu
 
 No breaking changes are planned for v0.2.0; the docs ship is additive.
 
-[v0.1.0]: https://github.com/chesun/claude-code-my-workflow/releases/tag/v0.1.0
+[v0.1.0]: https://github.com/chesun/claude-research-workflow/releases/tag/v0.1.0

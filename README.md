@@ -44,7 +44,7 @@ A full diff vs upstream lives at `docs/concepts/upstream-differences.md` (Phase 
 
 ```bash
 # Fork this repo on GitHub (click "Fork" on the repo page), then:
-git clone https://github.com/YOUR_USERNAME/claude-code-my-workflow.git my-project
+git clone https://github.com/YOUR_USERNAME/claude-research-workflow.git my-project
 cd my-project
 ```
 

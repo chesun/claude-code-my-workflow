@@ -49,9 +49,9 @@ This fork descends from two upstreams:
 
 If you fork *this* repo, please credit the chain in your own README. The relevant boilerplate:
 
-> Forked from [chesun/claude-code-my-workflow](https://github.com/chesun/claude-code-my-workflow), which itself adapts [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow) (Pedro Sant'Anna) and [hugosantanna/clo-author](https://github.com/hugosantanna/clo-author) (Hugo Sant'Anna).
+> Forked from [chesun/claude-research-workflow](https://github.com/chesun/claude-research-workflow), which itself adapts [pedrohcgs/claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow) (Pedro Sant'Anna) and [hugosantanna/clo-author](https://github.com/hugosantanna/clo-author) (Hugo Sant'Anna).
 
-If you cite the workflow in a paper or talk, citing the relevant rule or skill file by path is sufficient (e.g., `derive-dont-guess.md, claude-code-my-workflow v0.1.0`).
+If you cite the workflow in a paper or talk, citing the relevant rule or skill file by path is sufficient (e.g., `derive-dont-guess.md, claude-research-workflow v0.1.0`).
 
 ---
 
