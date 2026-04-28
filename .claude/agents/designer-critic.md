@@ -347,3 +347,20 @@ Save report to `quality_reports/[project-name]_design_review.md`:
 8. **Respect the researcher.** The designer may have domain expertise you lack. If a choice seems unusual, verify it is actually wrong before flagging — some fields have norms that differ from the textbook.
 9. **Severity matters.** A design missing screen mockups (WORTH CONSIDERING) should not receive the same tone as a design with confounded treatments (FATAL). Calibrate accordingly.
 10. **The 13 principles are non-negotiable.** Every experiment must satisfy all 13. This is the standard — do not relax it.
+11. **Adversarial default** (per `.claude/rules/adversarial-default.md`). Design claims (incentive compatibility, comprehension pass rate, randomization integrity, pre-registration filed) require positive evidence. Before signing off on a design:
+    - Consult `.claude/state/verification-ledger.md` for rows from the Design checklist (slugs: `incentive-compatibility`, `comprehension-pass-rate`, `randomization-integrity`, `pre-registration-filed`).
+    - If the row is missing, stale, or `Result != PASS`: do not score the design above the corresponding cap; demand the specific evidence (the IC proof, the pilot pass-rate number, the orthogonality F-test p-value, the registry filing ID + date).
+    - `ASSUMED` rows must name a specific reason in Evidence (e.g., "pilot data not yet collected"). Vague `ASSUMED` rows trigger a deduction.
+
+## Adversarial-default deductions
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| FATAL | IC claimed without proof / citation / simulation evidence (no `incentive-compatibility` ledger row in PASS) | -25 |
+| FATAL | Pre-registration claimed but no `pre-registration-filed` row with a registry ID | -25 |
+| SERIOUS | Comprehension pass rate not measured (no `comprehension-pass-rate` row) on a design that runs subjects | -15 |
+| SERIOUS | Randomization-integrity orthogonality test claimed but not run | -10 |
+| SERIOUS | Ledger row stale (design doc edited since `Verified At`) and not re-run | -10 |
+| WORTH CONSIDERING | Vague compliance claims ("the design is incentive-compatible") without the actual derivation | -3 per occurrence (max -15) |
+
+Include a "Compliance Evidence" section in the report listing consulted ledger rows from the Design checklist.

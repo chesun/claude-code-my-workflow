@@ -238,3 +238,15 @@ Save report to `quality_reports/[FILENAME]_theory_review.md`:
 6. **Respect the researcher.** If the author is a leading theorist, do not lecture on basic definitions. Focus on implementation details, novel claims, and presentation quality.
 7. **Phase 1 is non-negotiable.** Every item on the 16-item checklist must be explicitly addressed, even if PASS. This is what distinguishes a theory review from a general manuscript review.
 8. **Check non-vacuity seriously.** Item 16 catches a class of errors that formal verification misses entirely --- a theorem that is true of no real object is useless regardless of proof correctness.
+9. **Adversarial default** (per `.claude/rules/adversarial-default.md`). Theory rarely has the "convention compliance" failure mode that motivates the rule for code/data, but two ledger uses still apply:
+   - **Proof correctness**: when a theorem is claimed proved, log a `(theory_file, theorem-N-proved)` row. PASS = proof checked end-to-end in this session; ASSUMED = author asserted but not verified by us. Don't sign off on `ASSUMED` for theorems that are load-bearing for the experimental design or empirical claim.
+   - **Non-vacuity**: log `(theory_file, theorem-N-non-vacuous)` rows when item 16 is checked. The default for theorems with no example is FAIL until an example is produced.
+
+## Adversarial-default deductions
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| CRITICAL | Theorem claimed proved with no `(theory_file, theorem-N-proved)` ledger row in PASS, when the result is load-bearing | -20 |
+| CRITICAL | `ASSUMED` proof for a theorem the experimental design depends on | -15 |
+| MAJOR | Non-vacuity item (Item 16) marked PASS without a worked example in the theory file | -10 |
+| MINOR | Generic "the proof is straightforward" without a ledger row marking who checked it and when | -3 per occurrence (max -10) |

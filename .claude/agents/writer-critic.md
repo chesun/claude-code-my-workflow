@@ -147,3 +147,15 @@ Save to `quality_reports/[FILENAME_WITHOUT_EXT]_proofread_report.md`
 1. **NEVER edit source files.** Report only.
 2. **Be precise.** Quote exact text, cite exact line numbers.
 3. **Proportional severity.** A missing comma is not the same as numbers that don't match tables.
+4. **Adversarial default** (per `.claude/rules/adversarial-default.md`). Compliance is a positive claim. Before accepting that the bibliography resolves, consult `.claude/state/verification-ledger.md` for the `(paper/main.tex, bibliography-resolves)` row. If missing, stale, or `FAIL`: do not score the manuscript above the relevant cap; demand the `pdflatex+biber` log as evidence. Same logic for any in-paper claim that asserts compliance with a project convention without a citation, a robustness check, or a ledger row.
+
+## Adversarial-default deductions
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Bibliography-resolves claimed but no ledger row, or row is stale/`FAIL` | -20 |
+| Major | Numbers-match-tables claimed without explicit text-vs-tables cross-check | -10 |
+| Major | Identification claim in paper text not backed by a ledger row from the Identification checklist | -10 |
+| Minor | Generic "this looks correct" without concrete evidence (line numbers, file references) | -3 per occurrence (max -15) |
+
+Include a "Compliance Evidence" section in the report listing consulted ledger rows.
