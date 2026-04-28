@@ -80,6 +80,20 @@ Hyphenated stems (e.g., `chetty-friedman-rockoff_2014`) are supported — the pa
 
 The comment only applies to the scope where it appears — it is not session-wide. Abuse is auditable: `grep -R "primary-source-ok" master_supporting_docs/ quality_reports/ experiments/ theory/` surfaces every use.
 
+## Citation-style convention (two-coauthor papers)
+
+When citing a paper with exactly two coauthors, always write the names joined by `and`, never separated by a comma. Year in parentheses.
+
+- **Yes:** Roth and List (2022); Healy and Leo (2024); Gneezy and Rustichini (2000)
+- **No:** Roth, List (2022); Roth, List 2022; Roth & List 2022 (the comma-form and the &-form both invite hook-regex false positives or future-citation-style drift)
+
+Two reasons:
+
+1. **Standard economics convention.** Author-and-Author (year) is what every leading journal uses for two-author papers in running text.
+2. **Hook compatibility.** The primary-source-first hook's Author-Year extractor sometimes parses comma-adjacent surnames followed somewhere by a year as a co-authored citation (e.g., "...Roth, List 2022..."). Using `and` keeps the boundary clean and avoids false positives that force unnecessary escape-hatch comments.
+
+For three or more coauthors, follow your target journal's convention (commonly first author "et al." in text, full list in references). For one author, the form is simply Author (year).
+
 ## Why this exists
 
 Claude has, in prior projects, propagated an incorrect framing claim about a paper through multiple load-bearing documents — a decision log, an identification analysis, a session log, and a slide review — without ever opening the PDF despite it being in the repo the whole time. The error originates in a paraphrase, gets amplified across derivative docs, and each downstream claim inherits and amplifies the distortion.
