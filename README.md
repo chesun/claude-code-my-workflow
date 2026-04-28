@@ -1,10 +1,12 @@
 # Claude Code Research Workflow
 
-> **Work in progress.** A fork-and-adapt foundation for AI-assisted empirical research — identification, analysis, manuscript, talks, peer review, and submission. Based on Pedro Sant'Anna's [claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow) and Hugo Sant'Anna's clo-author template, re-targeted from lecture/slide production to research-paper production.
+> **Preview release (v0.1.0).** A fork-and-adapt foundation for AI-assisted empirical research — identification, analysis, manuscript, talks, peer review, and submission. Based on Pedro Sant'Anna's [claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow) and Hugo Sant'Anna's clo-author template, re-targeted from lecture/slide production to research-paper production.
 
-**Last Updated:** 2026-04-23
+**Last Updated:** 2026-04-28
 
 You describe what you want — an identification strategy, a data analysis, a paper draft, a replication package, a conference talk — and Claude plans the approach, runs specialized agents, fixes issues, verifies quality, and presents results. Like a contractor who handles the job end-to-end.
+
+> **Status:** v0.1.0 is a preview. The rule/skill/agent contracts may shift before v1.0.0. Pinning to a tagged release will give you a stable snapshot while the trunk evolves. See [CHANGELOG.md](CHANGELOG.md) for what's new and [CONTRIBUTING.md](CONTRIBUTING.md) for how to engage.
 
 ---
 
@@ -15,6 +17,24 @@ You describe what you want — an identification strategy, a data analysis, a pa
 - **`behavioral`** (overlay). Adds experimental-economics and formal-theory tooling: `theorist`, `designer`, `otree-specialist`, `qualtrics-specialist` agents, `/theory`, `/design`, `/otree`, `/qualtrics`, `/preregister` skills, `experiment-design-principles` rule, experiments/theory folder trees.
 
 Main is the trunk. The two overlays are thin diffs maintained on their own branches. Universal improvements land on main and flow to both overlays via rebase.
+
+---
+
+## What this fork adds (vs. upstream)
+
+The original `pedrohcgs/claude-code-my-workflow` was a lecture/slide production template; `hugosantanna/clo-author` adapted it for academic writing. This fork orients the entire pipeline at empirical research output and adds:
+
+1. **Four-rule epistemic stack** (the workflow's "don't fabricate" guards):
+   - **`no-assumptions.md`** — don't guess about user-side facts (preferences, deadlines, target journal). Ask, leave out, or explicitly assume.
+   - **`primary-source-first.md`** — don't make framing claims about external papers without reading them. Hook-enforced; reading notes required in `master_supporting_docs/literature/reading_notes/`.
+   - **`derive-dont-guess.md`** — don't fabricate facts the repo encodes (filepaths, variable names, macros, output conventions). Look them up.
+   - **`adversarial-default.md`** — don't claim compliance without evidence. Verification results cached in `.claude/state/verification-ledger.md` to avoid re-check bloat.
+2. **Three-branch model with paradigm overlays.** `main` is the universal trunk; `applied-micro` adds identification tooling (DiD/IV/RDD diagnostics, balance tables, event studies); `behavioral` adds experimental-design tooling (inference-first 14-step checklist, formal theory, oTree, Qualtrics, pre-registration).
+3. **Quality scoring with deduction tables.** 80/90/95 thresholds, weighted aggregate across components, per-target deduction matrices that critics apply consistently. No vague "looks fine" sign-offs.
+4. **Decision log (ADRs) + replication protocol.** Substantive decisions live in `decisions/NNNN_slug.md` (append-only, supersession via new ADRs). Replication has a 5-phase AEA-deposit-ready protocol with concrete tolerance thresholds.
+5. **Domain-specific overlays with academic provenance.** The behavioral overlay's 13 design principles (`.claude/rules/experiment-design-principles.md`) and 14-step inference-first checklist (`.claude/references/inference-first-checklist.md`) carry in-line attributions to the experimental-economics literature on test selection, IC, measurement error, parameter selection, and pre-registration.
+
+A full diff vs upstream lives at `docs/concepts/upstream-differences.md` (Phase 2 of the docs work — coming next).
 
 ---
 
@@ -85,9 +105,13 @@ Weighted aggregate score across components (literature, data, identification/des
 
 See `.claude/rules/quality.md` for the full rubric and per-target deduction tables.
 
+### Verification Ledger
+
+Critic agents demand positive evidence for every compliance claim — a `grep` result, a diagnostic output, a test pass, a hash match. Results cache in `.claude/state/verification-ledger.md` (one row per `(path, check, sha256[:12])`); subsequent checks on unchanged files cite the cache and skip the re-run. File-hash mismatch or convention-rule modification triggers re-run automatically. Net effect: adversarial verification without re-check bloat.
+
 ### Primary-Source-First (hook-enforced)
 
-Load-bearing files (decisions, analysis memos, session logs, plans, reviews) cannot cite a paper unless reading notes for that paper exist in `master_supporting_docs/literature/reading_notes/` AND were opened in the current session. The `primary-source-check` PreToolUse hook and `primary-source-audit` Stop hook enforce this deterministically. Escape hatch: `<!-- primary-source-ok: stem -->` in the delta.
+Load-bearing files (decisions, analysis memos, session logs, plans, reviews) cannot cite a paper unless reading notes for that paper exist in `master_supporting_docs/literature/reading_notes/` AND were opened in the current session. The `primary-source-check` PreToolUse hook and `primary-source-audit` Stop hook enforce this deterministically. Escape hatch: `<!-- primary-source-ok: stem -->` in the delta. Two-coauthor papers are rendered "Author and Author (year)" — never comma-separated, never with `&`.
 
 ### Decision Log (ADRs)
 
@@ -95,7 +119,7 @@ Substantive decisions live in `decisions/NNNN_slug.md` — append-only, immutabl
 
 ### Context Survival
 
-Pre-compact hook saves state to disk. Session logs capture incremental progress. ADRs preserve decisions. A new session can pick up from `CLAUDE.md` + most recent plan + `git log` and know where it is.
+Pre-compact hook saves state to disk. Session logs capture incremental progress. ADRs preserve decisions. A new session can pick up from `CLAUDE.md` + most recent plan + `git log` and know where it is. The `context-monitor` PostToolUse hook also writes a state snapshot at 90% context as a fallback for when Claude Code's PreCompact silently bypasses (a known interaction with MCP servers).
 
 ---
 
@@ -117,21 +141,23 @@ Utilities: `/commit`, `/context-status`, `/learn`, `/challenge`, `/deep-audit`, 
 
 `/tools` is a multi-subcommand router (compile, validate-bib, journal, deploy, learn, upgrade).
 
-### Rules (`.claude/rules/`)
+### Rules (`.claude/rules/` — 25 universal)
 
+- **Epistemic stack** ("don't fabricate" guards): `no-assumptions`, `primary-source-first`, `derive-dont-guess`, `adversarial-default`
 - **Workflow:** agents, workflow, quality, logging, revision
 - **Writing:** working-paper-format, figures, tables, tikz-visual-quality, single-source-of-truth, replication-protocol, verification-protocol
 - **Code:** stata-code-conventions, r-code-conventions, python-code-conventions
-- **Discipline:** primary-source-first, decision-log, todo-tracking, output-length, meta-governance
+- **Discipline:** decision-log, todo-tracking, output-length, meta-governance
 - **Sandbox:** exploration-folder-protocol, exploration-fast-track
 
-### Hooks (`.claude/hooks/`)
+### Hooks (`.claude/hooks/` — 11 scripts)
 
-- `primary-source-check` (PreToolUse) + `primary-source-audit` (Stop) — citation-grounding enforcement
-- `log-reminder` (Stop) — hard-cap reminder to write session logs
+- `primary-source-check` (PreToolUse) + `primary-source-audit` (Stop) — citation-grounding enforcement (Author-Year regex with sentence-start filter, hyphenated-name decomposition, project-allowlist; escape-hatch comments for illustrative citations)
+- `log-reminder` (Stop) — hard-cap reminder to write session logs every 10 responses
 - `verify-reminder` (PostToolUse) — prompts verification after edits
-- `context-monitor`, `pre-compact`, `post-compact-restore` — context survival
-- `protect-files` (PreToolUse) — guard against accidental writes to sensitive files
+- `context-monitor` (PostToolUse) — usage warnings at 40/55/65/80/90%; writes pre-compact-state.json snapshot at 90% as fallback for the MCP-induced PreCompact bypass
+- `pre-compact` + `post-compact-restore` — state preservation across context compaction
+- `protect-files` (PreToolUse) — guards against accidental writes to sensitive files (settings.json, etc.)
 
 ---
 
