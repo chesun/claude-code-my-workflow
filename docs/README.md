@@ -13,11 +13,14 @@ Two prerequisites paths depending on where you're starting:
 
 After installation, decide which branch you want — [`getting-started/branch-model.md`](getting-started/branch-model.md) walks through `main` vs `applied-micro` vs `behavioral` with one-line guidance for picking. Then read [`getting-started/first-session.md`](getting-started/first-session.md) (planned for v0.2.x) to see what a typical first day with the workflow looks like.
 
+**Before using the workflow on real research, also read [`concepts/appropriate-use.md`](concepts/appropriate-use.md).** It's the most important page in these docs — explains where the workflow fits (handles execution) and where your judgment remains irreplaceable (substantive expertise, literature knowledge, quality control). The applied-micro vs behavioral asymmetry — how much you can lean on the workflow — is discussed there in detail.
+
 ## I want to understand why this workflow makes the choices it does
 
 Read the `concepts/` pages — they explain the *what* and *why* of each distinctive design decision:
 
 - [`concepts/epistemic-rules.md`](concepts/epistemic-rules.md) — the four-rule "don't fabricate" stack (no-assumptions, primary-source-first, derive-don't-guess, adversarial-default). The most distinctive feature.
+- [`concepts/appropriate-use.md`](concepts/appropriate-use.md) — capable-RA analogy, applied-micro vs behavioral asymmetry, when to trust vs verify. Read before real-research use.
 - `concepts/worker-critic-pairs.md` *(planned for v0.2.x)* — adversarial pairing, three-strikes escalation, separation of powers.
 - `concepts/quality-scoring.md` *(planned for v0.2.x)* — weighted aggregate, deduction tables, gates.
 - `concepts/verification-ledger.md` *(planned for v0.2.x)* — what it caches, lookup protocol, file-hash semantics.

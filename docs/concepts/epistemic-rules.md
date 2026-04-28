@@ -29,7 +29,7 @@ Each is documented in full in `.claude/rules/`. This page is a tour, not a subst
 
 **How it's enforced.** The rule is loaded into every agent's prompt. Critics deduct for paper claims that fabricate stage, deadline, or audience without evidence in `CLAUDE.md` or the user's stated requirements. There's no hook for this rule because user-side facts can't be programmatically checked — only an agent reading the conversation can tell whether a claim is grounded.
 
-**Concrete example.** User: "Help me prepare the JMP." Without the rule, an agent might respond "Since the JMP is due soon, I'll skip the appendix and focus on the abstract." That sentence fabricates urgency. With the rule, the agent asks: "What's the timeline, and which sections want priority?"
+**Concrete example.** User: "Help me prepare a slide draft for the talk." Without the rule, an agent might respond "Since the talk is soon, I'll skip the appendix slides and focus on the main results." That sentence fabricates urgency and audience. With the rule, the agent asks: "What's the venue and timeline, and which content wants priority — main results, robustness, or motivation?"
 
 ---
 
@@ -84,8 +84,8 @@ Each rule alone catches one class of failure. Together, they catch all four:
 
 | Failure | Rule that catches it |
 |---|---|
-| "I assumed you wanted the JMP done by Friday" | `no-assumptions.md` |
-| "Niederle (2024) shows that p-hacking is good" *(without having read Niederle)* | `primary-source-first.md` |
+| "I assumed you wanted the slide draft done by Friday" | `no-assumptions.md` |
+| Citing a paper without having read it | `primary-source-first.md` |
 | `use "data/main.dta"` when the path is `$datadir/main_v3.dta` | `derive-don't-guess.md` |
 | "The code follows project conventions" *(without grep evidence)* | `adversarial-default.md` |
 
