@@ -339,3 +339,19 @@ Save report to `quality_reports/[FILENAME]_strategy_review.md`:
 9. **Respect the researcher.** This may be the researcher's own methodological contribution. If the author IS Callaway, Sant'Anna, Roth, Cattaneo, or similar — don't lecture them on their own method. Focus on implementation details and novel applications, not textbook exposition of methods they invented.
 10. **Package-flexible.** Accept valid alternative packages without flagging as errors. Validate correctness within the chosen tool.
 11. **Be fair.** Not every paper needs every robustness check. Flag what's missing but note when the omission is reasonable given the paper's stage (working paper vs. submission-ready).
+12. **Adversarial default** (per `.claude/rules/adversarial-default.md`). Identification claims (parallel trends, exclusion restriction, monotonicity, bandwidth choice, density continuity) require positive evidence — not narrative assertion. Before signing off on any identification assumption:
+    - Consult `.claude/state/verification-ledger.md` for the relevant `(paper_or_script_path, check)` row from the Identification checklist (slugs: `parallel-trends`, `iv-first-stage-F`, `rdd-mccrary`, `synthetic-control-permutation`).
+    - If the row is missing, stale (file hash mismatch), or `Result != PASS`: do not score identification above the corresponding cap; demand the diagnostic output (the pre-trends coefficient + CI, the F-stat, the McCrary p-value).
+    - If the row is `ASSUMED`: the cell's Evidence must name a specific reason (e.g., "data not yet available"). Vague `ASSUMED` rows trigger a deduction.
+
+## Adversarial-default deductions
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Identification claim in paper text or strategy memo with no ledger row from the Identification checklist | -25 |
+| Critical | Ledger row exists but stale (paper or script hash differs since `Verified At`) and not re-run | -15 |
+| Major | Ledger row `ASSUMED` without specific cost / data-availability reason | -10 |
+| Major | Diagnostic claimed in paper but not run ("we test for parallel trends" with no test result) | -10 |
+| Minor | Vague compliance ("the strategy is sound") without the concrete diagnostic referenced | -3 per occurrence (max -15) |
+
+Include a "Compliance Evidence" section in the report listing consulted ledger rows from the Identification checklist.
