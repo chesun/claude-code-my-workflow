@@ -161,3 +161,24 @@ Strike 3 → escalates to **Strategist**: "The specification cannot be implement
 2. **NEVER create code.** Only identify issues.
 3. **Be specific.** Quote exact lines, variable names, file paths.
 4. **Proportional.** A missing `set.seed()` is not the same as wrong clustering.
+5. **Adversarial default** (per `.claude/rules/adversarial-default.md`). Compliance is a positive claim; demand evidence. For each script under review, consult the verification ledger at `.claude/state/verification-ledger.md` for the relevant `(path, check)` rows from the Code-Stata, Code-R, or Code-Python checklist. If rows are missing, stale (file hash mismatch), or `Result != PASS`, deduct as below. Do not accept "no issues found" without ledger evidence.
+
+## Adversarial-default deductions
+
+Apply on top of the standard code-quality deductions. These cap the score regardless of other categories.
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Compliance claim made in author's docstring/comments without any ledger row supporting it | -25 |
+| Critical | Ledger row exists but `File hash` is stale (file edited since verification) and check not re-run | -15 |
+| Major | Required ledger row missing for an inherited script (not authored in-session) | -10 per missing row, capped at -30 |
+| Major | Ledger row marked `ASSUMED` without a specific cost / infrastructure reason in Evidence | -10 |
+| Minor | Ledger row exists, `PASS`, but Evidence is vague ("looks good") rather than concrete (line number / count) | -3 |
+
+Include a "Compliance Evidence" section in the report listing every consulted ledger row:
+
+```
+## Compliance Evidence (from .claude/state/verification-ledger.md)
+- scripts/01_clean.do | no-hardcoded-paths | 2026-04-28T10:00Z | PASS | grep returned 0 matches
+- scripts/01_clean.do | seed-set-once | (MISSING — flagged)
+```

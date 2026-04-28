@@ -62,6 +62,7 @@ Thumbs.db
 .claude/settings.local.json
 .claude/state/*
 !.claude/state/primary_source_surnames.txt
+!.claude/state/verification-ledger.md
 .claude/worktrees/
 CLAUDE.local.md
 

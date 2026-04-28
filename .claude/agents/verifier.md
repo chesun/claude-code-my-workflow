@@ -172,3 +172,18 @@ In the weighted overall score (quality.md), Verifier contributes 5% weight.
 2. Use `TEXINPUTS` and `BIBINPUTS` for LaTeX
 3. Report ALL issues, even minor warnings
 4. For Beamer talks: same compilation check, but results are advisory
+5. **Adversarial default + ledger updates** (per `.claude/rules/adversarial-default.md`). The verifier is the agent most empowered to actually run commands, so it is responsible for *populating* the verification ledger as well as consulting it.
+   - **Standard mode**: for each compile/execution/integrity/freshness check, write or update a row in `.claude/state/verification-ledger.md`. Use the slug from the per-domain table in the rule (e.g., `bibliography-resolves`, `master-script-runs`, `output-freshness`). Always record the file's `sha256(...) | head -c 12` at check time.
+   - **Submission mode**: rebuild the entire ledger from scratch (`/tools verify --force` semantics). Do not trust prior `PASS` rows; re-run every check. The 6 AEA-deposit checks each write a row.
+   - For any check the user asks to skip (e.g., end-to-end run too slow on this machine), record `Result = ASSUMED` with a specific Evidence reason. Submission mode FAILS if any `ASSUMED` row remains in load-bearing paths (replication/, paper/, scripts/).
+
+## Adversarial-default integration
+
+The verifier's PASS/FAIL output is now also a ledger update. Failure modes:
+
+| Issue | Action |
+|---|---|
+| File hash differs from prior ledger row, but new run still PASS | Update the row's `Verified At` and `File hash` in place |
+| File hash differs and new run is FAIL | Update row to FAIL; flag in verification report |
+| Convention rule (e.g., `stata-code-conventions.md`) modified after the row's `Verified At` | Re-run; update row regardless of file-hash match |
+| Submission mode + any `ASSUMED` row in `replication/`, `paper/`, or `scripts/` | Submission FAIL; report the specific rows |
