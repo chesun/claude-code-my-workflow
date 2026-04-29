@@ -93,11 +93,14 @@ The editor:
 4. Lists MUST address, SHOULD address, and MAY push back items
 
 #### Save Reports
-Save all outputs to `quality_reports/reviews/`:
-- `YYYY-MM-DD_desk_review.md` (Phase 1)
-- `YYYY-MM-DD_referee_domain.md` (Phase 2)
-- `YYYY-MM-DD_referee_methods.md` (Phase 2)
-- `YYYY-MM-DD_editorial_decision.md` (Phase 3)
+All four outputs follow the canonical path in `.claude/rules/agents.md` § 2: `quality_reports/reviews/YYYY-MM-DD_<target>_<critic>_review.md`. Use `<target>` = `desk-review` for Phase 1, the paper slug (e.g., `main`) for Phases 2–3:
+
+- `YYYY-MM-DD_desk-review_editor_review.md` (Phase 1)
+- `YYYY-MM-DD_<target>_domain_review.md` (Phase 2)
+- `YYYY-MM-DD_<target>_methods_review.md` (Phase 2)
+- `YYYY-MM-DD_<target>_editor_review.md` (Phase 3)
+
+Each report carries the required header (Date, Reviewer, Target, Score, Status: Active). Consult `quality_reports/reviews/INDEX.md` first; supersede prior `Active` reviews on the same target via the protocol in `quality_reports/reviews/README.md`.
 
 Log the referee assignments (dispositions + pet peeves) in the editorial decision so the user can re-run with different combinations.
 
@@ -105,7 +108,7 @@ Log the referee assignments (dispositions + pet peeves) in the editorial decisio
 
 Continues the review cycle after the author has revised the paper.
 
-1. **Load prior review state** — read previous referee reports and editorial decision from `quality_reports/reviews/`
+1. **Load prior review state** — read previous referee reports and editorial decision from `quality_reports/reviews/` (or `quality_reports/reviews/archive/` if already superseded)
 2. **Skip desk review** — the paper was already accepted for review
 3. **Same referees** — reload the same dispositions and pet peeves from round 1
 4. **Referee R&R mode** — each referee receives their previous report alongside the revised manuscript:
@@ -120,7 +123,7 @@ the original — improvement matters.
 They check whether each concern was: Resolved / Partially resolved / Not addressed. They may flag new concerns from the revisions.
 
 5. **Editor R&R decision** — Round 2 allows Accept/Minor/Major/Reject. Round 3 allows Accept/Minor/Reject only. Max 3 rounds total — editor's patience runs out, just like real life.
-6. **Save reports** with `_r2` or `_r3` suffix to `quality_reports/reviews/`
+6. **Save reports** with `<target>` slug suffixed by round (e.g., `main-r2`, `main-r3`): `YYYY-MM-DD_main-r2_domain_review.md`, etc. The Round-1 reviews are superseded per the lifecycle protocol.
 
 ### Hostile Stress Test (`--stress [journal]`)
 
@@ -179,9 +182,9 @@ Dispatch **coder-critic** in standalone mode.
 | Using `print()` for debugging left in production | **Minor** |
 | No package loading section at top of script | **Major** |
 
-**Do NOT edit any source files.** Only produce reports. Fixes are applied after user review, either manually or by re-dispatching the Coder agent.
+**Do NOT edit source artifacts.** The critic produces a review report only. Fixes are applied after user review, either manually or by re-dispatching the Coder agent.
 
-Save report to `quality_reports/[file]_code_review.md`
+Save report to `quality_reports/reviews/YYYY-MM-DD_<target>_coder_review.md` per the canonical path in `.claude/rules/agents.md` § 2.
 
 ### Causal Audit (`--methods`)
 
@@ -223,19 +226,19 @@ Dispatch **designer-critic** standalone for a full 4-phase experimental design a
 - **MAJOR ISSUES** — Significant concerns that could change conclusions
 - **CRITICAL ERRORS** — Fundamental design flaw or incorrect implementation
 
-Save report to `quality_reports/[file]_strategy_review.md`
+Save report to `quality_reports/reviews/YYYY-MM-DD_<target>_designer_review.md` per the canonical path in `.claude/rules/agents.md` § 2.
 
 ### Manuscript Polish (`--proofread`)
 Dispatch **writer-critic** standalone:
 - 6 categories: structure, claims-evidence, ID fidelity, writing, grammar, compilation
-- Save report to `quality_reports/[file]_proofread_report.md`
+- Critic writes report to `quality_reports/reviews/YYYY-MM-DD_<target>_writer_review.md`.
 
 ### Cross-Language Replication (`--replicate [language]`)
-1. Auto-detect source language from file extension
-2. Dispatch **Coder** in replication mode — re-implement in target language
-3. **coder-critic** reviews both implementations
-4. Compare numerical outputs per `.claude/references/domain-profile-behavioral.md` Quality Tolerance Thresholds
-5. Save replicated script and comparison report
+Re-implement existing code in a different language and compare outputs:
+1. Auto-detect source language from file extension (`.R`, `.py`, `.do`, `.jl`)
+2. Dispatch **Coder** in replication mode — re-implement in target language (writes to `scripts/[target-language]/`)
+3. **coder-critic** reviews both implementations and writes report to `quality_reports/reviews/YYYY-MM-DD_<target>_replicate-<lang>_coder_review.md` per the canonical path in `.claude/rules/agents.md` § 2.
+4. Compare numerical outputs per `.claude/references/domain-profile-behavioral.md` Quality Tolerance Thresholds.
 
 ---
 
@@ -266,6 +269,12 @@ Verifier score maps to 0 (FAIL) or 100 (PASS) for weighted aggregation.
 
 ---
 
+## Review-report path convention
+
+All critics write to `quality_reports/reviews/YYYY-MM-DD_<target>_<critic>_review.md`. Critics consult `quality_reports/reviews/INDEX.md` first; if an `Active` review exists for the same target, they follow the supersession protocol (mark prior `Status: Superseded by <new-path>`, `git mv` to `archive/`, set `Supersedes:` in the new report, update `INDEX.md`). See `quality_reports/reviews/README.md` for full lifecycle conventions.
+
+---
+
 ## Scoring
 
 | Mode | Blocking? | Gate |
@@ -282,12 +291,12 @@ Verifier score maps to 0 (FAIL) or 100 (PASS) for weighted aggregation.
 ## Principles
 - **Smart routing.** File type determines the default review mode.
 - **Flags override.** Use explicit flags for targeted reviews.
-- **Critics never edit.** All reviews produce reports only.
+- **Critics never edit source artifacts.** They do write review reports to `quality_reports/reviews/` — that is the audit trail. Source vs report distinction per `.claude/rules/agents.md` § 2.
 - **Journal drives everything.** The journal profile shapes the editor's bar, referee selection, and review culture.
 - **Referees vary.** Different dispositions and pet peeves mean running `/review --peer` twice gives different feedback — just like submitting to two journals would.
 - **"What would change my mind."** Every major comment must include the specific evidence or analysis that would resolve the concern.
 - **Design-opinionated, package-flexible.** Recommend standard packages (fixest, did, rdrobust, etc.) but accept and validate alternatives. The design matters more than the package.
 - **Sequential phases in causal audit.** Never skip to robustness before verifying the core design holds.
 - **Proportional severity.** Missing `set.seed()` is Major; missing comment is Minor.
-- **Worker-critic separation.** The reviewer never fixes code or rewrites text — it only critiques.
+- **Worker-critic separation.** The reviewer never fixes code or rewrites text — it produces a scored review report.
 - **Actionable output.** Every issue must have a concrete fix, not vague advice.
