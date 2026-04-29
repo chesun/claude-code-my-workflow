@@ -12,11 +12,12 @@ Pages for new users. The recommended reading order:
 
 ---
 
-## Overlay-specific walkthrough (this branch)
+## Overlay-specific walkthroughs
 
-5. **[`applied-micro.md`](applied-micro.md)** — what the `applied-micro` overlay adds beyond `main`. The three overlay skills (`/strategize`, `/balance`, `/event-study`), the strategist + strategist-critic agent pair, the `air-gapped-workflow.md` rule, and the `identification-checklists.md` reference. Read after `branch-model.md` confirms `applied-micro` is the right pick for your work.
+5. **[`applied-micro.md`](applied-micro.md)** — walkthrough of the `applied-micro` overlay's three skills (`/strategize`, `/balance`, `/event-study`), the strategist + critic agent pair, the air-gapped-workflow rule, and the identification-checklists reference. **Read this even if you're on `main`** — it's the most useful preview of what `applied-micro` offers before you check it out. The actual skills/agents/rules live only on the `applied-micro` branch; this walkthrough describes them from any branch.
+6. **[`behavioral.md`](behavioral.md)** — walkthrough of the `behavioral` overlay's five skills (`/design`, `/theory`, `/preregister`, `/otree`, `/qualtrics`), the four creator–critic agent pairs, the 13 design principles in `experiment-design-principles.md`, and the 14-step `inference-first-checklist.md`. **Read this even if you're on `main`** — preview of what `behavioral` offers. The actual content lives only on the `behavioral` branch; this walkthrough is portable.
 
-The behavioral overlay's walkthrough lives on the `behavioral` branch — `git checkout behavioral` and read its version of this `getting-started/` directory.
+Both walkthroughs live on all three branches so anyone evaluating the workflow can read them without first checking out an overlay. They describe what each overlay adds; running the skills they describe requires being on the corresponding branch.
 
 ---
 
