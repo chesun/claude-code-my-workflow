@@ -12,9 +12,11 @@ Pages for new users. The recommended reading order:
 
 ---
 
-## What's not yet here
+## Overlay-specific walkthrough (this branch)
 
-`applied-micro.md` and `behavioral.md` — overlay-specific walkthroughs of the paradigm-specific skills (`/strategize`, `/balance`, `/event-study` on `applied-micro`; `/design`, `/theory`, `/preregister`, `/otree`, `/qualtrics` on `behavioral`). These ship in v0.2.x and live on the corresponding overlay branches, not on `main`.
+5. **[`behavioral.md`](behavioral.md)** — what the `behavioral` overlay adds beyond `main`. The five overlay skills (`/design`, `/theory`, `/preregister`, `/otree`, `/qualtrics`), the four creator–critic agent pairs (designer + critic, theorist + critic, otree-specialist, qualtrics-specialist), the 13 design principles in `experiment-design-principles.md`, the 14-step inference-first checklist. Read after `branch-model.md` confirms `behavioral` is the right pick. **And read [`../concepts/appropriate-use.md`](../concepts/appropriate-use.md) before using these skills on real research** — the applied-micro vs behavioral judgment-asymmetry it discusses is most acute here.
+
+The applied-micro overlay's walkthrough lives on the `applied-micro` branch — `git checkout applied-micro` and read its version of this `getting-started/` directory.
 
 ---
 
