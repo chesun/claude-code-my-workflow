@@ -133,7 +133,8 @@ See `quality.md` for behavioral scoring weights (design 25%, paper 20%, theory 1
 | `/design experiment [topic]` | Inference-first experiment design (14-step checklist) |
 | `/theory [develop/review]` | Formal model development or proof review |
 | `/analyze [dataset]` | End-to-end data analysis (Stata 17 primary) |
-| `/write [section]` | Draft paper sections + humanizer pass |
+| `/write [section]` | Draft paper sections (anti-hedging, notation protocol) |
+| `/humanize [path]` | Strip AI writing patterns from any external-facing doc (paper, slide, README, blog, cover/response letter) |
 | `/review [file/--flag]` | Quality reviews (routes by target: paper, code, peer) |
 | `/challenge [--mode] [file]` | Devil's advocate: `--design`, `--theory`, `--paper`, `--fresh` |
 | `/preregister [study]` | Generate pre-registration (AsPredicted, OSF) |
