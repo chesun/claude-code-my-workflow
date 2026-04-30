@@ -353,6 +353,44 @@ assert_matches(
     "three-author comma+and form preserved (mid-sentence)",
 )
 
+print("\n=== Code-span mask: pedagogical examples are skipped ===")
+# Backtick-wrapped citations are style-guide examples, not framing claims.
+# The systemic fix masks them out before the regex runs.
+assert_no_match(
+    "Use the form `Smith (2020)` for single-author cites.",
+    "inline-code citation must not match (single backticks)",
+)
+assert_no_match(
+    "Examples: `Smith (2020)`, `Jones and Brown (2021)`, `Smith et al. (2024)`.",
+    "multiple inline-code citations must not match",
+)
+assert_no_match(
+    "```\nUse Smith (2020) and Brown (2021) as examples.\n```",
+    "code-fenced block citations must not match",
+)
+# But real citations in surrounding prose should still match.
+assert_matches(
+    "We follow the form `Smith (2020)` and apply it: We cite Adams (2014) here.",
+    {"adams_2014"},
+    "real citation in prose still extracts even with example in backticks",
+)
+
+print("\n=== Code-span mask: edge cases ===")
+# Unmatched / nested backticks shouldn't hide real citations
+assert_matches(
+    "We follow Adams (2014) — note the ` character is just punctuation here.",
+    {"adams_2014"},
+    "single stray backtick doesn't break extraction",
+)
+# Multiline prose where a real citation lives outside backticks
+result = stems(
+    "Use the syntax `Smith (2020)` in your text.\nWe follow Adams (2014).\n"
+)
+assert "adams_2014" in result and "smith_2020" not in result, (
+    f"FAIL: expected only adams_2014, got {result}"
+)
+print("PASS: real citation extracts when example is on a separate line")
+
 print("\n=== Residual: real surname at sentence start with empty allowlist ===")
 # Documented as unavoidable noise; user uses escape hatch.
 result = stems("Smith 2020 published a related result.")

@@ -213,11 +213,46 @@ def is_enforceable(rel_path: str) -> bool:
     return any(re.search(p, rel_path) for p in ENFORCEABLE_PATTERNS)
 
 
+def _mask_code_spans(text: str) -> str:
+    """Replace inline-code and code-fenced content with same-length whitespace.
+
+    Citations inside backticks are pedagogical examples — citation-form syntax
+    in style guides, rule documentation, and tutorial prose — not framing
+    claims about real papers. The convention in Markdown is that backtick-
+    wrapped content is code or syntax, not a claim about external work.
+    Skipping them eliminates a large recurring class of false positives.
+
+    Same-length whitespace preserves character offsets so the sentence-start
+    filter's `match.start()` still resolves correctly against the original
+    text positions.
+
+    Two forms are masked:
+    - Triple-backtick code fences (``````...``````) including any internal
+      newlines (DOTALL).
+    - Single-backtick inline-code spans (`...`) within a single line.
+
+    Real citations are written in flowing prose without backticks; this mask
+    does not affect them.
+    """
+    def _whitespace_replacement(m: "re.Match[str]") -> str:
+        # Preserve newlines so line-based sentence-boundary heuristics still work
+        return "".join(c if c == "\n" else " " for c in m.group(0))
+
+    text = re.sub(r"```.*?```", _whitespace_replacement, text, flags=re.DOTALL)
+    text = re.sub(r"`[^`\n]*`", _whitespace_replacement, text)
+    return text
+
+
 def extract_citations(text: str) -> list[tuple[str, str]]:
     """Return list of (stem, display) tuples for citations in text.
 
-    Applies four filters in order:
+    Applies five filters in order:
 
+    0. **Code-span mask** — content inside Markdown inline-code (`...`) or
+       code fences (``````...``````) is replaced with same-length whitespace
+       before the regex runs. Style-guide examples like `` `Smith (2020)` ``
+       are pedagogical, not framing claims, so they should not trigger the
+       audit.
     1. **NEVER_SURNAMES blocklist** — words that are never surnames
        (function words, seasons, months, table/figure/etc.). Drops the
        match regardless of allowlist state.
@@ -236,6 +271,7 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
        surname must appear in it. If empty (default for new projects),
        all matches that pass filters 1–3 are accepted.
     """
+    text = _mask_code_spans(text)
     citations: list[tuple[str, str]] = []
     seen: set[str] = set()
     allowlist_active = bool(KNOWN_SURNAMES)
