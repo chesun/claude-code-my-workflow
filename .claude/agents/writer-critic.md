@@ -99,6 +99,11 @@ Review the specified file thoroughly and produce a detailed scored report of all
 | Overfull hbox > 10pt | -10 per |
 | McCloskey anti-pattern (each type) | -3 per type (max -15) |
 | Hedging language | -5 per (max -15) |
+| AEA citation form: `&` between authors in running text (use `and`) — rule § Citation-style convention | -3 per (max -15) |
+| AEA citation form: missing Oxford comma in 3+ author cite (`Smith, Jones and Brown` → `Smith, Jones, and Brown`) | -3 per (max -15) |
+| AEA citation form: comma between author and year in parenthetical (`(Smith, 2020)` → `(Smith 2020)`) | -3 per (max -15) |
+| AEA citation form: `et al.` used at 4 or fewer authors in-text (AER lists 1-4 in full; et al. only at 5+) | -3 per (max -15) |
+| AEA citation form: missing year-suffix on same-author same-year cites (`Smith 2020` repeated for distinct works → must be `Smith 2020a` / `Smith 2020b`) | -5 per |
 | Naked "this" (no following noun) | -2 per (max -10) |
 | Sentence starts with math symbol | -3 per |
 | Consecutive displayed equations without prose | -3 per |

@@ -82,9 +82,10 @@ The following preamble is the project standard. New papers should use this struc
 
 \usepackage[backend=biber,
             style=authoryear,
-            maxcitenames=3,
-            mincitenames=1,
-            maxbibnames=99,
+            maxcitenames=4,    % AER: 1-4 in-text list all; 5+ "et al."
+            mincitenames=1,    % when truncating to "et al.", list only first author
+            maxbibnames=10,    % AER: 1-10 bib entries list all; 11+ truncate
+            minbibnames=7,     % AER: when truncating bib, list first 7 + "et al."
             giveninits=true,
             uniquename=false,
             uniquelist=true,
@@ -94,8 +95,9 @@ The following preamble is the project standard. New papers should use this struc
             natbib=true]{biblatex}
 \addbibresource{references.bib}
 
-% Citation color settings
-\renewcommand*{\nameyeardelim}{\addcomma\space}
+% AEA / Chicago author-date: no comma between author and year — "(Smith 2020)"
+% not "(Smith, 2020)". Override biblatex's default delim.
+\renewcommand*{\nameyeardelim}{\addspace}
 \DeclareCiteCommand{\cite}
   {\usebibmacro{prenote}}
   {\usebibmacro{citeindex}%
@@ -134,6 +136,8 @@ The following preamble is the project standard. New papers should use this struc
 | Choice | Standard | Rationale |
 |--------|----------|-----------|
 | `biblatex` + `biber` | Required | Replaces `natbib` + `bibtex`. More flexible, better Unicode, `natbib=true` preserves `\citet`/`\citep` |
+| `style=authoryear` + AER name-count settings | Required | `maxcitenames=4` enforces AER's "1-4 in-text list all; 5+ et al."; `maxbibnames=10`+`minbibnames=7` enforces AER's "1-10 reference list all; 11+ first seven + et al." |
+| `\nameyeardelim={\addspace}` | Required | AEA / Chicago author-date uses `(Smith 2020)` not `(Smith, 2020)`. Override biblatex's default comma-delim |
 | `lmodern` | Required | Clean Latin Modern font; compatible with all LaTeX engines |
 | `microtype` | Required | Improved character spacing and margin kerning |
 | `fancyhdr` | Required | Clean centered page numbers, no header rule |
@@ -219,6 +223,25 @@ Each section uses `\section{}` with `\label{sec:name}`. Subsections use `\subsec
 - Single-spaced or `\small` references
 - New page before references
 
+### Citation form (AEA / Chicago author-date)
+
+The preamble's `biblatex` settings (`style=authoryear, maxcitenames=4, mincitenames=1, maxbibnames=10, minbibnames=7, giveninits=true, uniquename=false, uniquelist=true, dashed=false, natbib=true`) plus the `\nameyeardelim` override produce AEA-compliant in-text citations and reference list entries per the AER style guide. Concretely:
+
+- `\citet{Smith2020}` → `Smith (2020)`
+- `\citet{RomerRomer2010}` → `Romer and Romer (2010)`
+- `\citet{GaduhHannaOlken2021}` → `Gaduh, Hanna, and Olken (2021)` (Oxford comma, "and" not "&")
+- `\citet{FourAuthors2024}` → `Smith, Jones, Brown, and Lee (2024)` (1-4 authors all listed per AER)
+- `\citet{FiveAuthors2024}` → `Smith et al. (2024)` (5+ truncates via `maxcitenames=4`)
+- Reference list entry with 8 authors → all 8 listed (within `maxbibnames=10`)
+- Reference list entry with 12 authors → first 7 listed + "et al." (truncated via `maxbibnames=10, minbibnames=7`)
+- Parenthetical: `\citep{Smith2020}` → `(Smith 2020)` — no comma between author and year (AER form, set via `\nameyeardelim`)
+- Multiple cites: `\citep{Smith2020,Jones2021}` → `(Smith 2020; Jones 2021)` (semicolon-separated)
+- Same author same year: distinguish in BibTeX with year suffix — `Smith2020a`, `Smith2020b` keys; biblatex renders `Smith (2020a)` and `Smith (2020b)` automatically.
+
+In-text writing conventions (the AEA/Chicago author-date rules in detail) live in `.claude/rules/primary-source-first.md` § "Citation-style convention". The writer-critic enforces them via deduction rows.
+
+**Do not** use `\&` between authors in `\textcite{...}` constructions or in raw prose. AEA convention is `and` in running text. The biblatex `authoryear` style produces `and` automatically; the failure mode here is hand-written `Smith \& Jones (2020)` outside `\citet`.
+
 ## Compilation
 
 ```bash
@@ -248,3 +271,4 @@ The writer-critic deducts points for:
 - `hyperref` not loaded last (-2)
 - Missing caption styling (`captionsetup`) (-2)
 - Using `bibtex` instead of `biber` (-3)
+- AEA citation form violation in running text — `&` between author names, missing Oxford comma in 3-author cite, or comma between author and year in parenthetical (per `primary-source-first.md` § "Citation-style convention"): -3 per occurrence (max -15)
