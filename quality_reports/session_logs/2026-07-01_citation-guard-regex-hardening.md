@@ -22,9 +22,17 @@ Catch-up + agenda session, then execute the citation-guard regex hardening umbre
 | Rule-doc updates (`primary-source-first.md`): blocklist categories + structural-guards subsection + unicode paragraph | DONE, committed | `1eb45b3` |
 | Housekeeping: TODO umbrella updated, proposal marked IMPLEMENTED | DONE | (this commit) |
 
-## Umbrella outcome
+## Umbrella outcome (2026-07-01)
 
-All four fix classes landed 2026-07-01. Suite: 116 checks + 22 stop-hooks, all green. **Open:** propagate the 6 hook commits (`aaba644`…`1eb45b3`) to overlays + consumers; bdm_bic natively has only the status-word fix. After propagation, remove BDD's retroactive `primary-source-ok` overrides for the accented citations the unicode bug forced.
+All four fix classes landed 2026-07-01. Suite: 116 checks + 22 stop-hooks, all green.
+
+## Workflow round (2026-07-02) — stress → implement → independently verify
+
+FP analysis (`quality_reports/reviews/2026-07-01_primary-source-hook-fp-analysis.md`, probe-verified) then a dynamic workflow (`wf_cf898e8f-8ec`, 9 agents, ~1.0M subagent tokens, 2 implement/verify rounds): 3 stress agents confirmed **54 cases** by execution; implementer landed the P1/P2/P3 roadmap; independent verifiers re-ran everything + fresh same-class probes. TP verifier PASSed both rounds (34/34 legitimate AEA forms, allowlist rescue of structural positions, e2e hook correct). FP verifier FAILed round 2 only on **enumeration-gap siblings** (Photoshop/Datastream/semester/medal/Thanksgiving) — closed in the main session with tests. Final: **47/54 fixed, 7 designed residue** (bare place+year, surname-identical titles, particle surnames — citation-line lookup mitigates; mixed-case orgs — skip-list).
+
+**Mechanisms landed** (`57e8e0e`): markdown-aware SENTENCE_BOUNDARY (tables/bullets/headings/blockquotes/line starts need allowlist — the dominant FP class); typographic fold (curly quotes, en/em-dash, NBSP — fixes wrong-author stem bugs); possessive normalization + `et al.'s` + `and colleagues` forms (closed 4 false NEGATIVES); apostrophe-free stems + symmetric lookups; preceding-token cue filter (storm cues, all-caps acronym precursors); org skip-list state file `primary_source_orgs.txt`; all-caps floor 3→2; large NEVER_SURNAMES clusters (collision surnames excluded). Suite 116 → **209 checks**. Rule doc rewritten to match (filter stack 1/1b/1c/2–5, typographic handling, known residue).
+
+**Open:** propagate all 8 hook commits (`aaba644`…`57e8e0e` + docs) to overlays + consumers; BDD override cleanup after propagation; P3-c telemetry (block logging) not yet implemented — still in TODO.
 
 ## Key implementation facts (for continuation)
 

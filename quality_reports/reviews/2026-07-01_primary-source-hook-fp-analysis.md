@@ -3,7 +3,7 @@
 **Date:** 2026-07-01
 **Author:** Claude (analysis session, post citation-guard-hardening umbrella)
 **Target:** `.claude/hooks/primary_source_lib.py`
-**Status:** Active
+**Status:** Completed — roadmap implemented 2026-07-02 via dynamic workflow (9 agents, 2 implement/verify rounds, 54 stress-confirmed cases, 47 fixed + 7 designed residue) + main-session closure of round-2 enumeration gaps. Code commits `57e8e0e` (workflow hardening) on top of `53c0a99`/`48bd093`/`c40a3ec`/`a4084f1`. Suite: 209 checks. See session log `2026-07-01_citation-guard-regex-hardening.md` § workflow outcome.
 **Method:** every claim below was verified empirically by probing the *live* extractor (post-`a4084f1`) with candidate texts; probe script preserved at the session scratchpad, results reproduced inline. No speculative entries — "confirmed" means the extractor fired on the probe today.
 
 <!-- primary-source-ok: kramer_2026, kramer_sun_2026 -->
