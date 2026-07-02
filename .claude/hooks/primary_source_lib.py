@@ -15,7 +15,9 @@ session-read-verification logic, which lives here.
 Project-agnostic. The surname allowlist is loaded at import time from
 `.claude/state/primary_source_surnames.txt` (one lowercase surname per
 line). If the file is missing or empty, the allowlist is skipped and
-every Author-Year match is accepted. See `.claude/rules/primary-source-first.md`.
+every Author-Year match is accepted. An org skip-list is loaded the same
+way from `.claude/state/primary_source_orgs.txt` (mixed-case corporate/
+data authors to skip). See `.claude/rules/primary-source-first.md`.
 """
 
 from __future__ import annotations
@@ -44,35 +46,44 @@ ENFORCEABLE_PATTERNS = [
 ]
 
 
-def _load_surname_allowlist() -> set[str]:
-    """Load lowercase surnames from the project-local allowlist file.
+def _load_state_wordlist(filename: str) -> set[str]:
+    """Load a lowercase one-name-per-line word list from `.claude/state/`.
 
-    Looks up `.claude/state/primary_source_surnames.txt` under
-    CLAUDE_PROJECT_DIR if set, otherwise relative to this library file.
-    Returns an empty set if the file is missing or empty — the caller
-    treats empty as "skip filtering" (accept all Author-Year matches).
+    Looks up the file under CLAUDE_PROJECT_DIR if set, otherwise relative
+    to this library file. Returns an empty set if the file is missing or
+    empty — callers treat empty as "mechanism inactive". Lines starting
+    with `#` are comments.
     """
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR", "")
     if project_dir:
-        path = Path(project_dir) / ".claude" / "state" / "primary_source_surnames.txt"
+        path = Path(project_dir) / ".claude" / "state" / filename
     else:
-        path = Path(__file__).resolve().parent.parent / "state" / "primary_source_surnames.txt"
+        path = Path(__file__).resolve().parent.parent / "state" / filename
     if not path.is_file():
         return set()
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
     except OSError:
         return set()
-    surnames: set[str] = set()
+    words: set[str] = set()
     for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        surnames.add(line.lower())
-    return surnames
+        words.add(line.lower())
+    return words
 
 
-KNOWN_SURNAMES = _load_surname_allowlist()
+# Surname allowlist: when non-empty, only Author-Year matches whose leading
+# surname appears here are accepted. Empty (the day-one default) = accept
+# all matches that pass the other filters.
+KNOWN_SURNAMES = _load_state_wordlist("primary_source_surnames.txt")
+
+# Org skip-list: mixed-case corporate/data authors to skip ("Gallup", "Pew",
+# Nielsen-the-company). These can't go in NEVER_SURNAMES safely (Nielsen is
+# a common surname), so the skip is per-project state — one project's data
+# vendor is another project's cited author. Missing/empty file = no skipping.
+ORG_SKIPLIST = _load_state_wordlist("primary_source_orgs.txt")
 
 # Author-Year regex. Matches:
 #   Chakraborty and Kendall (2025)
@@ -121,6 +132,16 @@ KNOWN_SURNAMES = _load_surname_allowlist()
 #    `jones_brown_lee_2024`). Capturing the whole list as one span and
 #    splitting on `,`/`and`/`&` in `extract_citations` handles any author
 #    count and keeps the lead author as the head that filters apply to.
+#
+# 5. **Possessive and "and colleagues" forms reach the year.** `et al.` may
+#    carry a possessive (`Smith et al.'s (2020)` — curly apostrophes are
+#    folded to ASCII before the regex runs), and `Author and colleagues
+#    (year)` / `Author and coauthors (year)` are standard prose citation
+#    forms. Without these alternations the lowercase word after `and` (or
+#    the `'s` after `al.`) broke the year-separator path and a load-bearing
+#    framing claim escaped the hook entirely. Bare-name possessives
+#    (`Chetty's (2014)`) already match via the surname char class (they end
+#    in the letter `s`) and are stripped in `extract_citations`.
 AUTHOR_YEAR = re.compile(
     r"""
     \b
@@ -128,7 +149,7 @@ AUTHOR_YEAR = re.compile(
         [A-Z][A-Za-z\-']*[A-Za-z]
         (?:(?:\s*,\s*(?:and\s+)?|\s+and\s+|\s*&\s*)[A-Z][A-Za-z\-']*[A-Za-z])*
     )
-    (?:\s+et\s+al\.?)?
+    (?:\s+et\s+al\.?(?:'s)?|\s+and\s+(?:colleagues|coauthors))?
     (?:\s+\(?|\(|,\s*\(?)(?P<year>(?:19|20)\d{2})(?![-–—/]\d)[a-z]?\)?
     """,
     re.VERBOSE,
@@ -150,7 +171,59 @@ ESCAPE_HATCH = re.compile(
 
 # Sentence-boundary detector. A capitalized first word right after a sentence
 # terminator is almost never a surname citation; it's just the next sentence.
-SENTENCE_BOUNDARY = re.compile(r"(?:[.?!:;]\s+|\n\s*\n)\s*$")
+#
+# Markdown-aware: the documents this hook scopes (session logs, plans,
+# reviews, TODO tables) are full of person-name + year in structural slots
+# the old `.?!:;` + blank-line pattern could not see — table cells
+# (`| Kramer 2026 | done |`), bullet items (`- Kramer (2026) reviewed`),
+# headings (`## Kramer 2026 review`), blockquotes (`> Sun (2026) approved`),
+# and plain line starts after a single newline. Those positions now count
+# as sentence-start too, so they require the surname allowlist to extract —
+# the same tradeoff sentence-start already makes, and real prose citations
+# are overwhelmingly mid-sentence. Recognized boundaries:
+#   - sentence terminator + whitespace (unchanged)
+#   - line start (single `\n` or start-of-string) followed by any run of
+#     markdown decorations: bullets (- * +), numbered-list markers
+#     (`1.` / `1)`), heading #s, blockquote >, table pipes, bold/emphasis
+#     markers (* _ ~)
+#   - a mid-line table-cell pipe (`| `)
+SENTENCE_BOUNDARY = re.compile(
+    r"""(?:
+        [.?!:;]\s+
+      | (?:\n|\A)[ \t]*
+        (?:(?:[-*+>#|]+|\d{1,3}[.)])[ \t]*|[*_~]{1,3})*
+      | \|[ \t]*
+    )\s*$""",
+    re.VERBOSE,
+)
+
+# Preceding-token cue: some false-positive classes are marked not by the
+# matched head token (which may be a real or unenumerable name — "Katrina",
+# "Grant", "Rotterdam") but by the word immediately BEFORE it:
+#
+#   Hurricane Katrina (2005)     — named-storm natural-experiment phrasing
+#   NSF Grant 2026               — funding acknowledgment ("Grant" is a real
+#                                  surname, so blocklisting it is unsafe)
+#   EEA-ESEM Rotterdam 2026      — conference acronym + host city
+#
+# When the token directly preceding the author match (separated by plain
+# spaces/tabs only — any intervening punctuation like `(` or `,` breaks the
+# cue, so parenthetical citations after acronyms, e.g. "IPUMS USA (Ruggles
+# et al. 2024)", are untouched) is either a named-entity cue word or an
+# all-caps acronym, the match is skipped. Like the sentence-start filter,
+# an explicit allowlist entry for the head surname overrides the skip.
+NAMED_ENTITY_CUES = frozenset({
+    "hurricane", "typhoon", "cyclone", "storm", "tropical",
+})
+
+# Token (plus trailing space/tab run) immediately before the match start.
+_CUE_BEFORE = re.compile(r"(\S+)[ \t]+$")
+
+# All-caps acronym shape: 2+ chars, uppercase letters/digits, internal
+# hyphens/ampersands allowed ("NSF", "UK", "EEA-ESEM", "AT&T"). A trailing
+# period or comma on the preceding token deliberately fails the match —
+# sentence-final acronyms are handled by the sentence-start filter instead.
+_ACRONYM_TOKEN = re.compile(r"^[A-Z][A-Z0-9&-]*[A-Z0-9]$")
 
 # Words that are *never* surnames. Applied independent of the project allowlist
 # so the hook is reasonable on day one (when the allowlist is empty). Keep this
@@ -212,6 +285,46 @@ NEVER_SURNAMES = frozenset({
     # catches the full-date forms; these entries catch the bare-year forms.
     "added", "new", "fixed", "removed", "inserted", "replaced", "changed",
     "extended", "deleted", "dropped", "copied", "merged", "patched",
+    # Software / platform / tool / product names (mixed-case, so the
+    # all-caps filter can't catch them). "Stata (2023)", "RStudio (2023)",
+    # "Windows 2000", "Claude (2025)" — tool-vintage attributions, never
+    # surnames in academic prose.
+    "stata", "matlab", "python", "qualtrics", "prolific", "overleaf",
+    "github", "dropbox", "beamer", "latex", "excel", "rstudio", "tableau",
+    "windows", "office", "unicode", "claude", "gemini",
+    "zotero", "mendeley", "jupyter", "docker",
+    "photoshop", "illustrator", "powerpoint",
+    # Document-lifecycle nouns. The changes-table cluster above has the
+    # *verbs*; these are the nouns ("Draft (2026)", "Version (2026)",
+    # "Meeting (2026)", "NBER Summer Institute 2025").
+    "draft", "version", "release", "update", "plan", "memo", "meeting",
+    "seminar", "conference", "workshop", "agenda", "milestone",
+    "deliverable", "submission", "deadline",
+    # Institutions, programs, legislation, surveys, datasets, rooms.
+    # "CARES Act (2020)", "World Bank (2024)", "Medicaid (2022)",
+    # "American Community Survey (2022)", "Head Start (2019)", "Suite
+    # 2026", "Compustat (2024)". "Dodd-Frank" is the two-part hyphenated
+    # statute name filter 4 preserves as a single surname. Deliberately
+    # NOT blocklisted (real surnames): Grant, Law, Bill, Nielsen.
+    "university", "institute", "center", "committee", "congress", "census",
+    "medicare", "medicaid", "act", "bank", "reserve", "survey", "study",
+    "start", "room", "suite", "form", "dodd-frank", "compustat",
+    "datastream", "refinitiv",
+    # Institution / title tail nouns in the same never-a-surname cluster
+    # ("European Commission (2023)", "Census Bureau (2024)", "Panel Study
+    # of Income Dynamics (2021)", "World Development Indicators (2023)").
+    "commission", "council", "agency", "bureau", "administration",
+    "department", "foundation", "association", "organization",
+    "dynamics", "indicators",
+    # Calendar / event / award nouns adjacent to years: "Spring Quarter
+    # 2026", "Labor Day 2026", "UK Budget 2026", "World Cup (2022)",
+    # "Euro 2024", "Nobel Prize (2023)", "Sloan Fellowship (2024)",
+    # "Brexit (2016)". Weekday names are blocked above but bare "Day"
+    # ("Labor Day 2026") was not.
+    "quarter", "day", "days", "budget", "cup", "euro", "prize",
+    "fellowship", "brexit", "covid", "omicron",
+    "semester", "trimester", "medal",
+    "thanksgiving", "christmas", "easter", "halloween",
 })
 
 
@@ -220,6 +333,19 @@ def _is_sentence_start(text: str, pos: int) -> bool:
     if pos == 0:
         return True
     return bool(SENTENCE_BOUNDARY.search(text[:pos]))
+
+
+def _stem_token(token: str) -> str:
+    """Lowercase and strip apostrophes for stem-building and list lookups.
+
+    Reading-notes filenames are conventionally apostrophe-free
+    (`obrien_2020.md`), and `paper_pdf_exists_for` tokenizes filenames on
+    non-alphanumerics, so a stem containing `'` (`o'brien_2020`) could
+    never match a filename token — PDF lookup unfixably failed. Stripping
+    at stem-build time (and symmetrically in the lookup functions) makes
+    both ends agree.
+    """
+    return token.lower().replace("'", "")
 
 
 def _split_hyphenated_surname(token: str) -> list[str]:
@@ -264,6 +390,20 @@ _PRECOMPOSED_MAP = str.maketrans({
     "þ": "th", "Þ": "Th",
 })
 
+# Typographic characters that break the ASCII-only regex char classes or the
+# stem conventions. Curly apostrophes abort a match mid-name ("O’Brien
+# (2020)" parsed as brien_2020 — wrong author); en/em-dashes break the
+# hyphenated-compound handling ("Goldsmith–Pinkham (2020)" dropped the lead
+# surname); NBSP masquerades as a space the char classes can't see. Folding
+# to ASCII keeps the ISO-date guard effective — it already keys on the ASCII
+# hyphen (and retains the en/em-dash forms as defense in depth).
+_TYPOGRAPHIC_MAP = str.maketrans({
+    "‘": "'", "’": "'",  # curly single quotes / apostrophe
+    "“": '"', "”": '"',  # curly double quotes
+    "–": "-", "—": "-",  # en-dash, em-dash
+    " ": " ",                 # no-break space
+})
+
 
 def _ascii_fold(text: str) -> str:
     """NFD-decompose, strip combining marks, then map precomposed letters.
@@ -275,10 +415,14 @@ def _ascii_fold(text: str) -> str:
     as rizzo_2013 (wrong author, wrong stem), and the hook then demanded
     a notes file that will never exist. Reading-notes filenames already
     use ASCII stems, so folding before extraction makes both ends agree.
+
+    Also folds typographic characters (curly quotes → ASCII apostrophe,
+    en/em-dash → hyphen, NBSP → space) via _TYPOGRAPHIC_MAP — see the
+    comment there for the wrong-author bugs this fixes.
     """
     nfd = unicodedata.normalize("NFD", text)
     stripped = "".join(c for c in nfd if unicodedata.category(c) != "Mn")
-    return stripped.translate(_PRECOMPOSED_MAP)
+    return stripped.translate(_PRECOMPOSED_MAP).translate(_TYPOGRAPHIC_MAP)
 
 
 def _mask_code_spans(text: str) -> str:
@@ -325,14 +469,26 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
        (function words, seasons, months, table/figure/etc.). Drops the
        match regardless of allowlist state.
     1a. **All-caps token filter** — captured surnames written in all
-       uppercase (length >= 3) are rejected. Real surnames in academic
+       uppercase (length >= 2) are rejected. Real surnames in academic
        prose are written `Smith`, never `SMITH`. This catches status
        markers (`COMPLETED (2026)`, `DRAFT (2025)`, `DONE (2024)`,
        `BLOCKED (2026)`, `ACTIVE (2026)`, `TODO (2026)`, `FIXME (2026)`,
        `WIP (2026)`, `PENDING (2025)`) and acronym corporate authors
-       (`BLS (2024)`, `OECD (2023)`, `USDA (2025)`). Corporate-author
-       data citations are not framing claims about research papers, so
-       they don't require reading notes.
+       (`BLS (2024)`, `OECD (2023)`, `USDA (2025)`, `EU (2024)`,
+       `AY 2026`). Corporate-author data citations are not framing
+       claims about research papers, so they don't require reading
+       notes. Real two-letter surnames (`Ng`, `Wu`, `Li`) are written
+       mixed-case in prose, never `NG`, so the length-2 floor is safe.
+    1b. **Org skip-list** — mixed-case corporate/data authors the project
+       has declared non-paper sources (`.claude/state/
+       primary_source_orgs.txt`: "Gallup", "Pew"). Same mechanics as the
+       surname allowlist, opposite polarity. Missing/empty file = no
+       skipping.
+    1c. **Preceding-token cue** — a named-entity cue word ("Hurricane
+       Katrina (2005)") or an all-caps acronym ("NSF Grant 2026",
+       "EEA-ESEM Rotterdam 2026") immediately before the head token,
+       separated by whitespace only, marks the match as a named entity.
+       Skipped unless the head surname is explicitly allowlisted.
     2. **Hyphenated-name decomposition** — if the captured `first` group
        is a 3+ part hyphenated capitalized token (e.g.,
        "Chetty-Friedman-Rockoff"), split it and treat each part as a
@@ -341,12 +497,20 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
        that sentence-start hyphenated compounds can be tested against
        the allowlist using the decomposed head.
     3. **Sentence-start filter** — a capitalized first word right after a
-       sentence terminator is dropped unless the project allowlist
+       sentence terminator OR a markdown structural boundary (line start,
+       bullet, numbered item, heading, blockquote, table cell — see
+       SENTENCE_BOUNDARY) is dropped unless the project allowlist
        explicitly contains the (possibly-decomposed) head. Sentence-
-       start function-word + year is almost never a citation.
+       start function-word + year is almost never a citation, and
+       person-name + year in structural slots (TODO tables, standup
+       bullets) is almost never a citation either.
     4. **Allowlist filter** — if KNOWN_SURNAMES is non-empty, the leading
        surname must appear in it. If empty (default for new projects),
        all matches that pass filters 1–3 are accepted.
+
+    Captured tokens are possessive-normalized (`Chetty's` → `Chetty`) and
+    stems are apostrophe-normalized (`O'Brien` → `obrien`) so that stems
+    always match the apostrophe-free reading-notes filename convention.
     """
     text = _mask_code_spans(_ascii_fold(text))
     citations: list[tuple[str, str]] = []
@@ -357,27 +521,58 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
         authors_span = match.group("authors") or ""
         year = match.group("year") or ""
 
-        # Defense in depth: strip trailing hyphens/apostrophes from surname
-        # captures. Real surnames don't end in `-` or `'`. If one slips through
-        # (e.g., from a malformed compound the year-separator filter didn't
-        # catch), strip rather than propagate to the stem.
-        names = [n.rstrip("-'") for n in AUTHOR_SEP.split(authors_span) if n]
+        # Defense in depth: strip possessives and trailing hyphens/apostrophes
+        # from surname captures. Real surnames don't end in `-` or `'`, and a
+        # possessive (`Chetty's (2014)`) would otherwise swallow the `'s` into
+        # the stem so a correctly-named `chetty_2014.md` no longer matches the
+        # startswith check — a spurious block on a legitimate citation.
+        names: list[str] = []
+        for n in AUTHOR_SEP.split(authors_span):
+            if not n:
+                continue
+            if n.endswith("'s"):
+                n = n[:-2]
+            n = n.rstrip("-'")
+            if n:
+                names.append(n)
         if not names:
             continue
         first, rest = names[0], names[1:]
 
         # Filter 1: hard-coded blocklist — independent of allowlist
-        if first.lower() in NEVER_SURNAMES:
+        if _stem_token(first) in NEVER_SURNAMES:
             continue
 
-        # Filter 1a: all-caps tokens (length >= 3) are status markers
+        # Filter 1a: all-caps tokens (length >= 2) are status markers
         # (COMPLETED, DRAFT, DONE, BLOCKED, PENDING, ACTIVE, TODO, FIXME, WIP)
-        # or acronym corporate authors (BLS, OECD, USDA). Real surnames in
-        # academic prose are never written ALL-CAPS; corporate-author
-        # citations are data attributions, not framing claims about research
-        # papers, so they don't require reading notes.
-        if len(first) >= 3 and first.isupper():
+        # or acronym corporate authors (BLS, OECD, USDA, EU, AY). Real
+        # surnames in academic prose are never written ALL-CAPS (two-letter
+        # surnames appear as `Ng`, never `NG`); corporate-author citations
+        # are data attributions, not framing claims about research papers,
+        # so they don't require reading notes.
+        if len(first) >= 2 and first.isupper():
             continue
+
+        # Filter 1b: project org skip-list — mixed-case corporate/data
+        # authors ("Gallup", "Pew") that the project has declared non-paper
+        # sources. Skips regardless of position; empty/missing file = off.
+        if _stem_token(first) in ORG_SKIPLIST:
+            continue
+
+        # Filter 1c: preceding-token cue — named-entity cue words
+        # ("Hurricane Katrina (2005)") and all-caps acronym precursors
+        # ("NSF Grant 2026", "EEA-ESEM Rotterdam 2026") mark the head token
+        # as part of a named entity, not a citation. Whitespace-only
+        # separation required; an explicit allowlist entry for the head
+        # surname overrides (same escape as the sentence-start filter).
+        prev = _CUE_BEFORE.search(text[: match.start()])
+        if prev is not None:
+            prev_token = prev.group(1)
+            if prev_token.lower() in NAMED_ENTITY_CUES or (
+                len(prev_token) >= 2 and _ACRONYM_TOKEN.match(prev_token)
+            ):
+                if not (allowlist_active and _stem_token(first) in KNOWN_SURNAMES):
+                    continue
 
         # Filter 2: hyphenated-name decomposition (handles method compounds)
         # Runs BEFORE the sentence-start check so that sentence-start hyphenated
@@ -388,7 +583,7 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
         # Filter 3: sentence-start positions require explicit allowlist match
         # on the head of the (possibly-decomposed) compound.
         if _is_sentence_start(text, match.start()):
-            head = first_parts[0].lower()
+            head = _stem_token(first_parts[0])
             if not (allowlist_active and head in KNOWN_SURNAMES):
                 continue
 
@@ -397,24 +592,25 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
             # Decomposed compound; treat each part as a surname slot
             all_parts = first_parts + rest
             if allowlist_active:
-                if first_parts[0].lower() not in KNOWN_SURNAMES:
+                if _stem_token(first_parts[0]) not in KNOWN_SURNAMES:
                     continue
-                surnames = [p for p in all_parts if p.lower() in KNOWN_SURNAMES]
+                surnames = [p for p in all_parts if _stem_token(p) in KNOWN_SURNAMES]
             else:
                 surnames = all_parts
         else:
             # Standard allowlist filter
             if allowlist_active:
-                if first.lower() not in KNOWN_SURNAMES:
+                if _stem_token(first) not in KNOWN_SURNAMES:
                     continue
-                surnames = [s for s in [first] + rest if s.lower() in KNOWN_SURNAMES]
+                surnames = [s for s in [first] + rest if _stem_token(s) in KNOWN_SURNAMES]
             else:
                 surnames = [first] + rest
 
         if not surnames:
             continue
 
-        stem = "_".join(s.lower() for s in surnames) + "_" + year
+        # Apostrophe-normalized stem (`O'Brien` -> obrien) — see _stem_token.
+        stem = "_".join(_stem_token(s) for s in surnames) + "_" + year
         # Use comma+and form so the display string round-trips through this
         # same extractor: a space-joined "Chetty Friedman Rockoff (2014)"
         # would be re-parsed as "Rockoff (2014)" alone (the regex doesn't
@@ -464,7 +660,11 @@ def matching_notes_files(stem: str, reading_notes_dir: Path) -> list[Path]:
     if not reading_notes_dir.is_dir():
         return []
 
-    stem_lower = stem.lower()
+    # Apostrophe normalization: stems built by extract_citations are already
+    # apostrophe-free, but escape-hatch stems or older callers may pass
+    # `o'brien_2020`. Strip on both sides (stem here, filename/citation-line
+    # below) so either convention resolves.
+    stem_lower = stem.lower().replace("'", "")
     # Hyphen→underscore fallback: a 2-part hyphenated dual-author citation
     # (`szekely-rizzo_2013`) conventionally maps to an underscore-separated
     # filename (`szekely_rizzo_2013.md`). Accept either form on the filename
@@ -489,7 +689,7 @@ def matching_notes_files(stem: str, reading_notes_dir: Path) -> list[Path]:
 
     matches: list[Path] = []
     for f in reading_notes_dir.glob("*.md"):
-        if f.name.lower().startswith((stem_lower, stem_underscored)):
+        if f.name.lower().replace("'", "").startswith((stem_lower, stem_underscored)):
             matches.append(f)
             continue
         try:
@@ -500,8 +700,10 @@ def matching_notes_files(stem: str, reading_notes_dir: Path) -> list[Path]:
             if not CITATION_LINE.match(line):
                 continue
             # Fold the line so accented citation metadata ("**Citation:**
-            # Székely-Rizzo (2013)") matches the ASCII surname pattern.
-            if citation_match_pattern.search(_ascii_fold(line)):
+            # Székely-Rizzo (2013)") matches the ASCII surname pattern, and
+            # strip apostrophes so "O'Brien" matches the apostrophe-free
+            # stem surname `obrien`.
+            if citation_match_pattern.search(_ascii_fold(line).replace("'", "")):
                 matches.append(f)
                 break
     return matches
@@ -524,7 +726,8 @@ def paper_pdf_exists_for(stem: str, papers_dir: Path) -> bool:
     if not papers_dir.is_dir():
         return False
 
-    stem_lower = stem.lower()
+    # Apostrophe normalization — same reasoning as matching_notes_files.
+    stem_lower = stem.lower().replace("'", "")
     parts = stem_lower.split("_")
     if len(parts) < 2:
         return False
@@ -537,7 +740,9 @@ def paper_pdf_exists_for(stem: str, papers_dir: Path) -> bool:
         return False
 
     for f in papers_dir.glob("*.pdf"):
-        tokens = set(re.split(r"[^a-z0-9]+", _ascii_fold(f.name.lower())))
+        # Strip apostrophes before tokenizing so `o'brien_2021.pdf` yields
+        # the token `obrien`, not `o` + `brien`.
+        tokens = set(re.split(r"[^a-z0-9]+", _ascii_fold(f.name.lower()).replace("'", "")))
         tokens.discard("")
         if year in tokens and surnames.issubset(tokens):
             return True

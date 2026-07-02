@@ -32,6 +32,11 @@ lib = _load_lib()
 _PROJECT_ALLOWLIST = lib.KNOWN_SURNAMES
 lib.KNOWN_SURNAMES = set()
 
+# Same clamp for the org skip-list — tests that exercise it inject their own
+# entries and restore to empty.
+_PROJECT_ORG_SKIPLIST = lib.ORG_SKIPLIST
+lib.ORG_SKIPLIST = set()
+
 
 # --- Helpers ---------------------------------------------------------------
 
@@ -521,13 +526,399 @@ with tempfile.TemporaryDirectory() as _td:
     assert not lib.paper_pdf_exists_for("smith_2020", _pd), "FAIL: unrelated PDF stem must not match"
     print("PASS: unrelated PDF stem does not match")
 
+print("\n=== Typographic fold (P1-a): curly quotes, en/em-dash, NBSP ===")
+_folded = lib._ascii_fold("O’Brien – Smith — Jones (2020) “quoted”")
+assert _folded == "O'Brien - Smith - Jones (2020) \"quoted\"", (
+    f"FAIL: typographic fold produced {_folded!r}"
+)
+print("PASS: _ascii_fold maps curly quotes -> ', en/em-dash -> -, NBSP -> space")
+assert_matches(
+    "We follow O’Brien (2020) in constructing the exposure measure.",
+    {"obrien_2020"},
+    "curly apostrophe: O’Brien no longer truncates to wrong author 'Brien'",
+)
+assert_matches(
+    "The Goldsmith–Pinkham (2020) decomposition of Bartik instruments.",
+    {"goldsmith-pinkham_2020"},
+    "en-dash folds to hyphen; lead surname no longer dropped",
+)
+assert_matches(
+    "We use the Chetty—Friedman—Rockoff (2014) teacher value-added measure.",
+    {"chetty_friedman_rockoff_2014"},
+    "em-dash compound decomposes to full underscore stem",
+)
+# The ISO-date guard still fires after the dash fold (en-dash range folds
+# to a hyphen range, which the guard's ASCII-hyphen branch already rejects).
+assert_no_match(
+    "The panel Window 2019–2021 spans three years.",
+    "en-dash year range still rejected by ISO-date guard after fold",
+)
+
+print("\n=== Possessive handling (P1-b): 's stripped; et al.'s reaches the year ===")
+assert_matches(
+    "Following Chetty's (2014) mobility estimates, we define upward mobility as...",
+    {"chetty_2014"},
+    "ASCII possessive stripped from stem (was chetty's_2014 -> spurious block)",
+)
+assert_matches(
+    "Following Chetty’s (2014) mobility estimates, we define upward mobility as...",
+    {"chetty_2014"},
+    "curly possessive extracts (was a false negative — escaped the hook)",
+)
+assert_matches(
+    "We adopt Smith et al.'s (2020) design for the elicitation stage.",
+    {"smith_2020"},
+    "et al. ASCII possessive extracts (was a false negative)",
+)
+assert_matches(
+    "We adopt Smith et al.’s (2020) design for the elicitation stage.",
+    {"smith_2020"},
+    "et al. curly possessive extracts (was a false negative)",
+)
+assert_matches(
+    "As shown by Smith and colleagues (2020), attrition is differential.",
+    {"smith_2020"},
+    "'Author and colleagues (year)' form extracts (was a false negative)",
+)
+assert_matches(
+    "Per Jones and coauthors (2019), effects fade.",
+    {"jones_2019"},
+    "'Author and coauthors (year)' form extracts",
+)
+
+print("\n=== Apostrophe stem normalization (P3-b) ===")
+assert_matches(
+    "We follow O'Brien (2020) in constructing the exposure measure.",
+    {"obrien_2020"},
+    "ASCII-apostrophe surname builds apostrophe-free stem",
+)
+with tempfile.TemporaryDirectory() as _td:
+    _nd = Path(_td)
+    (_nd / "obrien_2020.md").write_text(
+        "# Notes\n**Citation:** O'Brien (2020). Exposure construction.\n",
+        encoding="utf-8",
+    )
+    assert lib.notes_exist_for("obrien_2020", _nd), (
+        "FAIL: apostrophe-free stem should resolve to apostrophe-free filename"
+    )
+    print("PASS: obrien_2020 stem resolves to obrien_2020.md")
+    assert lib.notes_exist_for("o'brien_2020", _nd), (
+        "FAIL: apostrophe stem (escape-hatch style) should still resolve"
+    )
+    print("PASS: o'brien_2020 stem (apostrophe form) also resolves")
+    # Apostrophe in the notes FILENAME also resolves (stripped on both sides)
+    (_nd / "o'connor_2019.md").write_text("# Notes\n", encoding="utf-8")
+    assert lib.notes_exist_for("oconnor_2019", _nd), (
+        "FAIL: apostrophe in filename should be stripped before startswith"
+    )
+    print("PASS: apostrophe-bearing filename o'connor_2019.md resolves")
+    # Citation-metadata line with an apostrophe name matches the stripped stem
+    (_nd / "compiled_batch.md").write_text(
+        "## Batch\n**Citation:** D'Haultfoeuille (2018). Estimation notes.\n",
+        encoding="utf-8",
+    )
+    assert lib.notes_exist_for("dhaultfoeuille_2018", _nd), (
+        "FAIL: apostrophe citation line should match apostrophe-free stem"
+    )
+    print("PASS: **Citation:** D'Haultfoeuille line matches dhaultfoeuille stem")
+
+with tempfile.TemporaryDirectory() as _td:
+    _pd = Path(_td)
+    (_pd / "obrien_2020_exposure.pdf").write_bytes(b"%PDF-1.4")
+    assert lib.paper_pdf_exists_for("obrien_2020", _pd), (
+        "FAIL: apostrophe-free stem should match PDF tokens"
+    )
+    print("PASS: obrien_2020 stem matches obrien-named PDF")
+    assert lib.paper_pdf_exists_for("o'brien_2020", _pd), (
+        "FAIL: apostrophe stem should match PDF after normalization"
+    )
+    print("PASS: o'brien_2020 stem matches obrien-named PDF")
+    (_pd / "o'brien_2021.pdf").write_bytes(b"%PDF-1.4")
+    assert lib.paper_pdf_exists_for("obrien_2021", _pd), (
+        "FAIL: apostrophe in PDF filename should be stripped before tokenizing"
+    )
+    print("PASS: apostrophe-bearing PDF filename matches apostrophe-free stem")
+
+print("\n=== Markdown-aware boundaries (P1-c): structural FPs suppressed ===")
+assert_no_match(
+    "| Task | Owner | Status |\n|---|---|---|\n| Merge review | Kramer 2026 | done |",
+    "table cell, bare year (person in TODO table)",
+)
+assert_no_match(
+    "| Reviewed by | Sun (2026) |\n| Approved | yes |",
+    "table cell, paren year (reviewer metadata)",
+)
+assert_no_match(
+    "Standup notes:\n\n- Kramer (2026) reviewed the draft tables\n- rerun bootstrap tonight",
+    "bullet item opening with a person name",
+)
+assert_no_match(
+    "> Sun (2026) approved the merge during standup.\n\nProceeding with the release.",
+    "blockquote opening with a person name",
+)
+assert_no_match(
+    "## Kramer 2026 review\n\nComments received on the intro.",
+    "heading opening with a person name",
+)
+assert_no_match(
+    "The seminar draft went out yesterday\nKramer (2026) circulated comments this morning.",
+    "line start after a single newline (no blank line required)",
+)
+assert_no_match(
+    "Next steps:\n\n1. Update the ADR index.\n2. Chen (2024) replication re-run with corrected weights.",
+    "numbered-list start suppressed with empty allowlist (now consistent with bullets)",
+)
+
+print("\n=== Markdown boundaries: allowlisted citations still extract (by design) ===")
+lib.KNOWN_SURNAMES = {"chen", "chetty"}
+try:
+    assert_matches(
+        "Next steps:\n\n1. Update the ADR index.\n2. Chen (2024) replication re-run with corrected weights.",
+        {"chen_2024"},
+        "numbered-list citation extracts when head surname is allowlisted",
+    )
+    assert_matches(
+        "- Chetty (2014) shows teacher effects persist.",
+        {"chetty_2014"},
+        "bullet-start citation extracts when allowlisted",
+    )
+    assert_matches(
+        "| Key cite | Chetty (2014) | canonical |",
+        {"chetty_2014"},
+        "table-cell citation extracts when allowlisted (ADR tables stay citable)",
+    )
+finally:
+    lib.KNOWN_SURNAMES = set()
+# Mid-sentence prose citations are never boundary-suppressed.
+assert_matches(
+    "In the second bullet we follow Chetty (2014) closely.",
+    {"chetty_2014"},
+    "mid-sentence citation unaffected by markdown-boundary logic",
+)
+
+print("\n=== All-caps threshold 3 -> 2 (P2-d) ===")
+assert_no_match(
+    "Sample restricted to EU (2024) member states with harmonized survey items.",
+    "'EU (2024)' two-letter acronym",
+)
+assert_no_match(
+    "Enrollment counts are for AY 2026 and exclude summer sessions.",
+    "'AY 2026' academic-year marker",
+)
+assert_matches("As Ng (2019) shows, factor selection is consistent.", {"ng_2019"}, "two-letter mixed-case surname 'Ng' still extracts")
+assert_matches("Per Wu (2021), the estimator converges.", {"wu_2021"}, "two-letter mixed-case surname 'Wu' still extracts")
+
+print("\n=== NEVER_SURNAMES additions (P2-e): software / products / models ===")
+assert_no_match("We re-ran the cleaning pipeline in RStudio (2023) before handing off to the coder agent.", "'RStudio (2023)'")
+assert_no_match("The dashboard mockup was built in Tableau (2025) and exported as static PNGs for the talk.", "'Tableau (2025)'")
+assert_no_match("All replication code is versioned on GitHub (2025) under the lab organization.", "'GitHub (2025)'")
+assert_no_match("The RA machines were upgraded to Microsoft Office 2021 over the break.", "'Office 2021'")
+assert_no_match("The legacy survey terminal still runs Windows 2000 and cannot install DVC.", "'Windows 2000'")
+assert_no_match("Transcripts were classified with Claude (2025) using a zero-shot prompt.", "'Claude (2025)' AI model name")
+assert_no_match("Sentiment was scored with Gemini (2024) in batch mode.", "'Gemini (2024)' AI model name")
+assert_no_match("Filenames are normalized per Unicode (2023) NFC before hashing.", "'Unicode (2023)' versioned standard")
+
+print("\n=== NEVER_SURNAMES additions: cluster neighbors (verifier generalization probes) ===")
+assert_no_match("References were deduplicated in Zotero (2024) before export.", "'Zotero (2024)' reference manager")
+assert_no_match("Notebooks run under Jupyter (2023) on the lab server.", "'Jupyter (2023)' tool name")
+assert_no_match("Earnings histories come from the Panel Study of Income Dynamics (2021) waves.", "'... Dynamics (2021)' survey tail")
+assert_no_match("Tariff schedules follow the European Commission (2023) notification.", "'... Commission (2023)' institution tail")
+assert_no_match("County population counts come from the Census Bureau (2024) intercensal file.", "'... Bureau (2024)' institution tail")
+assert_no_match("Deflators are from the World Development Indicators (2023) release.", "'... Indicators (2023)' dataset tail")
+
+print("\n=== NEVER_SURNAMES additions (P2-e): datasets / surveys / programs / institutions ===")
+assert_no_match("We merge firm fundamentals from Compustat (2024) at the gvkey-year level.", "'Compustat (2024)'")
+assert_no_match("Demographic controls come from the American Community Survey (2022) five-year estimates.", "'... Survey (2022)' tail")
+assert_no_match("Expectations data come from the Understanding America Study (2023) wave.", "'... Study (2023)' tail")
+assert_no_match("Our sample includes children enrolled in Head Start (2019) centers in the treated counties.", "'Head Start (2019)' tail")
+assert_no_match("Eligibility is imputed from state Medicaid (2022) income thresholds.", "'Medicaid (2022)'")
+assert_no_match("The post-period begins after Dodd-Frank (2010) took effect.", "'Dodd-Frank (2010)' legislation")
+assert_no_match("School accountability changed under the Every Student Succeeds Act (2015) framework.", "'... Act (2015)' statute tail")
+assert_no_match("GDP deflators are taken from the World Bank (2024) development indicators.", "'World Bank (2024)' tail")
+assert_no_match("Rate-change dates follow the Federal Reserve (2025) FOMC calendar.", "'Federal Reserve (2025)' tail")
+assert_no_match("Preliminary results were presented at the NBER Summer Institute 2025.", "'Summer Institute 2025' conference")
+
+print("\n=== NEVER_SURNAMES additions (P2-e): calendar / events / awards ===")
+assert_no_match("The pilot runs in Spring Quarter 2026 sections only.", "'Quarter 2026' calendar term")
+assert_no_match("The lab sessions will be held in Suite 2026 of the economics building.", "'Suite 2026' room number")
+assert_no_match("She acknowledges support from a Sloan Fellowship (2024) during the fieldwork.", "'Fellowship (2024)' award")
+assert_no_match("The mechanism echoes themes from her Nobel Prize (2023) lecture on credibility.", "'Prize (2023)' award")
+assert_no_match("Attendance spikes around the Qatar World Cup (2022) contaminate the control weeks.", "'World Cup (2022)' tournament tail")
+assert_no_match("We drop match days from Euro 2024 to avoid crowd-size confounds.", "'Euro 2024' tournament")
+assert_no_match("We exclude post Brexit (2016) trade flows from the UK sample.", "'Brexit (2016)' named event")
+assert_no_match("Recruitment pauses over the Labor Day 2026 weekend.", "'Labor Day 2026' holiday tail")
+assert_no_match("Treatment timing follows the UK Budget 2026 announcement.", "'UK Budget 2026' fiscal event")
+
+print("\n=== Round-2 verifier survivors: enumeration-gap siblings ===")
+assert_no_match("Figures were retouched in Photoshop (2024) before export.", "'Photoshop (2024)' software")
+assert_no_match("Bond prices come from Datastream (2023) daily closes.", "'Datastream (2023)' commercial dataset")
+assert_no_match("Recruiting happens in Fall Semester 2026 sections only.", "'Semester 2026' calendar term")
+assert_no_match("Themes from her Clark Medal (2021) lecture recur here.", "'Medal (2021)' award")
+assert_no_match("The panel pauses over Thanksgiving 2026 travel days.", "'Thanksgiving 2026' holiday")
+assert_no_match("Waves resume after Christmas 2026 in all arms.", "'Christmas 2026' holiday")
+
+print("\n=== Org skip-list (P3-a): per-project mixed-case corporate authors ===")
+lib.ORG_SKIPLIST = {"pew", "blue", "gallup"}
+try:
+    assert_no_match(
+        "Baseline attitudes are benchmarked against Pew (2024) tracking polls.",
+        "org skip-list suppresses 'Pew (2024)'",
+    )
+    assert_no_match(
+        "The pilot uses YouGov Blue (2025) sampling.",
+        "org skip-list suppresses trailing token 'Blue' of 'YouGov Blue'",
+    )
+    assert_no_match(
+        "Per Gallup (2024) polling, trust declined.",
+        "org skip-list suppresses 'Gallup (2024)'",
+    )
+finally:
+    lib.ORG_SKIPLIST = set()
+# By design the skip only applies when the state file lists the org.
+assert_matches(
+    "Baseline attitudes are benchmarked against Pew (2024) tracking polls.",
+    {"pew_2024"},
+    "empty org skip-list leaves Pew extracting (documented default; per-project opt-in)",
+)
+
+print("\n=== Org skip-list loader: same pattern as the surname allowlist ===")
+import os as _os
+
+with tempfile.TemporaryDirectory() as _td:
+    _state = Path(_td) / ".claude" / "state"
+    _state.mkdir(parents=True)
+    (_state / "primary_source_orgs.txt").write_text(
+        "# per-project data vendors\nGallup\npew\n\n", encoding="utf-8"
+    )
+    _old_env = _os.environ.get("CLAUDE_PROJECT_DIR")
+    _os.environ["CLAUDE_PROJECT_DIR"] = _td
+    try:
+        _loaded = lib._load_state_wordlist("primary_source_orgs.txt")
+    finally:
+        if _old_env is None:
+            _os.environ.pop("CLAUDE_PROJECT_DIR", None)
+        else:
+            _os.environ["CLAUDE_PROJECT_DIR"] = _old_env
+    assert _loaded == {"gallup", "pew"}, f"FAIL: org loader returned {_loaded}"
+    print("PASS: org skip-list loader lowercases entries, skips comments/blanks")
+assert lib._load_state_wordlist("nonexistent_wordlist_xyz.txt") == set(), (
+    "FAIL: missing wordlist file must load as empty set"
+)
+print("PASS: missing wordlist file loads as empty set (mechanism inert)")
+
+print("\n=== Preceding-token cue (filter 1c): storms, funding lines, acronym precursors ===")
+# The head token here is a real or unenumerable name ("Katrina", "Grant",
+# "Rotterdam") — no blocklist can carry it. The word immediately BEFORE it
+# is the reliable signal: a named-entity cue word or an all-caps acronym.
+assert_no_match(
+    "We use Hurricane Katrina (2005) as the exogenous displacement shock.",
+    "'Hurricane Katrina (2005)' named-storm cue",
+)
+assert_no_match(
+    "Damage estimates follow Tropical Storm Sandy (2012) closely.",
+    "'Storm Sandy (2012)' storm cue word",
+)
+assert_no_match(
+    "This work was funded by NSF Grant 2026 from the economics program.",
+    "'NSF Grant 2026' acronym precursor ('Grant' is a real surname; blocklist unsafe)",
+)
+assert_no_match(
+    "Slides are due before EEA-ESEM Rotterdam 2026.",
+    "'EEA-ESEM Rotterdam 2026' hyphenated-acronym precursor",
+)
+# Punctuation between the acronym and the name breaks the cue — the standard
+# dataset-citation form "IPUMS USA (Ruggles et al. 2024)" must still extract.
+assert_matches(
+    "Extracts come from IPUMS USA (Ruggles et al. 2024) harmonized files.",
+    {"ruggles_2024"},
+    "parenthetical citation after acronym unaffected (punctuation breaks the cue)",
+)
+# Allowlist override: a project that actually cites author Grant can rescue
+# the head surname, same escape as the sentence-start filter.
+lib.KNOWN_SURNAMES = {"grant"}
+try:
+    assert_matches(
+        "This work was funded by NSF Grant 2026 from the economics program.",
+        {"grant_2026"},
+        "allowlisted head surname overrides the acronym cue (escape hatch then applies)",
+    )
+finally:
+    lib.KNOWN_SURNAMES = set()
+
+print("\n=== Documented residue (wontfix): escape hatch / org skip-list per project ===")
+# These are irreducible by blocklist: the extracted token is (or could be) a
+# real citable surname, or place names that no fixed list can enumerate and
+# that carry no cue word before them. The escape hatch and the per-project
+# org skip-list are the designed answers; the asserts pin the residual
+# behavior so a future change that alters it is noticed.
+assert_matches(
+    "The infrastructure shock from Tokyo 2020 construction predates our sample.",
+    {"tokyo_2020"},
+    "residue: host-city-plus-year (city names not enumerable; no cue word before)",
+)
+assert_matches(
+    "The placebo window coincides with the Oppenheimer (2023) release weekend.",
+    {"oppenheimer_2023"},
+    "residue: film title (Oppenheimer IS a citable surname — irreducible)",
+)
+# The org skip-list can retire any of these per project:
+lib.ORG_SKIPLIST = {"tokyo"}
+try:
+    assert_no_match(
+        "The infrastructure shock from Tokyo 2020 construction predates our sample.",
+        "org skip-list retires the host-city residue per project",
+    )
+finally:
+    lib.ORG_SKIPLIST = set()
+
+print("\n=== Documented residue (wontfix): particle surnames drop the particle ===")
+# Space-separated particles ('Van Reenen', 'de Chaisemartin', 'van der
+# Klaauw') are not joinable by the author-separator alternation, so the stem
+# lacks the particle. A particle-prefix mechanism is outside the P1-P3
+# roadmap; the mitigation is that a **Citation:** line in the notes file
+# resolves the lookup regardless (verified below).
+assert_matches(
+    "See Van Reenen (2011) for the management-practices evidence.",
+    {"reenen_2011"},
+    "residue: capitalized particle 'Van' dropped from stem",
+)
+assert_matches(
+    "Following de Chaisemartin and D'Haultfoeuille (2020), we use a heterogeneity-robust estimator.",
+    {"chaisemartin_dhaultfoeuille_2020"},
+    "residue: lowercase particle 'de' dropped; apostrophe normalized (P3-b)",
+)
+assert_matches(
+    "Bandwidth selection follows van der Klaauw (2008).",
+    {"klaauw_2008"},
+    "residue: 'van der' particles dropped from stem",
+)
+with tempfile.TemporaryDirectory() as _td:
+    _nd = Path(_td)
+    (_nd / "van_reenen_2011.md").write_text(
+        "# Notes\n**Citation:** Van Reenen (2011). Management practices.\n",
+        encoding="utf-8",
+    )
+    assert lib.notes_exist_for("reenen_2011", _nd), (
+        "FAIL: particle-less stem should resolve via the **Citation:** line"
+    )
+    print("PASS: particle-less stem reenen_2011 resolves via citation line in van_reenen_2011.md")
+    (_nd / "de_chaisemartin_dhaultfoeuille_2020.md").write_text(
+        "# Notes\n**Citation:** de Chaisemartin and D'Haultfoeuille (2020). Two-way FE estimators.\n",
+        encoding="utf-8",
+    )
+    assert lib.notes_exist_for("chaisemartin_dhaultfoeuille_2020", _nd), (
+        "FAIL: particle-less apostrophe-free stem should resolve via citation line"
+    )
+    print("PASS: chaisemartin_dhaultfoeuille_2020 resolves via citation line despite dropped particle")
+
 print("\n=== Residual: real surname at sentence start with empty allowlist ===")
 # Documented as unavoidable noise; user uses escape hatch.
 result = stems("Smith 2020 published a related result.")
 # With empty allowlist, sentence-start Smith is dropped (good, suppresses noise)
 print(f"INFO: empty-allowlist sentence-start 'Smith 2020' -> {result} (expected: empty)")
 
-# Restore project's actual allowlist (in case anything imports the lib after)
+# Restore project's actual lists (in case anything imports the lib after)
 lib.KNOWN_SURNAMES = _PROJECT_ALLOWLIST
+lib.ORG_SKIPLIST = _PROJECT_ORG_SKIPLIST
 
 print("\nAll tests passed.")
