@@ -89,7 +89,7 @@ What this commits us to. What it rules out. Open questions it creates.
 
 | ID | Title | Date | Status | Scope |
 |----|-------|------|--------|-------|
-| *(no ADRs yet)* | | | | |
+| [0001](0001_lfs-dvc-bulk-migration-go.md) | D6 pilot exit: GO for bulk LFS (+ selective DVC) migration | 2026-07-03 | Decided | Infrastructure — data storage & versioning |
 
 ---
 
