@@ -225,6 +225,38 @@ _CUE_BEFORE = re.compile(r"(\S+)[ \t]+$")
 # sentence-final acronyms are handled by the sentence-start filter instead.
 _ACRONYM_TOKEN = re.compile(r"^[A-Z][A-Z0-9&-]*[A-Z0-9]$")
 
+# Lowercase name particles: a capitalized particle immediately before a
+# surname ("Van Reenen (2011)", "De Loecker and Warzynski (2012)", "La
+# Ferrara (2007)") is part of the NAME, not evidence of a larger proper-noun
+# phrase, so it is exempt from the capitalized-phrase precursor cue below.
+NAME_PARTICLES = frozenset({
+    "van", "von", "vander", "vanden", "de", "der", "den", "del", "della",
+    "di", "da", "du", "dos", "das", "do", "la", "le", "les", "los",
+    "ter", "ten", "te", "op", "mc", "mac", "san", "santa", "saint", "st",
+    "al", "el", "bin", "ben", "abu", "ibn",
+})
+
+# Particle-led named events: NAME_PARTICLES exempts "El"/"La" from the
+# phrase-precursor cue so that particle surnames ("La Ferrara (2007)",
+# "El Ghoul (2011)") stay citable — but the same rescue lets climate-event
+# names parse as particle surnames: "yields fell during El Niño (2015)" ->
+# nino_2015, "losses during La Niña (2022)" -> nina_2022. These (particle,
+# folded head) bigrams mark the known particle-led named entities and
+# suppress them in filter 1c. Blocklisting the bare heads would be unsafe
+# ("Nino" is a real cited surname — Carlos Santiago Nino), so the bigram is
+# the narrowest cut; an explicit allowlist entry for the head still rescues
+# a project that really cites author Niño / Niña.
+PARTICLE_EVENT_BIGRAMS = frozenset({
+    ("el", "nino"),
+    ("la", "nina"),
+})
+
+# Capitalized-word shape for the phrase-precursor cue: initial capital, then
+# letters/apostrophes/hyphens only. Trailing punctuation deliberately fails
+# the shape — a comma/period/colon after the preceding word means the match
+# stands alone ("...per Anthropic, Smith (2020) shows..." still extracts).
+_CAP_WORD_TOKEN = re.compile(r"^[A-Z][A-Za-z'\-]*$")
+
 # Words that are *never* surnames. Applied independent of the project allowlist
 # so the hook is reasonable on day one (when the allowlist is empty). Keep this
 # list conservative — only words with effectively zero chance of being a real
@@ -325,7 +357,160 @@ NEVER_SURNAMES = frozenset({
     "fellowship", "brexit", "covid", "omicron",
     "semester", "trimester", "medal",
     "thanksgiving", "christmas", "easter", "halloween",
+    # Holidays beyond the Western set above: "Ramadan (2025)",
+    # "around Diwali 2024", "over Eid (2025)", "Juneteenth 2025".
+    "ramadan", "diwali", "eid", "juneteenth", "hanukkah", "passover",
+    "olympics",
+    # Named macro / policy / political episode nouns — same class as
+    # brexit/covid above: capitalized episode names adjacent to a year in
+    # canonical econ prose, never surnames. "during the Great Recession
+    # (2008)", "the Depression (1933) sample years", "the Financial Crisis
+    # (2008) window", "the Taper Tantrum (2013) episode", "after the
+    # Boatlift (1980)", "the Presidential Election (2016)", "the firm's
+    # Listing (2019)".
+    "recession", "depression", "crisis", "pandemic", "lockdown",
+    "moderation", "stimulus", "sequester", "boatlift", "shutdown",
+    "referendum", "tantrum", "blackout",
+    "election", "elections", "midterm", "midterms", "reform", "listing",
+    # Hyphenated statute names — same class as "dodd-frank" above. The
+    # compound is a statute, never a surname; the COMPONENTS stay citable
+    # (Glass, Oxley, Sarbanes are real surnames and are NOT listed).
+    "sarbanes-oxley", "glass-steagall", "smoot-hawley",
+    # Institution tails / bodies missed by the institution cluster above:
+    # "the Econometric Society (2026) winter meetings", "the Treasury
+    # (2023) calendar", "Parliament (2024)", "the Senate (2023)",
+    # "the Fed (2024)".
+    "society", "treasury", "parliament", "senate", "fed",
+    # Journal-title TAIL nouns. The title HEAD nouns (journal, handbook,
+    # review) are blocked above, but the year follows the TAIL: "Journal
+    # of Public Economics (2019)", "Review of Economic Studies (2021)",
+    # "Economics Letters (2020)", "Journal of Finance (2024)".
+    "economics", "economy", "studies", "finance", "literature",
+    "statistics", "perspectives", "letters", "behavior", "behaviour",
+    "policy", "management",
+    # Programs / assets / products (mixed-case, so the all-caps filter
+    # can't catch them): "Obamacare (2014)", "Bitcoin (2017)",
+    # "ChatGPT (2025)", "Claude Code (2026)", "Google Drive (2025)".
+    "obamacare", "bitcoin", "ethereum", "chatgpt", "copilot",
+    "code", "drive",
+    # Macro / policy / historical episode nouns — round-3 members of the
+    # brexit/recession/boatlift class: "after the Crash (1929)", "during
+    # the Panic (1907)", "the Bubble (2000) years", "the Default (2001)
+    # episode", "after the Bailout (2008)", "during the Embargo (1973)
+    # shock", "during the Famine (1959)", "after the Accord (1951)"
+    # (Treasury-Fed), "spent the Rebate (2008) checks", "during the
+    # Intifada (2000)", "after the Coup (1973)", "the Airlift (1948)",
+    # "the Blockade (1948)". The PRODUCTIVE tail of this class — nouns in
+    # -tion/-sion/-ism/-nomics/-demic (Liberalization, Reunification,
+    # Devaluation, Partition, Hyperinflation, Expansion, Epidemic,
+    # Abenomics, Demonetization, ...) — is handled structurally by
+    # NEVER_SURNAME_SUFFIXES below, not by enumeration. (Note: the rare
+    # Serbian surname "Panić" folds to "panic"; the 1907-Panic reading
+    # dominates in econ prose, so it is listed anyway.)
+    "crash", "panic", "bubble", "default", "bailout", "embargo",
+    "famine", "accord", "rebate", "intifada", "coup", "blockade",
+    "airlift",
+    # Firm-event nouns — corporate-finance event-study prose ("returns
+    # around the Merger (2015) window", "after the Bankruptcy (2009)
+    # filing", "the Spinoff (2018) event study"). Sibling of "listing"
+    # above. "-tion" members (acquisition, recapitalization) fall to the
+    # suffix guard.
+    "merger", "bankruptcy", "spinoff", "takeover", "buyout",
+    "delisting", "divestiture", "restructuring",
+    # Conference-cluster members missed by the meeting/seminar/conference/
+    # workshop/society entries above ("presented at the Symposium (2025)").
+    "symposium", "colloquium", "summit",
+    # Data / project lifecycle nouns ("the Vintage (2019) file of the
+    # LEHD", "the Audit (2023) sample", "the Rollout (2021) counties";
+    # "the Inspection (2023) wave" falls to the -tion suffix guard).
+    "vintage", "audit", "rollout",
+    # Institution tail nouns missed by the commission/agency/bureau/
+    # department cluster above ("a circular from the Ministry (2024)").
+    "ministry", "directorate", "secretariat", "authority",
+    # Program / legislation names ("after the Amnesty (1986) legalized
+    # workers" — IRCA; "termination of the Bracero (1964) program";
+    # "designated under Superfund (1980)"). "Abenomics"-style coinages
+    # fall to the -nomics suffix guard.
+    "amnesty", "bracero", "superfund",
+    # Software / platform / crypto names beyond the stata/overleaf/claude
+    # cluster above ("sessions over Zoom (2025)", "vectorized in Inkscape
+    # (2024)", "inside Anaconda (2024) environments", "hosted on Colab
+    # (2025)", "scripted in Mplus (2023)", "migrated to Ubuntu 2024
+    # images", "holdings of Dogecoin (2021)"). Deliberately NOT listed
+    # (real surnames): Slack, Solana.
+    "zoom", "webex", "skype", "inkscape", "anaconda", "colab", "mplus",
+    "ubuntu", "linux", "debian", "dogecoin", "litecoin",
+    # Holidays / festivals / recurring events beyond the ramadan/diwali/
+    # olympics set above ("during Oktoberfest (2025)", "around Carnival
+    # (2024) in Brazil", "ad prices around the Superbowl (2024)",
+    # "enrollment for Michaelmas (2025) term", "attendance at the
+    # Biennale (2024)").
+    "oktoberfest", "carnival", "superbowl", "michaelmas", "biennale",
+    # Round-3 verifier survivors — vetted never-surname members of the
+    # classes above. Natural disasters ("after the Earthquake (2010)",
+    # "during the Drought (2012)"); diseases ("during Ebola (2014)",
+    # "after Zika (2016)"); treaty/agreement nouns ("under the Protocol
+    # (1997)", "the Treaty (1919)"); labor actions ("after the Strike
+    # (1981)"); currency crises ("the Peso (1994) crisis"); conflict
+    # episodes ("during the Blitz (1940)", "after the Surge (2007)");
+    # pandemic/election lifecycle ("during the Quarantine (2020)", "the
+    # Recount (2000)"); institutions ("the Legislature (2019)"); policy
+    # episodes ("after Apartheid (1994)", "the Tariff (1930)"); holidays/
+    # calendar ("during the Hajj (2010)", "the Monsoon (2019) season");
+    # named events ("the Oscars (2024)", "after Sputnik (1957)", "the
+    # Windrush (1948) arrivals"); research software ("in Quarto (2024)",
+    # "via CloudResearch (2023)"). Deliberately NOT listed (real names —
+    # org-skip-list/escape-hatch residue instead): Flood (Robert Flood),
+    # Katrina, Sandy, Julia, Trinity, Storm, Lira, Slack, Solana.
+    "earthquake", "tsunami", "drought", "heatwave", "blizzard",
+    "wildfire", "landslide", "avalanche",
+    "ebola", "zika", "cholera", "malaria", "measles", "influenza",
+    "protocol", "agreement", "charter", "pact", "treaty",
+    "strike", "lockout", "walkout",
+    "peso", "ruble",
+    "blitz", "siege", "armistice", "surge",
+    "quarantine", "outbreak", "recount",
+    "legislature", "assembly", "exchequer", "cabinet",
+    "apartheid", "perestroika", "glasnost", "tariff",
+    "hajj", "lent", "nowruz", "monsoon",
+    "oscars", "emmys", "eclipse", "marathon", "sputnik", "windrush",
+    "renaissance",
+    "quarto", "pandoc", "mathematica", "cloudresearch", "moodle",
 })
+
+# Abstract-noun suffix guard — the GENERAL mechanism for the productive tail
+# of the episode/program/event class above. Derivational suffixes that form
+# event / process / doctrine nouns essentially never end real surnames, so a
+# fresh class member ("after Liberalization (1991)", "after Reunification
+# (1990)", "following the Devaluation (1994)", "after the Partition (1947)",
+# "during the Hyperinflation (1923)", "states adopting the Expansion (2014)",
+# "during the Epidemic (1918)", "the Inspection (2023) wave", "under
+# Abenomics (2013)", "after Demonetization (2016)", "during Privatization
+# (1992)") is caught structurally instead of by per-word enumeration.
+#
+# The length floor protects short real names whose tail happens to spell a
+# suffix: "Sion (1958)" (Sion's minimax theorem, cited in economic theory)
+# and "Nation" (a real, if rare, cited surname) are both < 7 characters.
+# Unlike NEVER_SURNAMES (exact, curated, unrescuable), this is a heuristic
+# over an open class, so an explicit surname-allowlist entry rescues any
+# colliding real surname.
+NEVER_SURNAME_SUFFIXES = ("tion", "sion", "ism", "nomics", "demic")
+_SUFFIX_GUARD_MIN_LEN = 7
+
+# "-ment" event nouns (Settlement, Amendment, Enlargement, Impeachment) are
+# the same productive class, but the floor must sit at 8: "Clement" (7 chars)
+# is a real cited surname the 7-char floor would swallow. Same allowlist
+# rescue applies.
+_MENT_SUFFIX_MIN_LEN = 8
+
+
+def _has_never_surname_suffix(stem: str) -> bool:
+    """True if `stem` carries an abstract-noun derivational suffix (with the
+    length floors that keep short real surnames like Sion and Clement
+    citable)."""
+    if len(stem) >= _SUFFIX_GUARD_MIN_LEN and stem.endswith(NEVER_SURNAME_SUFFIXES):
+        return True
+    return len(stem) >= _MENT_SUFFIX_MIN_LEN and stem.endswith("ment")
 
 
 def _is_sentence_start(text: str, pos: int) -> bool:
@@ -333,6 +518,38 @@ def _is_sentence_start(text: str, pos: int) -> bool:
     if pos == 0:
         return True
     return bool(SENTENCE_BOUNDARY.search(text[:pos]))
+
+
+def _is_phrase_precursor(text: str, token: str, pos: int) -> bool:
+    """True if `token` (at absolute offset `pos`, directly before the match)
+    marks the match as the tail of a larger capitalized proper-noun phrase.
+
+    Generalizes the named-entity cue beyond the enumerable cue words and
+    acronyms: multi-word proper nouns — episode names ("the Great Recession
+    (2008)"), journal titles ("Journal of Public Economics (2019)"),
+    org + place ("US Embassy Madrid 2026", "Statistics Canada (2023)"),
+    product names ("Claude Code (2026)", "Google Drive (2025)") — put a
+    capitalized word directly before the token the regex captures as the
+    head "surname". A real Chicago author-date citation is surname-led; the
+    capitalized words that legitimately precede a cited surname are:
+
+    (a) a sentence-start word capitalized by position ("As Smith (2020)
+        shows..."), exempted via the sentence-boundary check;
+    (b) a capitalized name particle ("Van Reenen (2011)", "De Loecker and
+        Warzynski (2012)"), exempted via NAME_PARTICLES;
+    (c) a given name ("Raj Chetty (2014)") — designed suppression, the same
+        tradeoff the acronym cue already makes; the surname allowlist
+        rescues it (and AEA/Chicago in-text form is surname-only anyway).
+    """
+    if not _CAP_WORD_TOKEN.match(token):
+        return False
+    if not any(c.islower() for c in token):
+        return False  # all-caps tokens are the acronym branch's job
+    if token.lower() in NAME_PARTICLES:
+        return False
+    if _is_sentence_start(text, pos):
+        return False  # capitalized by position, not a proper-noun phrase
+    return True
 
 
 def _stem_token(token: str) -> str:
@@ -458,7 +675,7 @@ def _mask_code_spans(text: str) -> str:
 def extract_citations(text: str) -> list[tuple[str, str]]:
     """Return list of (stem, display) tuples for citations in text.
 
-    Applies six filters in order:
+    Applies these filters in order:
 
     0. **Code-span mask** — content inside Markdown inline-code (`...`) or
        code fences (``````...``````) is replaced with same-length whitespace
@@ -468,6 +685,12 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
     1. **NEVER_SURNAMES blocklist** — words that are never surnames
        (function words, seasons, months, table/figure/etc.). Drops the
        match regardless of allowlist state.
+    1d. **Abstract-noun suffix guard** — heads with derivational
+       event/process/doctrine suffixes (-tion/-sion/-ism/-nomics/-demic,
+       length >= 7) are never surnames: "Liberalization (1991)",
+       "the Expansion (2014)", "the Epidemic (1918)", "Abenomics
+       (2013)". General mechanism for the productive tail of the
+       episode-noun class; an allowlist entry rescues a collision.
     1a. **All-caps token filter** — captured surnames written in all
        uppercase (length >= 2) are rejected. Real surnames in academic
        prose are written `Smith`, never `SMITH`. This catches status
@@ -485,10 +708,16 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
        surname allowlist, opposite polarity. Missing/empty file = no
        skipping.
     1c. **Preceding-token cue** — a named-entity cue word ("Hurricane
-       Katrina (2005)") or an all-caps acronym ("NSF Grant 2026",
-       "EEA-ESEM Rotterdam 2026") immediately before the head token,
-       separated by whitespace only, marks the match as a named entity.
-       Skipped unless the head surname is explicitly allowlisted.
+       Katrina (2005)"), an all-caps acronym ("NSF Grant 2026",
+       "EEA-ESEM Rotterdam 2026"), a particle-led named-event bigram
+       ("El Niño (2015)", "La Niña (2022)" — see
+       PARTICLE_EVENT_BIGRAMS), or a mid-sentence capitalized word
+       that is neither a name particle nor positionally capitalized
+       ("US Embassy Madrid 2026", "Statistics Canada (2023)", "Claude
+       Code (2026)" — see _is_phrase_precursor) immediately before the
+       head token, separated by whitespace only, marks the match as a
+       named entity / proper-noun-phrase tail. Skipped unless the head
+       surname is explicitly allowlisted.
     2. **Hyphenated-name decomposition** — if the captured `first` group
        is a 3+ part hyphenated capitalized token (e.g.,
        "Chetty-Friedman-Rockoff"), split it and treat each part as a
@@ -543,6 +772,16 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
         if _stem_token(first) in NEVER_SURNAMES:
             continue
 
+        # Filter 1d: abstract-noun suffix guard — general mechanism for the
+        # productive episode/program tail (-tion/-sion/-ism/-nomics/-demic:
+        # Liberalization, Devaluation, Expansion, Epidemic, Abenomics, ...).
+        # Heuristic over an open class (unlike the exact blocklist above),
+        # so an explicit allowlist entry rescues a colliding real surname.
+        if _has_never_surname_suffix(_stem_token(first)) and not (
+            allowlist_active and _stem_token(first) in KNOWN_SURNAMES
+        ):
+            continue
+
         # Filter 1a: all-caps tokens (length >= 2) are status markers
         # (COMPLETED, DRAFT, DONE, BLOCKED, PENDING, ACTIVE, TODO, FIXME, WIP)
         # or acronym corporate authors (BLS, OECD, USDA, EU, AY). Real
@@ -568,8 +807,11 @@ def extract_citations(text: str) -> list[tuple[str, str]]:
         prev = _CUE_BEFORE.search(text[: match.start()])
         if prev is not None:
             prev_token = prev.group(1)
-            if prev_token.lower() in NAMED_ENTITY_CUES or (
-                len(prev_token) >= 2 and _ACRONYM_TOKEN.match(prev_token)
+            if (
+                prev_token.lower() in NAMED_ENTITY_CUES
+                or (len(prev_token) >= 2 and _ACRONYM_TOKEN.match(prev_token))
+                or (prev_token.lower(), _stem_token(first)) in PARTICLE_EVENT_BIGRAMS
+                or _is_phrase_precursor(text, prev_token, prev.start(1))
             ):
                 if not (allowlist_active and _stem_token(first) in KNOWN_SURNAMES):
                     continue
