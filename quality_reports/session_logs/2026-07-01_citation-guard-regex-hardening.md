@@ -42,6 +42,10 @@ FP analysis (`quality_reports/reviews/2026-07-01_primary-source-hook-fp-analysis
 - **BDD override cleanup:** unicode-forced `primary-source-ok` overrides removed from 3 files (`5c5da3b`, `685d5a6`); both stem forms verified resolving against `szekely_rizzo_2013.md` first.
 - ⚠️ **Unintended side effect (flagged to Christina):** the `git add -u` in BDD's `5c5da3b` swept the ~51 pre-LFS churn PDFs into the commit, converting them to LFS pointers — executing pending-decision option (b) accidentally. Post-hoc verification: 63 LFS files, 0 objects pending push, working-tree PDFs intact, churn resolved, no history rewrite. Ratify-or-revert recorded in TODO.md Up Next.
 
+## Verify-loop round 2 (2026-07-02, workflow `wf_ba34b503-09e`, 8 agents, ~1.04M tokens)
+
+Verify-first loop (user: "same review and loop ending condition"), 3-round cap. **TP battery PASSed all 3 rounds** (zero regressions; allowlist rescue + e2e verified each round). **FP hunter FAILed all 3** — each round minted fresh members of productive noun classes. Two agent implement-rounds + main-session closure landed (`cfea526`): `NEVER_SURNAME_SUFFIXES` (-tion/-sion/-ism/-nomics/-demic floor 7; -ment floor 8; Sion/Nation/Clement citable, allowlist-rescuable), capitalized-phrase precursor cue (NAME_PARTICLES exempt; El Niño bigram carve-out), ~140 vetted blocklist entries. Determiner cue tested and REJECTED (eponymous `the Heckman (1979) correction` — a regex test string, not a framing claim — must extract; test-pinned). Suite 209 → **341 checks**. **Structural conclusion documented in the rule doc:** capitalized-common-noun + year is an unbounded productive class; enumeration + guards cover the high-frequency core, and the tail belongs to org skip-list / escape hatch / telemetry (P3-c, still TODO). Loop closed on this basis rather than a 4th round — diminishing returns; telemetry is the right instrument for the real-world tail.
+
 ## Key implementation facts (for continuation)
 
 - Test suite is **script-style**, not pytest: `python3 .claude/hooks/test_primary_source_lib.py` (pytest collects 0). Exits on first FAIL; ends "All tests passed."
