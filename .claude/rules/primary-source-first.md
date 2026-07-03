@@ -78,7 +78,17 @@ The extractor ASCII-folds text before matching (NFD-decompose + strip combining 
 
 Bare place-name + year (`Tokyo 2020`), titles that are also surnames, and mixed-case polling orgs are irreducible by syntax — the org skip-list or escape hatch handles them. Particle surnames (`van Reenen`, `de Chaisemartin`) build stems without the lowercase particles; name the notes file by the extracted stem or rely on the `**Citation:**`-line match, which resolves regardless of filename.
 
-**The structural limit (verify-loop conclusion, 2026-07-02):** "capitalized common noun + year" is a productive open class — an adversarial hunter can always mint fresh members (a new disaster, platform, or policy episode). The blocklist and suffix guards cover the high-frequency core; the tail is handled per-project by the org skip-list, the escape hatch, and (planned) block telemetry. The one *rejected* general fix, for the record: a lowercase-determiner cue ("the X (year)" ⇒ not a citation) kills legitimate eponymous forms — "the Heckman (1979) correction", "the Card and Krueger (1994) study" — and must not be added; a regression test pins this.
+**The structural limit (verify-loop conclusion, 2026-07-02):** "capitalized common noun + year" is a productive open class — an adversarial hunter can always mint fresh members (a new disaster, platform, or policy episode). The blocklist and suffix guards cover the high-frequency core; the tail is handled per-project by the org skip-list, the escape hatch, and block telemetry. The one *rejected* general fix, for the record: a lowercase-determiner cue ("the X (year)" ⇒ not a citation) kills legitimate eponymous forms — "the Heckman (1979) correction", "the Card and Krueger (1994) study" — and must not be added; a regression test pins this.
+
+### Block telemetry
+
+Every block by either hook appends a JSONL record to `.claude/state/primary-source-blocks.jsonl` (gitignored, per-project; rotates to `.old` past ~1MB; fail-open — telemetry never breaks the hook). Each record carries the timestamp, which hook fired, the source (file path or `session-prose`), and the missing stems with their status. This is the evidence base for residual-false-positive tuning: a stem that blocks repeatedly without ever gaining a notes file is a false-positive candidate (or a chronically unread citation — the judgment is human). Aggregate before a tuning pass:
+
+```bash
+jq -r '.missing[].stem' .claude/state/primary-source-blocks.jsonl | sort | uniq -c | sort -rn
+```
+
+Route confirmed false positives to the right mechanism: never-a-surname words → `NEVER_SURNAMES` upstream in the workflow repo (propagates to everyone); project-local names (orgs, tools, colleagues) → the org skip-list; one-off framing-free mentions → the escape hatch.
 
 ## Escape hatch
 

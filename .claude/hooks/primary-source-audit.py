@@ -106,6 +106,7 @@ def main() -> None:
         ),
         missing=missing,
     )
+    lib.log_block("primary-source-audit", "session-prose", missing)
     output = {"decision": "block", "reason": message}
     json.dump(output, sys.stdout)
     sys.exit(0)

@@ -992,6 +992,64 @@ def paper_pdf_exists_for(stem: str, papers_dir: Path) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Block telemetry
+# ---------------------------------------------------------------------------
+
+_BLOCK_LOG_NAME = "primary-source-blocks.jsonl"
+_BLOCK_LOG_MAX_BYTES = 1_000_000  # rotate to .old past ~1MB
+
+
+def _state_dir() -> Path:
+    """Resolve `.claude/state/` the same way the word-list loaders do."""
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", "")
+    if project_dir:
+        return Path(project_dir) / ".claude" / "state"
+    return Path(__file__).resolve().parent.parent / "state"
+
+
+def log_block(hook: str, source: str, missing: list[tuple[str, str, str]]) -> None:
+    """Append one JSONL record per hook block to the telemetry log.
+
+    Evidence base for residual-false-positive tuning: every block records
+    which stems fired, on what source, with what missing-status. A stem
+    that blocks repeatedly without ever gaining a notes file is a
+    false-positive candidate (or a chronically unread citation — the
+    review is human). Aggregate with:
+
+        jq -r '.missing[].stem' .claude/state/primary-source-blocks.jsonl \
+          | sort | uniq -c | sort -rn
+
+    Fail-open on every error — telemetry must never break the hook. The
+    log lives in `.claude/state/` (gitignored, per-project). Rotates to
+    `.old` past ~1MB, mirroring destructive-action-guard.log.
+    """
+    try:
+        from datetime import datetime, timezone
+
+        state = _state_dir()
+        state.mkdir(parents=True, exist_ok=True)
+        path = state / _BLOCK_LOG_NAME
+        try:
+            if path.is_file() and path.stat().st_size > _BLOCK_LOG_MAX_BYTES:
+                path.replace(path.with_suffix(".jsonl.old"))
+        except OSError:
+            pass
+        record = {
+            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "hook": hook,
+            "source": source,
+            "missing": [
+                {"stem": stem, "display": display, "status": status}
+                for stem, display, status in missing
+            ],
+        }
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Session-transcript inspection
 # ---------------------------------------------------------------------------
 
