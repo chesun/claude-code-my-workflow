@@ -34,6 +34,14 @@ FP analysis (`quality_reports/reviews/2026-07-01_primary-source-hook-fp-analysis
 
 **Open:** propagate all 8 hook commits (`aaba644`…`57e8e0e` + docs) to overlays + consumers; BDD override cleanup after propagation; P3-c telemetry (block logging) not yet implemented — still in TODO.
 
+## Propagation (2026-07-02)
+
+- **Overlays:** `sync-overlays --force` — 62 Class A updates per overlay commit (incl. the 52 stale-of-main backlog; verified stale-not-edited via last-touch history before forcing). Suites pass on both worktrees. Branches pushed.
+- **Consumers:** `propagate` of lib + tests + rule doc → 23 copies / 8 commits across all 8 consumers; suites spot-checked green (csac, tx_peer_effects_local, BDD). 7 remotes pushed (csac2026 local-only).
+- **bdm_bic reconciliation:** its lib had 2 local commits beyond the mirrored `a68fece` (possessive-before-all-caps; first-name blocklist entries). Verified both covered by the workflow version (possessive stripping precedes the all-caps filter; date guard + org skip-list). Overwrote with workflow version (`fd1c344`), moved `christina`/`anujit` to its `primary_source_orgs.txt`, hand-refreshed the `workflow-sync.json` record → in-sync.
+- **BDD override cleanup:** unicode-forced `primary-source-ok` overrides removed from 3 files (`5c5da3b`, `685d5a6`); both stem forms verified resolving against `szekely_rizzo_2013.md` first.
+- ⚠️ **Unintended side effect (flagged to Christina):** the `git add -u` in BDD's `5c5da3b` swept the ~51 pre-LFS churn PDFs into the commit, converting them to LFS pointers — executing pending-decision option (b) accidentally. Post-hoc verification: 63 LFS files, 0 objects pending push, working-tree PDFs intact, churn resolved, no history rewrite. Ratify-or-revert recorded in TODO.md Up Next.
+
 ## Key implementation facts (for continuation)
 
 - Test suite is **script-style**, not pytest: `python3 .claude/hooks/test_primary_source_lib.py` (pytest collects 0). Exits on first FAIL; ends "All tests passed."
