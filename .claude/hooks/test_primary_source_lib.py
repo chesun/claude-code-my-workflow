@@ -911,6 +911,273 @@ with tempfile.TemporaryDirectory() as _td:
     )
     print("PASS: chaisemartin_dhaultfoeuille_2020 resolves via citation line despite dropped particle")
 
+print("\n=== Named macro / policy episodes (should not match) ===")
+assert_no_match("Employment fell sharply during the Great Recession (2008) in our sample.", "'Great Recession (2008)' episode")
+assert_no_match("Bank suspensions rose in the Depression (1933) sample years.", "'Depression (1933)' episode")
+assert_no_match("Spreads widened in the Financial Crisis (2008) window.", "'Financial Crisis (2008)' episode")
+assert_no_match("Attrition doubled during the Pandemic (2020) waves.", "'Pandemic (2020)' episode")
+assert_no_match("Volatility fell over the Great Moderation (1985) era.", "'Great Moderation (1985)' episode")
+assert_no_match("Transfers increased under the Stimulus (2009) provisions.", "'Stimulus (2009)' program episode")
+assert_no_match("Spending fell after the Sequester (2013) cuts.", "'Sequester (2013)' fiscal episode")
+assert_no_match("Miami wages are measured after the Boatlift (1980) natural experiment.", "'Boatlift (1980)' natural experiment")
+assert_no_match("Furloughs occurred during the Shutdown (2019) weeks.", "'Shutdown (2019)' episode")
+assert_no_match("Trade flows shift after the Referendum (2016) vote.", "'Referendum (2016)' political event")
+assert_no_match("Yields spiked in the Taper Tantrum (2013) episode.", "'Taper Tantrum (2013)' episode")
+assert_no_match("Outage exposure after the Blackout (2003) identifies the effect.", "'Blackout (2003)' episode")
+
+print("\n=== Election / corporate-event nouns (should not match) ===")
+assert_no_match("Turnout data span the Presidential Election (2016) cycle.", "'Presidential Election (2016)'")
+assert_no_match("We merge the Midterms (2022) canvass files by county.", "'Midterms (2022)'")
+assert_no_match("Support shifted after the Reform (2025) passed.", "'Reform (2025)'")
+assert_no_match("Returns are measured around the firm's Listing (2019) date.", "'Listing (2019)' corporate event")
+
+print("\n=== Hyphenated statute names (compound blocked; components stay citable) ===")
+assert_no_match("Disclosure costs rose after Sarbanes-Oxley (2002) took effect.", "'Sarbanes-Oxley (2002)' statute")
+assert_no_match("Universal banks were split under Glass-Steagall (1933) provisions.", "'Glass-Steagall (1933)' statute")
+assert_no_match("Tariff retaliation followed Smoot-Hawley (1930) closely.", "'Smoot-Hawley (1930)' statute")
+# The statute components remain citable as real surnames.
+assert_matches("We follow Glass (1976) on meta-analysis.", {"glass_1976"}, "'Glass' alone stays a citable surname")
+
+print("\n=== Holidays beyond the Western set (should not match) ===")
+assert_no_match("Sessions avoided Ramadan (2025) fasting weeks.", "'Ramadan (2025)' holiday")
+assert_no_match("Sales spike around Diwali 2024 in the treated districts.", "'Diwali 2024' holiday")
+assert_no_match("Recruitment paused over Eid (2025) in both arms.", "'Eid (2025)' holiday")
+assert_no_match("Offices closed for Juneteenth 2025 in all states.", "'Juneteenth 2025' holiday")
+assert_no_match("The panel breaks over Hanukkah 2026 and resumes in January.", "'Hanukkah 2026' holiday")
+
+print("\n=== Institutions / bodies (should not match) ===")
+assert_no_match("Results were presented at the Econometric Society (2026) winter meetings.", "'Econometric Society (2026)' learned-society tail")
+assert_no_match("Auction schedules follow the Treasury (2023) calendar.", "'Treasury (2023)'")
+assert_no_match("The bill cleared Parliament (2024) in March.", "'Parliament (2024)'")
+assert_no_match("Hearings continued in the Senate (2023) through spring.", "'Senate (2023)'")
+assert_no_match("Rate paths follow the Fed (2024) dot plot.", "'Fed (2024)'")
+
+print("\n=== Journal-title tail nouns (should not match) ===")
+assert_no_match("The paper appeared in the Journal of Public Economics (2019) symposium issue.", "'... Public Economics (2019)' journal tail")
+assert_no_match("The chapter is in the Handbook of Labor Economics (2011) volume.", "'... Labor Economics (2011)' handbook tail")
+assert_no_match("Published in the Quarterly Journal of Economics (2021) spring issue.", "'... of Economics (2021)' tail after lowercase 'of'")
+assert_no_match("See the Review of Economic Studies (2021) version for proofs.", "'... Economic Studies (2021)' tail")
+assert_no_match("Forthcoming in the Journal of Finance (2024) June issue.", "'Journal of Finance (2024)' tail")
+assert_no_match("Surveyed in the Journal of Economic Literature (2020) piece.", "'... Economic Literature (2020)' tail")
+assert_no_match("A short version ran in Economics Letters (2020) that year.", "'Economics Letters (2020)' tail")
+assert_no_match("Summarized in the Journal of Economic Perspectives (2019) symposium.", "'... Economic Perspectives (2019)' tail")
+
+print("\n=== Programs / assets / products (should not match) ===")
+assert_no_match("Coverage expanded under Obamacare (2014) provisions.", "'Obamacare (2014)' program")
+assert_no_match("The run-up in Bitcoin (2017) prices contaminates the event window.", "'Bitcoin (2017)' asset")
+assert_no_match("Summaries came from ChatGPT (2025) with a fixed prompt.", "'ChatGPT (2025)' product")
+assert_no_match("Transcripts were coded with Claude Code (2026) in batch mode.", "'Claude Code (2026)' two-word product")
+assert_no_match("Files sync through Google Drive (2025) shared folders.", "'Google Drive (2025)' two-word product")
+assert_no_match("Tourism spiked around the Paris Olympics 2024 fortnight.", "'Paris Olympics 2024' event")
+
+print("\n=== Capitalized-phrase precursor cue (general mechanism, filter 1c) ===")
+assert_no_match("Staff visas were processed at the US Embassy Madrid 2026 desk.", "'US Embassy Madrid 2026' place tail of proper-noun phrase")
+assert_no_match("Income data come from Statistics Canada (2023) public tables.", "'Statistics Canada (2023)' org tail")
+assert_no_match("Panels convened at the World Economic Forum Davos 2026 meetings.", "'... Forum Davos 2026' host city after capitalized phrase")
+# Sentence-start capitalization of the preceding word is positional, not a
+# proper-noun phrase — real citations after it must keep extracting.
+assert_matches(
+    "Notably Smith (2020) reaches the same conclusion.",
+    {"smith_2020"},
+    "sentence-start capitalized word before a citation is exempt from the phrase cue",
+)
+# Capitalized name particles are part of the NAME — exempt.
+assert_matches(
+    "Markups are estimated following De Loecker and Warzynski (2012) throughout.",
+    {"loecker_warzynski_2012"},
+    "capitalized particle 'De' exempt from the phrase cue (particle-residue stem)",
+)
+assert_matches(
+    "Utility is expected per Von Neumann and Morgenstern (1944) axioms.",
+    {"neumann_morgenstern_1944"},
+    "capitalized particle 'Von' exempt from the phrase cue",
+)
+# (A capitalized word + comma before a citation joins the author list —
+# that is the documented mid-sentence people-list residue, not this cue.)
+# Given-name + surname is designed suppression (same tradeoff as the acronym
+# cue; AEA/Chicago in-text form is surname-only). The allowlist rescues it.
+_result = stems("The seminar cited Raj Chetty (2014) as the canonical reference.")
+assert _result == set(), (
+    f"FAIL: given-name precursor should suppress with empty allowlist; got {_result}"
+)
+print("PASS: 'Raj Chetty (2014)' suppressed with empty allowlist (designed; allowlist rescues)")
+lib.KNOWN_SURNAMES = {"chetty"}
+try:
+    assert_matches(
+        "The seminar cited Raj Chetty (2014) as the canonical reference.",
+        {"chetty_2014"},
+        "allowlist rescues given-name + surname from the phrase cue",
+    )
+finally:
+    lib.KNOWN_SURNAMES = set()
+
+print("\n=== Documented residue (wontfix): awards named for real surnames ===")
+# Pulitzer and Guggenheim ARE real surnames, so NEVER_SURNAMES may not carry
+# them (same reasoning as Grant/Law/Bill/Nielsen). The per-project org
+# skip-list is the designed retirement path; the asserts pin both sides.
+assert_matches(
+    "She won a Pulitzer (2023) for the investigative series.",
+    {"pulitzer_2023"},
+    "residue: Pulitzer is a real surname — org skip-list per project",
+)
+assert_matches(
+    "He was awarded a Guggenheim (2025) during the fieldwork.",
+    {"guggenheim_2025"},
+    "residue: Guggenheim is a real surname — org skip-list per project",
+)
+lib.ORG_SKIPLIST = {"pulitzer", "guggenheim"}
+try:
+    assert_no_match(
+        "She won a Pulitzer (2023) for the investigative series.",
+        "org skip-list retires the Pulitzer residue per project",
+    )
+    assert_no_match(
+        "He was awarded a Guggenheim (2025) during the fieldwork.",
+        "org skip-list retires the Guggenheim residue per project",
+    )
+finally:
+    lib.ORG_SKIPLIST = set()
+
+print("\n=== Round-3: macro / policy / historical episode nouns (should not match) ===")
+assert_no_match("Deposits contracted sharply after the Crash (1929) in our bank panel.", "'Crash (1929)' episode")
+assert_no_match("Call-loan rates spiked during the Panic (1907) window.", "'Panic (1907)' episode")
+assert_no_match("Valuations were inflated through the Bubble (2000) years.", "'Bubble (2000)' episode")
+assert_no_match("Spreads stayed wide after the Default (2001) episode in Argentina.", "'Default (2001)' episode")
+assert_no_match("Bank equity recovered after the Bailout (2008) announcement.", "'Bailout (2008)' episode")
+assert_no_match("Gas lines formed during the Embargo (1973) shock.", "'Embargo (1973)' episode")
+assert_no_match("Grain output collapsed during the Famine (1959) years.", "'Famine (1959)' episode")
+assert_no_match("Rates were pegged until the Accord (1951) freed the Fed.", "'Accord (1951)' Treasury-Fed episode")
+assert_no_match("Households spent the Rebate (2008) checks within a quarter.", "'Rebate (2008)' fiscal episode")
+assert_no_match("Tourism collapsed during the Intifada (2000) period.", "'Intifada (2000)' episode")
+assert_no_match("Copper output fell after the Coup (1973) in Chile.", "'Coup (1973)' episode sibling")
+
+print("\n=== Round-3 GENERAL mechanism: abstract-noun suffix guard ===")
+# -tion / -sion / -ism / -nomics / -demic heads (length >= 7) are event /
+# process / doctrine nouns, never surnames — caught structurally, so fresh
+# class members need no enumeration.
+assert_no_match("Tariffs fell after Liberalization (1991) in India.", "'Liberalization (1991)' -tion")
+assert_no_match("Eastern wages converged slowly after Reunification (1990) despite transfers.", "'Reunification (1990)' -tion")
+assert_no_match("The peso collapsed following the Devaluation (1994) in December.", "'Devaluation (1994)' -tion")
+assert_no_match("Migration surged after the Partition (1947) of Punjab.", "'Partition (1947)' -tion")
+assert_no_match("Prices doubled daily during the Hyperinflation (1923) months.", "'Hyperinflation (1923)' -tion")
+assert_no_match("Coverage rose in states adopting the Expansion (2014) early.", "'Expansion (2014)' -sion (Medicaid)")
+assert_no_match("Mortality peaked during the Epidemic (1918) autumn wave.", "'Epidemic (1918)' -demic")
+assert_no_match("Compliance improved in findings from the Inspection (2023) wave.", "'Inspection (2023)' -tion")
+assert_no_match("The yen weakened under Abenomics (2013) easing.", "'Abenomics (2013)' -nomics")
+# Fresh members the blocklist never enumerated — the point of the mechanism.
+assert_no_match("Cash-intensive firms retrenched after Demonetization (2016) in India.", "'Demonetization (2016)' fresh -tion member")
+assert_no_match("Output fell during Privatization (1992) in Russia.", "'Privatization (1992)' fresh -tion member")
+# Length floor: short real names whose tail spells a suffix stay citable.
+assert_matches(
+    "The proof applies Sion (1958) to the payoff kernel.",
+    {"sion_1958"},
+    "'Sion (1958)' minimax theorem — protected by the length floor",
+)
+# The guard is a heuristic (unlike exact NEVER_SURNAMES), so an explicit
+# allowlist entry rescues a colliding real surname.
+lib.KNOWN_SURNAMES = {"attrition"}
+try:
+    assert_matches(
+        "Rates follow Attrition (2020) closely.",
+        {"attrition_2020"},
+        "allowlist rescues a suffix-guard collision",
+    )
+finally:
+    lib.KNOWN_SURNAMES = set()
+
+print("\n=== Round-3: firm-event nouns (should not match) ===")
+assert_no_match("Returns are measured around the Merger (2015) window.", "'Merger (2015)' corporate event")
+assert_no_match("Suppliers cut exposure after the Bankruptcy (2009) filing.", "'Bankruptcy (2009)' corporate event")
+assert_no_match("We run the Spinoff (2018) event study at the parent level.", "'Spinoff (2018)' corporate event")
+assert_no_match("Minority bidders withdrew after the Takeover (2007) bid lapsed.", "'Takeover (2007)' corporate-event sibling")
+
+print("\n=== Round-3: conference / lifecycle / institution nouns (should not match) ===")
+assert_no_match("The draft was presented at the Symposium (2025) in June.", "'Symposium (2025)' conference-cluster gap")
+assert_no_match("Earnings histories come from the Vintage (2019) file of the LEHD.", "'Vintage (2019)' data-lifecycle noun")
+assert_no_match("A circular from the Ministry (2024) changed the eligibility rule.", "'Ministry (2024)' institution tail")
+
+print("\n=== Round-3: program / legislation names (should not match) ===")
+assert_no_match("Farm wages rose after the Amnesty (1986) legalized workers.", "'Amnesty (1986)' IRCA")
+assert_no_match("Crop wages jumped after termination of the Bracero (1964) program.", "'Bracero (1964)' program")
+assert_no_match("Housing prices fall near sites designated under Superfund (1980) rules.", "'Superfund (1980)' legislation")
+
+print("\n=== Round-3: software / platform / crypto names (should not match) ===")
+assert_no_match("All sessions were run over Zoom (2025) with recording enabled.", "'Zoom (2025)' platform")
+assert_no_match("Figures were vectorized in Inkscape (2024) before submission.", "'Inkscape (2024)' software")
+assert_no_match("Environments are pinned inside Anaconda (2024) for the RAs.", "'Anaconda (2024)' software")
+assert_no_match("Notebooks are hosted on Colab (2025) with GPU runtimes.", "'Colab (2025)' platform")
+assert_no_match("The measurement model was scripted in Mplus (2023) syntax.", "'Mplus (2023)' software")
+assert_no_match("The cluster was migrated to Ubuntu 2024 images.", "'Ubuntu 2024' OS release")
+assert_no_match("Retail holdings of Dogecoin (2021) spiked with the meme cycle.", "'Dogecoin (2021)' crypto asset")
+
+print("\n=== Round-3: holidays / festivals / recurring events (should not match) ===")
+assert_no_match("Beer demand spikes during Oktoberfest (2025) weeks.", "'Oktoberfest (2025)' festival")
+assert_no_match("Absenteeism rises around Carnival (2024) in Brazil.", "'Carnival (2024)' festival")
+assert_no_match("Ad prices peak around the Superbowl (2024) broadcast.", "'Superbowl (2024)' event")
+assert_no_match("Enrollment opens for Michaelmas (2025) term in August.", "'Michaelmas (2025)' academic term")
+assert_no_match("Attendance at the Biennale (2024) doubled hotel rates.", "'Biennale (2024)' festival")
+
+print("\n=== Round-3: particle-led climate events (El Niño / La Niña bigrams) ===")
+# NAME_PARTICLES exempts El/La from the phrase cue (needed for real particle
+# surnames), so the bigram set carves the climate events back out.
+assert_no_match(
+    "Yields fell during El Niño (2015) in the treated provinces.",
+    "'El Niño (2015)' particle-led named event",
+)
+assert_no_match(
+    "Insurance losses mounted during La Niña (2022) planting seasons.",
+    "'La Niña (2022)' particle-led named event",
+)
+# Particle-led real SURNAMES keep extracting — the exemption the bigrams
+# carve into must stay intact.
+assert_matches(
+    "Following La Ferrara (2007), we proxy diversity with a fractional index.",
+    {"ferrara_2007"},
+    "'La Ferrara (2007)' still extracts (particle-residue stem)",
+)
+# Allowlist rescue for a project that really cites author Niño.
+lib.KNOWN_SURNAMES = {"nino"}
+try:
+    assert_matches(
+        "Yields fell during El Niño (2015) in the treated provinces.",
+        {"nino_2015"},
+        "allowlist rescues 'Niño' from the event bigram",
+    )
+finally:
+    lib.KNOWN_SURNAMES = set()
+
+print("\n=== Round-3 survivor closures: disaster/disease/treaty/labor/event nouns ===")
+assert_no_match("Remittances rose after the Earthquake (2010) in Haiti.", "'Earthquake (2010)' disaster")
+assert_no_match("Crop insurance claims spiked during the Drought (2012) counties.", "'Drought (2012)' disaster")
+assert_no_match("Trade fell during Ebola (2014) in West Africa.", "'Ebola (2014)' disease")
+assert_no_match("Births declined after Zika (2016) advisories.", "'Zika (2016)' disease")
+assert_no_match("Emissions pledged under the Protocol (1997) fell short.", "'Protocol (1997)' treaty noun")
+assert_no_match("Targets set by the Agreement (2015) bind unevenly.", "'Agreement (2015)' treaty noun")
+assert_no_match("Wages fell after the Strike (1981) was broken.", "'Strike (1981)' labor action")
+assert_no_match("Capital fled during the Peso (1994) crisis.", "'Peso (1994)' currency crisis")
+assert_no_match("Output held up during the Blitz (1940) months.", "'Blitz (1940)' conflict episode")
+assert_no_match("Mobility collapsed during the Quarantine (2020) order.", "'Quarantine (2020)' lifecycle")
+assert_no_match("Bills stalled after the Legislature (2019) reconvened.", "'Legislature (2019)' institution")
+assert_no_match("Farm income rose after Apartheid (1994) ended.", "'Apartheid (1994)' policy episode")
+assert_no_match("Pilgrim spending surged during the Hajj (2010) window.", "'Hajj (2010)' calendar event")
+assert_no_match("Planting shifted before the Monsoon (2019) season.", "'Monsoon (2019)' season")
+assert_no_match("Viewership of the Oscars (2024) declined again.", "'Oscars (2024)' named event")
+assert_no_match("STEM enrollment jumped after Sputnik (1957) launched.", "'Sputnik (1957)' named event")
+assert_no_match("Slides were typeset in Quarto (2024) for the deck.", "'Quarto (2024)' software")
+assert_no_match("Subjects were recruited via CloudResearch (2023) panels.", "'CloudResearch (2023)' platform")
+
+print("\n=== -ment suffix guard (floor 8; Clement stays citable) ===")
+assert_no_match("Payments from the Settlement (1998) funded the programs.", "'Settlement (1998)' -ment guard")
+assert_no_match("Turnout rose after the Amendment (1971) lowered the age.", "'Amendment (1971)' -ment guard")
+assert_no_match("Migration surged after the Enlargement (2004) round.", "'Enlargement (2004)' -ment guard")
+assert_no_match("Markets moved after the Impeachment (2019) vote.", "'Impeachment (2019)' -ment guard")
+assert_matches("The estimator follows Clement (2007) closely.", {"clement_2007"}, "'Clement (2007)' (7 chars) below -ment floor — citable")
+
+print("\n=== Collision exclusions stay citable (skip-list residue, not blocklist) ===")
+assert_matches("We follow Flood (2019) on exchange-rate regimes.", {"flood_2019"}, "'Flood (2019)' real surname not blocklisted")
+assert_matches("Estimates match Julia (2021) on network effects.", {"julia_2021"}, "'Julia (2021)' not blocklisted (skip-list residue)")
+assert_matches("As shown in the Heckman (1979) correction literature.", {"heckman_1979"}, "eponymous 'the Heckman (1979) correction' still extracts")
+
 print("\n=== Residual: real surname at sentence start with empty allowlist ===")
 # Documented as unavoidable noise; user uses escape hatch.
 result = stems("Smith 2020 published a related result.")

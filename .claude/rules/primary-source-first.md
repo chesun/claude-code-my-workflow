@@ -53,7 +53,9 @@ The hook extracts citations via an Author-Year regex, then applies a filter stac
 
 1b. **Org skip-list (`.claude/state/primary_source_orgs.txt`).** Optional per-project list (same loader/format as the surname allowlist) of mixed-case corporate/data authors to skip ("Gallup", "Pew", Nielsen-the-company). These can't go in `NEVER_SURNAMES` safely because one project's data vendor is another project's cited author. Missing/empty file = no skipping.
 
-1c. **Preceding-token cue filter.** A named-entity cue word ("Hurricane Katrina (2005)") or an all-caps acronym immediately before the head token ("NSF Grant 2026", "EEA-ESEM Rotterdam 2026"), separated by whitespace only, marks the match as a named entity and skips it — unless the head surname is explicitly allowlisted. Punctuation between acronym and name breaks the cue, so `IPUMS USA (Ruggles et al. 2024)` still extracts.
+1c. **Preceding-token cue filter.** A named-entity cue word ("Hurricane Katrina (2005)"), an all-caps acronym ("NSF Grant 2026"), or any other capitalized word directly before the head token ("Great Recession (2008)", "Journal of Public Economics (2019)", "Statistics Canada (2023)") marks the match as the tail of a multi-word proper noun and skips it — unless the head surname is explicitly allowlisted. Surname particles (La Ferrara, El Ghoul, De Loecker) are exempt so particle surnames still extract; the El Niño / La Niña event bigrams are carved back out. Punctuation between the preceding word and the name breaks the cue, so `IPUMS USA (Ruggles et al. 2024)` still extracts.
+
+1d. **Abstract-noun suffix guard.** Head tokens ending in `-tion/-sion/-ism/-nomics/-demic` (length ≥ 7) or `-ment` (length ≥ 8) are event/process/doctrine nouns, essentially never surnames — "after Liberalization (1991)", "the Settlement (1998)", "under Abenomics (2013)" — caught structurally instead of by enumeration. The length floors keep short real surnames citable (`Sion`, `Nation`, `Clement`), and an allowlist entry rescues any colliding surname.
 
 2. **All-caps token filter.** A captured surname written entirely in uppercase (length ≥ 2) is rejected. Real surnames in academic prose are written `Smith`, never `SMITH`; real two-letter surnames (`Ng`, `Wu`, `Li`) are written mixed-case. Catches status markers (`COMPLETED (2026)`, `WIP (2026)`) and acronym corporate authors (`BLS (2024)`, `OECD (2023)`, `EU (2024)`, `AY 2026`). Corporate-author citations are *data* attributions, not framing claims about research papers, so they don't require reading notes. Mixed-case surnames (`McGregor`, `DeAngelo`, `O'Brien`) still match.
 
@@ -75,6 +77,8 @@ The extractor ASCII-folds text before matching (NFD-decompose + strip combining 
 ### Known residue (by design)
 
 Bare place-name + year (`Tokyo 2020`), titles that are also surnames, and mixed-case polling orgs are irreducible by syntax — the org skip-list or escape hatch handles them. Particle surnames (`van Reenen`, `de Chaisemartin`) build stems without the lowercase particles; name the notes file by the extracted stem or rely on the `**Citation:**`-line match, which resolves regardless of filename.
+
+**The structural limit (verify-loop conclusion, 2026-07-02):** "capitalized common noun + year" is a productive open class — an adversarial hunter can always mint fresh members (a new disaster, platform, or policy episode). The blocklist and suffix guards cover the high-frequency core; the tail is handled per-project by the org skip-list, the escape hatch, and (planned) block telemetry. The one *rejected* general fix, for the record: a lowercase-determiner cue ("the X (year)" ⇒ not a citation) kills legitimate eponymous forms — "the Heckman (1979) correction", "the Card and Krueger (1994) study" — and must not be added; a regression test pins this.
 
 ## Escape hatch
 
