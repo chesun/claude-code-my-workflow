@@ -1178,6 +1178,55 @@ assert_matches("We follow Flood (2019) on exchange-rate regimes.", {"flood_2019"
 assert_matches("Estimates match Julia (2021) on network effects.", {"julia_2021"}, "'Julia (2021)' not blocklisted (skip-list residue)")
 assert_matches("As shown in the Heckman (1979) correction literature.", {"heckman_1979"}, "eponymous 'the Heckman (1979) correction' still extracts")
 
+print("\n=== Block telemetry: log_block writes, rotates, fails open ===")
+import json as _json
+import os as _os
+import tempfile as _tempfile
+
+with _tempfile.TemporaryDirectory() as _td:
+    _prev = _os.environ.get("CLAUDE_PROJECT_DIR")
+    _os.environ["CLAUDE_PROJECT_DIR"] = _td
+    try:
+        lib.log_block("primary-source-check", "decisions/0001_test.md",
+                      [("smith_2020", "Smith (2020)", "MISSING_NOTES_NO_PDF")])
+        _log = Path(_td) / ".claude" / "state" / "primary-source-blocks.jsonl"
+        assert _log.is_file(), "FAIL: log file not created"
+        _rec = _json.loads(_log.read_text().splitlines()[0])
+        assert _rec["hook"] == "primary-source-check", _rec
+        assert _rec["source"] == "decisions/0001_test.md", _rec
+        assert _rec["missing"][0]["stem"] == "smith_2020", _rec
+        assert _rec["missing"][0]["status"] == "MISSING_NOTES_NO_PDF", _rec
+        assert "ts" in _rec, _rec
+        print("PASS: log_block writes a well-formed JSONL record")
+
+        # Rotation: inflate past the 1MB threshold, then log again.
+        _log.write_text("x" * (lib._BLOCK_LOG_MAX_BYTES + 1))
+        lib.log_block("primary-source-audit", "session-prose",
+                      [("jones_2021", "Jones (2021)", "NOTES_NOT_READ_IN_SESSION")])
+        assert (Path(_td) / ".claude" / "state" / "primary-source-blocks.jsonl.old").is_file(), (
+            "FAIL: oversized log not rotated to .old"
+        )
+        _lines = _log.read_text().splitlines()
+        assert len(_lines) == 1 and _json.loads(_lines[0])["hook"] == "primary-source-audit"
+        print("PASS: oversized log rotates to .old; fresh log gets the new record")
+    finally:
+        if _prev is None:
+            _os.environ.pop("CLAUDE_PROJECT_DIR", None)
+        else:
+            _os.environ["CLAUDE_PROJECT_DIR"] = _prev
+
+# Fail-open: unwritable state dir must not raise.
+_prev = _os.environ.get("CLAUDE_PROJECT_DIR")
+_os.environ["CLAUDE_PROJECT_DIR"] = "/dev/null/not-a-dir"
+try:
+    lib.log_block("primary-source-check", "x.md", [("a_2020", "A (2020)", "MISSING_NOTES_NO_PDF")])
+    print("PASS: log_block fails open on unwritable state dir")
+finally:
+    if _prev is None:
+        _os.environ.pop("CLAUDE_PROJECT_DIR", None)
+    else:
+        _os.environ["CLAUDE_PROJECT_DIR"] = _prev
+
 print("\n=== Residual: real surname at sentence start with empty allowlist ===")
 # Documented as unavoidable noise; user uses escape hatch.
 result = stems("Smith 2020 published a related result.")
