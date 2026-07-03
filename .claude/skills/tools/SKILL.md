@@ -1,7 +1,7 @@
 ---
 name: tools
-description: Utility commands — commit, compile, validate-bib, journal, context-status, deploy, learn, sync-status, propagate, list-consumers. Replaces individual utility skills.
-argument-hint: "[subcommand: commit | compile | validate-bib | journal | context | deploy | learn | sync-status | propagate | list-consumers] [args]"
+description: Utility commands — commit, compile, validate-bib, context-status, deploy, learn, sync-status, propagate, list-consumers. Replaces individual utility skills.
+argument-hint: "[subcommand: commit | compile | validate-bib | context | deploy | learn | sync-status | propagate | list-consumers | stata-sweep | normdiff | cite-check] [args]"
 allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Task
 ---
 
@@ -106,16 +106,6 @@ Cross-reference all citation keys against the project's `.bib` file.
 | Quality issues | N | (key → which field is missing/malformed) |
 
 Save full report to `quality_reports/bib_validation_[YYYY-MM-DD].md` if any issues found.
-
----
-
-### `/tools journal` — Research Journal
-
-Regenerate `quality_reports/research_journal.md` from quality reports and git history.
-
-- Walk `quality_reports/` for agent reports, extract date + score + verdict
-- Cross-reference with `git log` for phase-transition commits
-- Append-only: never overwrite existing entries; only add new ones since the last journal update
 
 ---
 
@@ -231,11 +221,13 @@ Sync selected files from this workflow source repo to all configured consumer re
 **Class-aware routing.** Every file is read from the branch its class declares as authoritative:
 
 - **Class A — Universal** (default): read from `main`. Hooks, most rules, templates.
-- **Class B — Overlay-customized**: read from consumer's overlay branch (`applied-micro` or `behavioral`). E.g., `CLAUDE.md`, `orchestrator.md`, `quality.md`.
+- **Class B — Overlay-customized**: read from consumer's overlay branch (`applied-micro` or `behavioral`). E.g., `orchestrator.md`, `quality.md`.
 - **Class C — Overlay-only**: read from the consumer's overlay if the consumer is on a matching branch; otherwise skipped as "not-applicable". E.g., `strategist.md` (applied-micro) or `designer.md` (behavioral).
-- **Class D — Excluded**: never propagates. Project-state files like `quality_reports/`, `MEMORY.md`, `data/`.
+- **Class D — Excluded**: never propagates. Project-state files (`quality_reports/`, `MEMORY.md`, `data/`) AND project-identity files (`CLAUDE.md`, `README.md`) that mix workflow guidance with consumer-specific content.
 
 The manifest lives at `.claude/file-classes.toml` on `main` (itself Class A so it propagates to overlay worktrees via `/tools sync-overlays`). Default for unlisted files = Class A.
+
+**Cherry-pick caveat for Class D project-identity files.** `CLAUDE.md` and `README.md` are Class D because each consumer owns its own copy (project name, coauthors, dataset paths, current state — all consumer-specific). But the workflow source's `CLAUDE.md` template ALSO accumulates substantive workflow-level changes (new principles, new skills in the Quick Reference, new folder-structure entries, new rule cross-references). Those changes are NOT auto-propagated. When the workflow's `CLAUDE.md` template changes substantively, **manually cherry-pick the relevant sections into each consumer's `CLAUDE.md`** — `git diff main:CLAUDE.md` between the prior workflow commit and now identifies the change set; the per-consumer merge is a judgment call (which sections apply, what to rename per project terminology). The same applies to `README.md` if you ever change the workflow's README's structure in a way that's worth propagating.
 
 **Step 1: identity check.** Run `python3 .claude/skills/tools/propagate.py --check-identity` first. The script's three identity modes:
 
@@ -343,6 +335,24 @@ One commit per overlay listing the propagated Class A files. No git push — use
 Plan: `quality_reports/plans/2026-05-07_comprehensive-propagation-plan.md` §5.
 
 ---
+
+### `/tools normdiff [--check] FILE` — Evidence-Gating Normalized-Content Diff
+
+Compute the normalized-content diff of a research-artifact file vs its `HEAD` baseline — the Tier-1 evidence check of the evidence-gating discipline (`.claude/rules/adversarial-default.md`; design of record `quality_reports/reviews/2026-05-28_whole-picture-critic-gates-dispatch.md` §7). Strips comments/scaffold/blank lines and path-tokenizes, then reports any residual analysis/content change (Stata/R/Python/LaTeX). Implementation: `python3 .claude/skills/tools/normdiff.py`; shared logic `.claude/hooks/normdiff_lib.py`.
+
+- default — prints the residue (added/removed/reordered normalized lines) vs `HEAD`.
+- `--check` — exits nonzero if residue is non-empty (clean refactor = exit 0).
+
+The always-on PostToolUse recorder `evidence-gate-recorder.py` uses the same lib to silently record a `no-logic-change` row to the verification ledger on every research-artifact edit (scope: `paper/ talks/ scripts/ replication/ figures/ tables/ preambles/`); this subcommand is the manual / orchestrator entry point to the same check.
+
+### `/tools cite-check <citation>...` — Tier-2 Citation Existence Check
+
+Resolve a Tier-2 evidence citation (`file[:line-or-range][:test_id]`) — the existence-check half of the evidence-gating discipline's Tier-2 enforcement (`.claude/rules/adversarial-default.md`; detail `.claude/references/evidence-gating-detail.md`; design of record `quality_reports/reviews/2026-05-28_whole-picture-critic-gates-dispatch.md` §7). A locatable-judgment verdict ("goal X achieved") must carry a structured `{claim, artifact_citation, sufficiency_argument}`; this confirms the cited *artifact* resolves — file exists, any cited line / range is in the file, and any named test runs and passes — so a *fabricated* artifact is caught mechanically (the critic still judges sufficiency). Implementation: `python3 .claude/skills/tools/cite_check.py`; shared logic `.claude/hooks/citation_existence_lib.py`.
+
+- Format: `scripts/01_clean.do:47` (file+line), `scripts/01_clean.do:40-52` (range), `tests/test_x.py:88:test_foo` or `tests/test_x.py::test_foo` (named test).
+- Exit codes: `0` RESOLVED (or ASSUMED, with a printed note); `1` MISSING (file/line absent or test failed).
+- **MISSING vs ASSUMED:** a missing file / out-of-range line / failed test is **MISSING** (a real fabrication signal). Infra-absence only — no test runner for the file type, toolchain absent — is **ASSUMED** (fail-open, exit 0), never MISSING.
+- **Security:** the citation is untrusted input. Paths are resolved repo-relative and must stay inside the repo (`..` traversal / absolute / symlink-escape rejected → MISSING); test ids must match a safe-identifier whitelist; tests run via a fixed per-extension runner with `shell=False` and an argv list — the citation never reaches a shell.
 
 ### `/tools stata-sweep [--check | --fix] [--root PATH] [--diff] [--json] [FILE ...]` — Stata Greedy-`/*` Bug Sweep
 
