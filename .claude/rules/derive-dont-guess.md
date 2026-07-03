@@ -8,16 +8,34 @@ This is the inward-facing twin of `primary-source-first.md`. That rule requires 
 
 ---
 
+## Enforcement
+
+For most of this rule's life it had no enforcement mechanism — it was prose the model was expected to internalize, with critic deduction tables (`agents/coder-critic.md`, `agents/writer-critic.md`) that fire *only* when a critic is dispatched inside the orchestrated pipeline. In ad-hoc usage ("just write me this `.do` file") no critic runs, so the rule didn't bind. As of 2026-05-28 the rule has a deterministic trigger, mirroring the hook that gives `primary-source-first.md` its teeth.
+
+- **`.claude/hooks/derive-check-advisory.py`** (PostToolUse, matcher `Write|Edit|MultiEdit`) — **on by default, non-blocking.** After any edit to an analysis/paper file (`.do .doh .R .r .py .tex`), it extracts newly-introduced **read/input** path-literals (`use`/`merge ... using`/`import`/`include` for Stata; `read_*`/`source`/`load` for R; `pd.read_*`/`np.load`/`open` for Python; `\input`/`\includegraphics`/`\addbibresource` for LaTeX) and resolves each against the working tree. A path that does not resolve — or a Stata `$global`/`` `local` `` defined nowhere in the repo — triggers an injected advisory naming the path and pointing back here. Write/output targets (`save`, `export`, `ggsave`, `esttab using`, ...) are never flagged, so non-existent output paths (routine and legitimate) stay silent.
+- **`.claude/hooks/derive-check-block.py`** (PreToolUse, matcher `Write|Edit|MultiEdit`) — **opt-in, blocking.** Inert unless `.claude/state/derive-guess-block.enabled` exists. When enabled, blocks the edit only for the highest-confidence guess signal: a newly-added read/input path that doesn't resolve **and** (for Stata macro paths) whose macro is undefined repo-wide. Writes to `.claude/state/derive-guard.log` (append-only JSONL audit trail).
+
+Shared detection logic lives in `.claude/hooks/derive_lib.py` (tested by `.claude/hooks/test_derive_lib.py`).
+
+### What enforcement deliberately does NOT catch
+
+The honest detection limit (same reasoning as the rule's "Citation requirement" below): a *guessed* entity that happens to resolve is byte-identical to a *derived* one, so the hook can only enforce the weaker proposition of **resolvability**, not derivation. It cannot see guessed variable names, function signatures, or runtime-constructed paths — those have no on-disk anchor. The hook is therefore a floor, not a ceiling: the critic deduction tables and the model's own discipline remain load-bearing for everything the hook can't mechanically see.
+
+### Escape hatch
+
+If a referenced read path is intentionally new, built at runtime, or otherwise legitimately absent, add a `derive-ok` comment to the edit:
+
+```
+* derive-ok: data/extract_built_at_runtime.dta
+```
+
+A bare `<!-- derive-ok -->` (or `// derive-ok`, `# derive-ok`) suppresses all warnings in that edit; a comma list (`derive-ok: a.dta, b.csv`) suppresses only paths containing those substrings. Auditable: `grep -R "derive-ok" scripts/ paper/` surfaces every use.
+
+---
+
 ## Where this fits in the epistemic stack
 
-Four rules together prevent four distinct failure modes of "filling in blanks":
-
-| Rule | Source-of-truth | What it prevents |
-|---|---|---|
-| `no-assumptions.md` | The user's stated requirements | Guessing about user preferences, workflow, tools, role boundaries |
-| `primary-source-first.md` | The actual PDF in `master_supporting_docs/literature/papers/` | Framing claims about external papers without reading them |
-| `adversarial-default.md` | A `grep` / diagnostic / test output recorded in the verification ledger | Asserting compliance without producing evidence |
-| **derive-dont-guess.md** (this rule) | The relevant file in this repo | Fabricating internal facts when the repo has the answer |
+This rule is one of four that together prevent four distinct failure modes of "filling in blanks." The canonical table mapping each rule to its source-of-truth and the failure mode it prevents lives in `no-assumptions.md` (§ "What this rule covers"). In the stack, `derive-dont-guess` is the repo-facing one: it prevents fabricating internal facts (filepaths, variables, configs) when the repo already encodes the answer.
 
 Each rule has a distinct scope. Together they form the workflow's epistemic floor: don't make things up, don't claim what you haven't checked, don't guess what you can derive.
 
