@@ -112,6 +112,7 @@ def main() -> None:
         ),
         missing=missing,
     )
+    lib.log_block("primary-source-check", str(rel_path), missing)
     output = {"decision": "block", "reason": message}
     json.dump(output, sys.stdout)
     sys.exit(0)
